@@ -559,14 +559,25 @@ export default function UnifiedTransactionForm() {
             <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2.5">
               {transactionType === 'payment' ? "Payment Date" : t.dueDateLabel}
             </label>
-            <div className="relative">
-              <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none" />
-              <input 
+            <div className="relative h-10">
+              <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none z-10" />
+              {/* Visible DD/MM/YYYY label */}
+              <div className="absolute inset-0 flex items-center pl-10 pr-4 pointer-events-none z-10">
+                <span className="text-xs font-semibold text-slate-800 dark:text-white">
+                  {dueDate
+                    ? new Date(dueDate + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                    : <span className="text-slate-400 dark:text-slate-500">DD/MM/YYYY</span>}
+                </span>
+              </div>
+              {/* Native date input — transparent, handles click */}
+              <input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full bg-slate-50/50 focus:bg-white dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-xs font-semibold text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                className="absolute inset-0 w-full opacity-0 cursor-pointer z-20"
               />
+              {/* Styled background box */}
+              <div className="w-full h-full bg-slate-50/50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800 rounded-lg" />
             </div>
 
             {/* Smart Due Date suggestions */}

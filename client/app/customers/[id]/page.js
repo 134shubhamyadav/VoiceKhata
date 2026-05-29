@@ -491,7 +491,7 @@ export default function CustomerDetail() {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-10 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80"
+              className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80"
             >
               <div className="w-12 h-1 bg-slate-250 dark:bg-slate-800 rounded-full mx-auto mb-5" />
               <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">Edit Customer Details</h3>
@@ -562,7 +562,7 @@ export default function CustomerDetail() {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-10 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80"
+              className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80"
             >
               <div className="w-12 h-1 bg-slate-250 dark:bg-slate-800 rounded-full mx-auto mb-5" />
               <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">

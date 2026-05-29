@@ -16,8 +16,11 @@ export default function BottomNavigation() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Exclude visual layouts on startup/splash (/), AI verification details (/confirm), and success screens (/success)
-  if (pathname === "/" || pathname === "/confirm" || pathname === "/success") return null;
+  // Hide nav on pages that use full-screen drawers or don't need it
+  const hiddenPaths = ["/", "/confirm", "/success", "/login", "/voice"];
+  if (hiddenPaths.includes(pathname)) return null;
+  // Also hide on dynamic customer detail pages
+  if (pathname.startsWith("/customers/") && pathname !== "/customers") return null;
 
   return (
     <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 px-5 pb-5">
