@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-display: "Sora", system-ui, sans-serif;
+  --color-primary: #4F46E5; /* refined slate-indigo */
+  --color-accent: #10B981; /* emerald success */
+  --border-width-3: 3px;
+}
+
+:root {
+  --primary: #4F46E5;
+  --accent: #10B981;
+  --bg: #F8FAFC; /* ultra-clean gray backdrop */
+  --surface: #FFFFFF;
+  --glass: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(241, 245, 249, 0.8);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  font-family: "DM Sans", sans-serif;
+  background: var(--bg);
+  color: #0F172A;
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: "Sora", sans-serif;
+}
+
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #4F46E5, #0F172A);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, #4F46E5, #3730A3);
+}
+
+.blob {
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.08; /* extremely subtle organic blur */
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Dark Mode Support */
+.dark-theme, .dark {
+  --bg: #0B0F19; /* premium deep obsidian */
+  --surface: #151D30;
+  --glass: rgba(21, 29, 48, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  background-color: #0B0F19 !important;
+  color: #F1F5F9 !important;
+}
+
+.dark-theme body {
+  background-color: #0B0F19 !important;
+  color: #F1F5F9 !important;
+}
+
+.dark-theme .bg-white {
+  background-color: #151D30 !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark-theme .text-slate-800,
+.dark-theme .text-slate-700 {
+  color: #F1F5F9 !important;
+}
+
+.dark-theme .text-slate-600 {
+  color: #E2E8F0 !important;
+}
+
+.dark-theme .text-slate-500,
+.dark-theme .text-slate-400 {
+  color: #94A3B8 !important;
+}
+
+.dark-theme .border-blue-50,
+.dark-theme .border-slate-50,
+.dark-theme .border-slate-100 {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* bg-[#F8FAFF] and bg-[#F5F7FA] are overridden via --bg variable reassignment above */
+
+.dark-theme .bg-\[\#F8FAFF\],
+.dark-theme .bg-\[\#F5F7FA\],
+.dark-theme .bg-\[\#f8faff\],
+.dark-theme .bg-\[\#f5f7fa\],
+.dark .bg-\[\#F8FAFF\],
+.dark .bg-\[\#F5F7FA\],
+.dark .bg-\[\#f8faff\],
+.dark .bg-\[\#f5f7fa\] {
+  background-color: #0B0F19 !important;
+}
+
+.dark-theme .bg-slate-50 {
+  background-color: #1E293B !important;
+}
+
+.dark-theme input {
+  background-color: #151D30 !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  color: #F1F5F9 !important;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+::-webkit-scrollbar { width: 0; }

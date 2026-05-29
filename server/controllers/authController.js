@@ -1,0 +1,160 @@
+/**
+ * authController.js
+ *
+ * Handles Firebase token verification, user creation, onboarding, and JWT signing.
+ *
+ * Demo mode (DEMO_MODE=true in .env):
+ *   - Accepts tokens prefixed with "demo-" for UI simulation without real Firebase.
+ *   - Never enable demo mode in production.
+ */
+
+"use strict";
+
+const { admin, firebaseInitialized } = require("../config/firebaseAdmin");
+const jwt    = require("jsonwebtoken");
+const User   = require("../models/User");
+const appConfig = require("../config/appConfig");
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+const signJwt = (user) =>
+  jwt.sign(
+    { id: user._id, firebaseUid: user.firebaseUid },
+    appConfig.jwtSecret,
+    { expiresIn: "30d" }
+  );
+
+const userPayload = (user) => ({
+  id:                  user._id,
+  name:                user.name,
+  phone:               user.phone,
+  email:               user.email,
+  shopName:            user.shopName,
+  businessType:        user.businessType,
+  language:            user.language,
+  profilePhoto:        user.profilePhoto,
+  upiId:               user.upiId,
+  onboardingIncomplete: user.onboardingIncomplete,
+});
+
+// ─── Controllers ────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/auth/verify-token
+ * Verifies a Firebase ID token (or demo token) and returns a signed session JWT.
+ */
+const verifyToken = async (req, res) => {
+  const { idToken } = req.body;
+
+  if (!idToken) {
+    return res.status(400).json({ success: false, message: "idToken is required." });
+  }
+
+  try {
+    if (!firebaseInitialized) {
+      return res.status(503).json({
+        success: false,
+        message: "Firebase Admin is not initialized.",
+      });
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+
+    // ── User lookup and auto-create ───────────────────────────────────────
+    const { uid, email, name, picture, phone_number } = decodedToken;
+    let user = await User.findOne({ firebaseUid: uid });
+
+    if (!user && email) {
+      user = await User.findOne({ email });
+      if (user) {
+        user.firebaseUid = uid;
+        if (picture && !user.profilePhoto) user.profilePhoto = picture;
+        await user.save();
+      }
+    }
+
+    if (!user && phone_number) {
+      user = await User.findOne({ phone: phone_number });
+      if (user) {
+        user.firebaseUid = uid;
+        await user.save();
+      }
+    }
+
+    let isNewUser = false;
+    if (!user) {
+      isNewUser = true;
+      user = await User.create({
+        firebaseUid:         uid,
+        email:               email    || null,
+        phone:               phone_number || null,
+        name:                name     || "Merchant",
+        profilePhoto:        picture  || null,
+        onboardingIncomplete: true,
+      });
+      console.log(`[Auth] New merchant created for UID: ${uid}`);
+    }
+
+    const token = signJwt(user);
+
+    return res.status(200).json({
+      success: true,
+      data: { token, user: userPayload(user), isNewUser },
+    });
+
+  } catch (err) {
+    console.error("[Auth] Token verification failed:", err.message);
+    return res.status(401).json({ success: false, message: "Authentication failed: " + err.message });
+  }
+};
+
+/**
+ * POST /api/auth/complete-onboarding
+ * Saves merchant profile and marks onboarding complete.
+ */
+const completeOnboarding = async (req, res) => {
+  const { name, shopName, language, businessType, phone, email, profilePhoto, upiId } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found." });
+
+    user.name         = name         !== undefined ? (name ? name.trim() : null) : user.name;
+    user.shopName     = shopName     !== undefined ? (shopName ? shopName.trim() : null) : user.shopName;
+    user.language     = language     !== undefined ? language : user.language;
+    user.businessType = businessType !== undefined ? businessType : user.businessType;
+    user.phone        = phone        !== undefined ? (phone ? phone.trim() : null) : user.phone;
+    user.email        = email        !== undefined ? (email ? email.trim() : null) : user.email;
+    user.profilePhoto = profilePhoto !== undefined ? profilePhoto : user.profilePhoto;
+    user.upiId        = upiId        !== undefined ? (upiId ? upiId.trim() : null) : user.upiId;
+
+    if (user.shopName) {
+      user.onboardingIncomplete = false;
+    }
+
+    await user.save();
+    console.log(`[Auth] Profile updated for merchant: ${user.name || user.shopName}`);
+
+    return res.status(200).json({ success: true, data: { user: userPayload(user) } });
+
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
+ * GET /api/auth/me
+ * Returns the current user profile.
+ */
+const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found." });
+
+    return res.status(200).json({ success: true, data: { user: userPayload(user) } });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = { verifyToken, completeOnboarding, getMe };

@@ -1,0 +1,299 @@
+"use strict";
+
+/**
+ * voiceService.js
+ *
+ * Two-tier voice parsing pipeline:
+ *
+ * Tier 1 — Gemini API (primary)
+ *   Sends the raw transcript to Gemini with a structured extraction prompt.
+ *   Handles Hindi, Hinglish, English, and mixed-language input natively.
+ *   Returns: { customerName, amount, type, dueDate, note, confidence }
+ *
+ * Tier 2 — Rule-based fallback (secondary)
+ *   Used when Gemini is unavailable (no API key, quota exceeded, network error).
+ *   Keyword matching + number extraction covers common patterns.
+ */
+
+const appConfig = require("../config/appConfig");
+
+// ─── Gemini Client Setup ────────────────────────────────────────────────────
+
+let geminiModel = null;
+
+(async () => {
+  try {
+    if (appConfig.geminiApiKey) {
+      const { GoogleGenerativeAI } = require("@google/generative-ai");
+      const genAI = new GoogleGenerativeAI(appConfig.geminiApiKey);
+      geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      console.log("[VoiceService] Gemini AI initialized successfully.");
+    } else {
+      console.warn("[VoiceService] GEMINI_API_KEY not set. Using rule-based fallback parser.");
+    }
+  } catch (err) {
+    console.warn("[VoiceService] Gemini initialization failed:", err.message);
+  }
+})();
+
+// ─── Gemini Prompt ──────────────────────────────────────────────────────────
+
+const GEMINI_PROMPT = (text) => `
+You are a financial assistant for Indian merchants who track credit (udhaar) and payments (vasuli).
+Analyse the following voice transcript and extract the transaction details.
+
+The merchant may speak in Hindi (both Devnagari script and Hinglish), English, Marathi, Gujarati, or Bhojpuri.
+
+Common patterns:
+- "Ramesh ko 500 diye" → credit, amount=500, customer=Ramesh
+- "Suresh ne 1000 diya" → payment received, amount=1000, customer=Suresh
+- "शुभम में 5 रुपए दिए" → payment received, amount=5, customer=Shubham, dueDate=${new Date().toISOString().split("T")[0]}
+- "सतीश को 800 का उधार" → credit, amount=800, customer=Satish
+- "Ramesh ka udhaar 500" → credit
+- "2000 chai ke liye kharch kiya" → cashbook_out, amount=2000, note=Chai
+- "aaj 3000 sales hui" → cashbook_in, amount=3000
+- "Priya ko 700 kal tak dena hai" → credit, dueDate=tomorrow
+- "next week tak" → dueDate = 7 days from today
+
+Transaction type rules:
+- "diya", "denge", "udhaar diya", "credit", "liya", "baki" → type = "credit"
+- "aaya", "mila", "payment mili", "vasuli", "collected", "ne diya", "ne diye" → type = "payment"
+- "kharch", "expense", "chai", "petrol", "rent", "salary" → type = "cashbook_out"
+- "sales", "bikri", "aaj ki", "galla", "income" → type = "cashbook_in"
+
+Date resolution rules:
+- If no date is mentioned in the transcript:
+  - If the type is "payment" (vasuli/payment received), automatically select today's date (${new Date().toISOString().split("T")[0]}) as the dueDate/payment date.
+  - If the type is "credit", leave dueDate as null.
+
+Today's date is: ${new Date().toISOString().split("T")[0]}
+
+Return ONLY valid JSON — no markdown, no explanation:
+{
+  "customerName": "<transliterated English name, e.g. 'Shubham', or null if cashbook>",
+  "amount": <number in rupees, integer, required>,
+  "type": "<credit | payment | cashbook_out | cashbook_in>",
+  "dueDate": "<YYYY-MM-DD or null>",
+  "note": "<brief English description or null>",
+  "confidence": <0.0 to 1.0>
+}
+
+Transcript: "${text}"
+`;
+
+// ─── Gemini Parser ──────────────────────────────────────────────────────────
+
+const parseWithGemini = async (text) => {
+  if (!geminiModel) return null;
+
+  try {
+    const result = await geminiModel.generateContent(GEMINI_PROMPT(text));
+    const raw    = result.response.text().trim();
+
+    // Strip markdown code fences if Gemini returns them
+    const json = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
+
+    const parsed = JSON.parse(json);
+
+    // Validate required fields
+    if (!parsed.amount || typeof parsed.amount !== "number" || parsed.amount <= 0) {
+      return null;
+    }
+    if (!["credit", "payment", "cashbook_out", "cashbook_in"].includes(parsed.type)) {
+      return null;
+    }
+
+    return {
+      customerName: parsed.customerName || null,
+      amount:       Math.round(Math.abs(parsed.amount)),
+      type:         parsed.type,
+      dueDate:      parsed.dueDate || null,
+      note:         parsed.note    || null,
+      confidence:   Math.min(1, Math.max(0, parsed.confidence || 0.85)),
+      source:       "gemini",
+      raw:          text,
+    };
+  } catch (err) {
+    console.warn("[VoiceService] Gemini parse error:", err.message);
+    return null;
+  }
+};
+
+// ─── Rule-Based Fallback ─────────────────────────────────────────────────────
+
+const HINDI_NUMBERS = {
+  ek: 1, do: 2, teen: 3, char: 4, paanch: 5, chhe: 6, saat: 7, aath: 8, nau: 9,
+  das: 10, bees: 20, tees: 30, chalis: 40, pachaas: 50, saath: 60, sattar: 70,
+  assi: 80, nabbe: 90, sau: 100, hazaar: 1000, lakh: 100000,
+};
+const MULTIPLIERS = { sau: 100, hazaar: 1000, lakh: 100000 };
+
+const CASHBOOK_OUT_WORDS = [
+  "expense", "kharch", "kharch kiya", "chai", "tea", "rent", "salary",
+  "petrol", "fuel", "bill", "electricity", "samosa", "snack", "food",
+  "wages", "transport", "maintenance",
+];
+const CASHBOOK_IN_WORDS = [
+  "sales", "bikri", "income", "revenue", "galla", "aaj ki kamai",
+  "settlement", "daily sales", "collection",
+];
+const CREDIT_WORDS = [
+  "udhaar", "credit", "diya", "diye", "de diya", "baki", "baaki",
+  "liya", "le gaya", "ka udhaar", "ko udhaar",
+];
+const PAYMENT_WORDS = [
+  "payment", "paid", "mila", "aaya", "vasuli", "wapas", "return",
+  "ne diya", "ne diye", "collect", "recovered",
+];
+
+const extractAmount = (text) => {
+  // Numeric: 2000, 2,000, ₹2000, Rs 2000
+  const numericMatch = text.match(/(?:₹|rs\.?|inr\s*)?\s*(\d[\d,]*(?:\.\d+)?)/i);
+  if (numericMatch) {
+    const val = parseFloat(numericMatch[1].replace(/,/g, ""));
+    if (val > 0) return Math.round(val);
+  }
+
+  // Hindi words: "paanch hazaar", "do sau"
+  const words = text.toLowerCase().split(/\s+/);
+  let total = 0, current = 0;
+  for (const word of words) {
+    if (MULTIPLIERS[word]) {
+      current = current === 0 ? MULTIPLIERS[word] : current * MULTIPLIERS[word];
+      total += current;
+      current = 0;
+    } else if (HINDI_NUMBERS[word]) {
+      current += HINDI_NUMBERS[word];
+    }
+  }
+  if (current > 0) total += current;
+  return total > 0 ? total : null;
+};
+
+const extractCustomerName = (text) => {
+  // Look for name before/after common prepositions in both English and Hindi/Devnagari script
+  const patterns = [
+    // Devnagari patterns
+    /^([\u0900-\u097F]+)\s+(?:ने|को|का|के|की|में|से)(?:\s|$)/,
+    /(?:\s|^)(?:ने|को|का|के|से)\s+([\u0900-\u097F]+)(?:\s|$)/,
+    // English patterns
+    /^([a-zA-Z]+(?:\s[a-zA-Z]+)?)\s+(?:ko|ne|ka|ke|ki)\b/i,
+    /\b(?:ko|ne|ka|ke)\s+([a-zA-Z]+(?:\s[a-zA-Z]+)?)\b/i,
+    /^([a-zA-Z]{2,})\b/i,
+  ];
+
+  for (const re of patterns) {
+    const m = text.match(re);
+    if (m && m[1] && m[1].length > 1) {
+      const name = m[1].trim();
+      // Capitalize first letter if it is English
+      if (/^[a-zA-Z]/.test(name)) {
+        return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+      }
+      return name;
+    }
+  }
+
+  // Fallback: if first word is in Devnagari and it is followed by prepositions/amounts
+  const words = text.trim().split(/\s+/);
+  if (words.length > 0 && /^[\u0900-\u097F]+$/.test(words[0])) {
+    const stopwords = ["ने", "को", "का", "के", "की", "में", "से", "रुपए", "रुपये", "रुपया", "दिए", "दिया", "खर्च", "उधार", "पेमेंट"];
+    if (!stopwords.includes(words[0])) {
+      return words[0];
+    }
+  }
+  return null;
+};
+
+const extractDueDate = (text) => {
+  const t = text.toLowerCase();
+  const today = new Date();
+  const addDays = (d) => {
+    const dt = new Date(today);
+    dt.setDate(dt.getDate() + d);
+    return dt.toISOString().split("T")[0];
+  };
+
+  if (/aaj|today/.test(t))                   return addDays(0);
+  if (/kal|tomorrow/.test(t))                return addDays(1);
+  if (/parso|day after/.test(t))             return addDays(2);
+  if (/hafte\s*mein|next\s*week/.test(t))    return addDays(7);
+  if (/mahine\s*mein|next\s*month/.test(t))  return addDays(30);
+
+  const daysMatch = t.match(/(\d+)\s*(?:din|days?)\s*(?:mein|baad|later)/);
+  if (daysMatch) return addDays(parseInt(daysMatch[1]));
+
+  // ISO date
+  const isoMatch = text.match(/(\d{4}-\d{2}-\d{2})/);
+  if (isoMatch) return isoMatch[1];
+
+  return null;
+};
+
+const detectType = (text) => {
+  const t = text.toLowerCase();
+  if (CASHBOOK_OUT_WORDS.some((w) => t.includes(w)) || /खर्च|सैलरी|किराया|पेट्रोल/i.test(t)) return "cashbook_out";
+  if (CASHBOOK_IN_WORDS.some((w) => t.includes(w)) || /बिक्री|कमाई|गल्ला/i.test(t)) return "cashbook_in";
+
+  // Check if "ne/mein" or "ने/में" is present before the amount, and "diya/diye" or "दिया/दिए" is present
+  const isPaymentRegex = /(?:ne|mein|ने|में)\s+.*\s+(?:diya|diye|दिया|दिए)(?:\s|$)/i;
+  const isPaymentSimple = /mila|aaya|vasuli|wapas|payment|paid|collect|मिला|आया|वसूली|वापस/i;
+  if (isPaymentRegex.test(t) || isPaymentSimple.test(t)) {
+    return "payment";
+  }
+
+  const isCreditRegex = /udhaar|credit|diya|diye|baki|baaki|liya|उधार|दिया|दिए|बाकी|लिया/i;
+  if (isCreditRegex.test(t)) {
+    return "credit";
+  }
+
+  return "credit"; // safe default
+};
+
+const ruleBasedParse = (text) => {
+  const amount       = extractAmount(text);
+  const customerName = extractCustomerName(text);
+  const type         = detectType(text);
+  let dueDate        = extractDueDate(text);
+
+  // If transaction type is payment and no date is specified, automatically default to today
+  if (type === "payment" && !dueDate) {
+    dueDate = new Date().toISOString().split("T")[0];
+  }
+
+  // Confidence: base 0.60, add for each extracted field
+  let confidence = 0.60;
+  if (amount)       confidence += 0.15;
+  if (customerName) confidence += 0.10;
+  if (dueDate)      confidence += 0.05;
+
+  return {
+    customerName: customerName || null,
+    amount:       amount       || 0,
+    type,
+    dueDate:      dueDate      || null,
+    note:         null,
+    confidence:   Math.min(0.90, confidence),
+    source:       "rule-based",
+    raw:          text,
+  };
+};
+
+// ─── Public API ──────────────────────────────────────────────────────────────
+
+/**
+ * processVoiceInput(text)
+ *
+ * Tries Gemini first; falls back to rule-based parser.
+ * Always returns a valid result object.
+ */
+const processVoiceInput = async (text) => {
+  // Tier 1: Gemini
+  const geminiResult = await parseWithGemini(text);
+  if (geminiResult) return geminiResult;
+
+  // Tier 2: Rule-based
+  return ruleBasedParse(text);
+};
+
+module.exports = { processVoiceInput, ruleBasedParse };
