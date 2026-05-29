@@ -3,7 +3,7 @@ import { SafeAreaView, StyleSheet, ActivityIndicator, View } from 'react-native'
 import { WebView } from 'react-native-webview';
 
 // Replace with your Vercel deployment URL
-const VERCEL_URL = 'https://your-vercel-url';
+const VERCEL_URL = 'https://voice-khata.vercel.app/';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
