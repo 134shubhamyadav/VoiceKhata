@@ -98,7 +98,25 @@ export default function CustomersPage() {
         console.warn("Could not load real customers, using offline mock data instead.");
       }
     }
+
+    // Initial load
     loadCustomers();
+
+    // Re-fetch when user navigates back to this page
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadCustomers();
+      }
+    };
+    const handleFocus = () => loadCustomers();
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const filtered = customers.filter(c => {

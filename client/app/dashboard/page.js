@@ -245,7 +245,25 @@ export default function Dashboard() {
         setLoading(false);
       }
     }
+
+    // Initial load
     loadDashboard();
+
+    // Re-fetch whenever user navigates back to this page (tab visible again)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadDashboard();
+      }
+    };
+    const handleFocus = () => loadDashboard();
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   return (
