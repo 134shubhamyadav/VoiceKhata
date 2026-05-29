@@ -22,9 +22,16 @@ try {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
       });
-    } else if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PROJECT_ID) {
-      const rawKey = process.env.FIREBASE_PRIVATE_KEY.trim();
-      const cleanKey = rawKey.replace(/^"|"$/g, "").replace(/\\n/g, "\n");
+    } else if ((process.env.FIREBASE_PRIVATE_KEY || process.env.FIREBASE_PRIVATE_KEY_BASE64) && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PROJECT_ID) {
+      let cleanKey = "";
+      
+      if (process.env.FIREBASE_PRIVATE_KEY_BASE64) {
+        cleanKey = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_BASE64.trim(), "base64").toString("utf8");
+        console.log("[Firebase Admin] Decoded private key from Base64.");
+      } else {
+        const rawKey = process.env.FIREBASE_PRIVATE_KEY.trim();
+        cleanKey = rawKey.replace(/^"|"$/g, "").replace(/\\n/g, "\n");
+      }
       
       console.log("[Firebase Admin] Key starts with:", JSON.stringify(cleanKey.substring(0, 30)));
       console.log("[Firebase Admin] Key ends with:", JSON.stringify(cleanKey.substring(cleanKey.length - 30)));
