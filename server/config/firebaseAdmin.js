@@ -26,7 +26,8 @@ try {
       let cleanKey = "";
       
       if (process.env.FIREBASE_PRIVATE_KEY_BASE64) {
-        cleanKey = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_BASE64.trim(), "base64").toString("utf8");
+        const cleanBase64 = process.env.FIREBASE_PRIVATE_KEY_BASE64.replace(/\s/g, "");
+        cleanKey = Buffer.from(cleanBase64, "base64").toString("utf8");
         console.log("[Firebase Admin] Decoded private key from Base64.");
       } else {
         const rawKey = process.env.FIREBASE_PRIVATE_KEY.trim();
