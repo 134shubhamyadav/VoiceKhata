@@ -53,24 +53,45 @@ Common patterns:
 - "2000 chai ke liye kharch kiya" → cashbook_out, amount=2000, note=Chai
 - "aaj 3000 sales hui" → cashbook_in, amount=3000
 - "Priya ko 700 kal tak dena hai" → credit, dueDate=tomorrow
-- "next week tak" → dueDate = 7 days from today
+
+ENGLISH SENTENCE PATTERNS (very important):
+- "I give Ramesh 5000" → credit, customer=Ramesh, amount=5000
+- "I gave Ramesh 5000 rupees" → credit, customer=Ramesh, amount=5000
+- "give Ramesh 500" → credit, customer=Ramesh, amount=500
+- "I give NAME AMOUNT and he will give me back in X days" → credit, customer=NAME, amount=AMOUNT, dueDate=X days from today
+- "Ramesh owes me 2000" → credit, customer=Ramesh, amount=2000
+- "Priya paid me 1500" → payment, customer=Priya, amount=1500
+- "received 500 from Suresh" → payment, customer=Suresh, amount=500
+- "he will give me back in 30 days" → dueDate = 30 days from today
+- "give me back after 30 days" → dueDate = 30 days from today
+- "return in X days" → dueDate = X days from today
+
+CUSTOMER NAME EXTRACTION (critical):
+- Look for proper nouns (capitalized names) immediately after "give", "gave", "to", "from", "for"
+- "I give Ramesh" → Ramesh is the customer
+- "give to Priya" → Priya is the customer
+- "Suresh paid" → Suresh is the customer
+- If no clear customer name found, set customerName to null (do NOT set "Unknown Customer")
+
+DUE DATE EXTRACTION:
+- "30 days back" = 30 days from today
+- "give back in X days" = X days from today
+- "he will give me X days back" = X days from today
+- "next month" = 30 days from today
+- "next week" = 7 days from today
+- Payment type: if no date mentioned, use today as dueDate
 
 Transaction type rules:
-- "diya", "denge", "udhaar diya", "credit", "liya", "baki" → type = "credit"
-- "aaya", "mila", "payment mili", "vasuli", "collected", "ne diya", "ne diye" → type = "payment"
+- "diya", "denge", "udhaar diya", "credit", "liya", "baki", "give", "gave", "I give" → type = "credit"
+- "aaya", "mila", "payment mili", "vasuli", "collected", "ne diya", "ne diye", "paid", "received from" → type = "payment"
 - "kharch", "expense", "chai", "petrol", "rent", "salary" → type = "cashbook_out"
 - "sales", "bikri", "aaj ki", "galla", "income" → type = "cashbook_in"
-
-Date resolution rules:
-- If no date is mentioned in the transcript:
-  - If the type is "payment" (vasuli/payment received), automatically select today's date (${new Date().toISOString().split("T")[0]}) as the dueDate/payment date.
-  - If the type is "credit", leave dueDate as null.
 
 Today's date is: ${new Date().toISOString().split("T")[0]}
 
 Return ONLY valid JSON — no markdown, no explanation:
 {
-  "customerName": "<transliterated English name, e.g. 'Shubham', or null if cashbook>",
+  "customerName": "<proper name string, e.g. 'Ramesh', or null if not found>",
   "amount": <number in rupees, integer, required>,
   "type": "<credit | payment | cashbook_out | cashbook_in>",
   "dueDate": "<YYYY-MM-DD or null>",

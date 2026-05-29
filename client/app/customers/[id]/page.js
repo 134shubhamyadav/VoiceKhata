@@ -75,8 +75,9 @@ export default function CustomerDetail() {
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState("");
 
-  // Record Cash Payment drawer states
+  // Record Cash Payment / Give Credit drawer states
   const [isRecordingPayment, setIsRecordingPayment] = useState(false);
+  const [entryType, setEntryType] = useState("payment"); // 'payment' | 'credit'
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentNotes, setPaymentNotes] = useState("");
   const [savingPayment, setSavingPayment] = useState(false);
@@ -136,13 +137,14 @@ export default function CustomerDetail() {
     setPaymentError("");
 
     try {
+      const isPayment = entryType === 'payment';
       const payload = {
         customerId: id,
         userId: user?.id || '60b9b32b9b1d8e2df8a149f1',
         amount: amountNum,
-        type: 'payment',
-        status: 'paid',
-        note: paymentNotes.trim() || `Cash payment received`,
+        type: entryType,
+        status: isPayment ? 'paid' : 'pending',
+        note: paymentNotes.trim() || (isPayment ? `Cash payment received` : `Credit given`),
       };
 
       const response = await apiClient.createEntry(payload);
@@ -150,19 +152,19 @@ export default function CustomerDetail() {
         localStorage.setItem('recent_transaction', JSON.stringify({
           customer: customer.name,
           amount: amountNum,
-          type: 'payment',
+          type: entryType,
           dueDate: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
           note: payload.note,
-          raw: `Paid ₹${amountNum} in cash`
+          raw: isPayment ? `Paid ₹${amountNum} in cash` : `Credit of ₹${amountNum} given`
         }));
         
         setIsRecordingPayment(false);
         router.push("/success");
       } else {
-        throw new Error(response.message || "Failed to record payment");
+        throw new Error(response.message || "Failed to record entry");
       }
     } catch (err) {
-      console.error("Could not save cash payment to backend:", err);
+      console.error("Could not save entry to backend:", err);
       setPaymentError(err.message || "Something went wrong. Please try again.");
     } finally {
       setSavingPayment(false);
@@ -369,23 +371,36 @@ export default function CustomerDetail() {
         </motion.div>
 
         {/* Unified actions grid */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 gap-3 mb-3.5">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="grid grid-cols-3 gap-2 mb-3.5">
           <button 
             onClick={handleWhatsAppReminder} 
-            className="py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none transition-colors"
+            className="py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] rounded-xl flex items-center justify-center gap-1 cursor-pointer outline-none focus:outline-none transition-colors"
           >
-            <MessageCircle size={13} /> Send Reminder
+            <MessageCircle size={12} /> Remind
           </button>
           <button 
             onClick={() => {
               setPaymentAmount("");
               setPaymentNotes("");
               setPaymentError("");
+              setEntryType("payment");
               setIsRecordingPayment(true);
             }} 
-            className="py-3 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none transition-colors"
+            className="py-3 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-[10px] rounded-xl flex items-center justify-center gap-1 cursor-pointer outline-none focus:outline-none transition-colors"
           >
-            <IndianRupee size={13} /> Record Payment
+            <IndianRupee size={12} /> Got Payment
+          </button>
+          <button 
+            onClick={() => {
+              setPaymentAmount("");
+              setPaymentNotes("");
+              setPaymentError("");
+              setEntryType("credit");
+              setIsRecordingPayment(true);
+            }} 
+            className="py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[10px] rounded-xl flex items-center justify-center gap-1 cursor-pointer outline-none focus:outline-none transition-colors"
+          >
+            <TrendingDown size={12} /> Give Credit
           </button>
         </motion.div>
 
@@ -550,8 +565,12 @@ export default function CustomerDetail() {
               className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-10 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80"
             >
               <div className="w-12 h-1 bg-slate-250 dark:bg-slate-800 rounded-full mx-auto mb-5" />
-              <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">Record Cash Payment</h3>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mb-5">Enter details for manual cash payment ledger entry.</p>
+              <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">
+                {entryType === 'payment' ? 'Record Cash Payment' : 'Give Credit (Udhaar)'}
+              </h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mb-5">
+                {entryType === 'payment' ? 'Record cash received from this customer.' : 'Record new credit/udhaar given to this customer.'}
+              </p>
 
               {paymentError && (
                 <div className="bg-red-500/5 border border-red-500/10 text-red-500 text-xs font-semibold p-3 rounded-lg mb-4">
@@ -604,9 +623,11 @@ export default function CustomerDetail() {
                 <button
                   onClick={handleSavePayment}
                   disabled={savingPayment}
-                  className="flex-1 py-2.5 bg-indigo-650 hover:bg-indigo-750 text-white font-bold text-xs rounded-lg cursor-pointer flex items-center justify-center outline-none focus:outline-none transition-colors"
+                  className={`flex-1 py-2.5 text-white font-bold text-xs rounded-lg cursor-pointer flex items-center justify-center outline-none focus:outline-none transition-colors ${
+                    entryType === 'payment' ? 'bg-indigo-600 hover:bg-indigo-750' : 'bg-orange-500 hover:bg-orange-600'
+                  }`}
                 >
-                  {savingPayment ? "Saving..." : "Save Payment ✓"}
+                  {savingPayment ? "Saving..." : entryType === 'payment' ? "Save Payment ✓" : "Save Credit ✓"}
                 </button>
               </div>
             </motion.div>

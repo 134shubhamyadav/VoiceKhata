@@ -179,11 +179,11 @@ export default function VoicePage() {
             const response = await apiClient.parseVoice(chosen);
             if (response.success && response.data) {
               localStorage.setItem('voice_intent', JSON.stringify({
-                customer: response.data.customerName || 'Unknown Customer',
+                customer: response.data.customerName || '',
                 amount: response.data.amount || 100, // Rupees
                 type: response.data.type || 'credit',
-                dueDate: response.data.dueDate ? new Date(response.data.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'No due date',
-                note: response.data.note || 'Grocery items',
+                dueDate: response.data.dueDate || null,
+                note: response.data.note || '',
                 confidence: Math.round(response.data.confidence * 100),
                 raw: chosen
               }));
@@ -236,11 +236,11 @@ export default function VoicePage() {
           const response = await apiClient.parseVoice(resultText);
           if (response.success && response.data) {
             localStorage.setItem('voice_intent', JSON.stringify({
-              customer: response.data.customerName || 'Unknown Customer',
+              customer: response.data.customerName || '',
               amount: response.data.amount || 100,
               type: response.data.type || 'credit',
-              dueDate: response.data.dueDate ? new Date(response.data.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'No due date',
-              note: response.data.note || 'Grocery items',
+              dueDate: response.data.dueDate || null,
+              note: response.data.note || '',
               confidence: Math.round(response.data.confidence * 100),
               raw: resultText
             }));
