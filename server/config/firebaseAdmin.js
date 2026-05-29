@@ -22,17 +22,20 @@ try {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
       });
-      firebaseInitialized = true;
-      console.log("[Firebase Admin] Initialized with local service account key file.");
     } else if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PROJECT_ID) {
-      const cleanKey = process.env.FIREBASE_PRIVATE_KEY.replace(/^"|"$/g, "").replace(/\\n/g, "\n");
+      const rawKey = process.env.FIREBASE_PRIVATE_KEY.trim();
+      const cleanKey = rawKey.replace(/^"|"$/g, "").replace(/\\n/g, "\n");
+      
+      console.log("[Firebase Admin] Key starts with:", JSON.stringify(cleanKey.substring(0, 30)));
+      console.log("[Firebase Admin] Key ends with:", JSON.stringify(cleanKey.substring(cleanKey.length - 30)));
+      
       admin.initializeApp({
         credential: admin.credential.cert({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          projectId: process.env.FIREBASE_PROJECT_ID.trim(),
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL.trim(),
           privateKey: cleanKey,
-          project_id: process.env.FIREBASE_PROJECT_ID,
-          client_email: process.env.FIREBASE_CLIENT_EMAIL,
+          project_id: process.env.FIREBASE_PROJECT_ID.trim(),
+          client_email: process.env.FIREBASE_CLIENT_EMAIL.trim(),
           private_key: cleanKey
         })
       });
