@@ -84,14 +84,22 @@ const verifyToken = async (req, res) => {
     let isNewUser = false;
     if (!user) {
       isNewUser = true;
-      user = await User.create({
-        firebaseUid:         uid,
-        email:               email    || null,
-        phone:               phone_number || null,
-        name:                name     || "Merchant",
-        profilePhoto:        picture  || null,
-        onboardingIncomplete: true,
-      });
+      // Use findOneAndUpdate+upsert on firebaseUid (never null, always unique)
+      // This avoids triggering the phone_1 unique index when phone is null
+      user = await User.findOneAndUpdate(
+        { firebaseUid: uid },
+        {
+          $setOnInsert: {
+            firebaseUid:          uid,
+            email:                email        || null,
+            phone:                phone_number || null,
+            name:                 name         || "Merchant",
+            profilePhoto:         picture      || null,
+            onboardingIncomplete: true,
+          },
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
       console.log(`[Auth] New merchant created for UID: ${uid}`);
     }
 
@@ -104,7 +112,12 @@ const verifyToken = async (req, res) => {
 
   } catch (err) {
     console.error("[Auth] Token verification failed:", err.message);
-    return res.status(401).json({ success: false, message: "Authentication failed: " + err.message });
+    // Hide raw MongoDB/internal errors from the client
+    const isMongoError = err.code === 11000 || err.name === 'MongoServerError';
+    const clientMsg = isMongoError
+      ? "Account setup failed due to a data conflict. Please try again."
+      : err.message;
+    return res.status(401).json({ success: false, message: "Authentication failed: " + clientMsg });
   }
 };
 
