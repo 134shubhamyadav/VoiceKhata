@@ -331,10 +331,10 @@ export default function Dashboard() {
       <div className="relative z-10 px-5 mb-6">
         <div className="grid grid-cols-2 gap-3">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-            <StatsCard label="Total Customers" value={totalCustomersCount} icon={<Users size={15} />} color="blue" trend={8} />
+            <StatsCard label="Total Customers" value={totalCustomersCount} icon={<Users size={15} />} color="blue" />
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <StatsCard label="Overdue Today" value={overdueCustomersCount} icon={<Clock size={15} />} color="orange" trend={-5} />
+            <StatsCard label="Overdue Today" value={overdueCustomersCount} icon={<Clock size={15} />} color="orange" />
           </motion.div>
         </div>
       </div>
