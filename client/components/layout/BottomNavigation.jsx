@@ -17,7 +17,7 @@ export default function BottomNavigation() {
   const router = useRouter();
 
   // Hide nav on pages that use full-screen drawers or don't need it
-  const hiddenPaths = ["/", "/confirm", "/success", "/login", "/voice"];
+  const hiddenPaths = ["/", "/confirm", "/success", "/login", "/voice", "/terms", "/privacy"];
   if (hiddenPaths.includes(pathname)) return null;
   // Also hide on dynamic customer detail pages
   if (pathname.startsWith("/customers/") && pathname !== "/customers") return null;
