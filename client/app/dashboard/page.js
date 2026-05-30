@@ -128,11 +128,21 @@ export default function Dashboard() {
 
   // Dynamic Merchant Profile State
   const [merchantProfile, setMerchantProfile] = useState({
-    shopName: "Yaksh Kirana Store",
-    ownerName: "Yaksh Patel",
-    phone: "+91 98765 43210",
-    upiId: "yakshkirana@paytm"
+    shopName: "",
+    ownerName: "",
+    phone: "",
+    email: "",
+    upiId: "",
+    profilePhoto: ""
   });
+
+  // Real trend state (computed from API data)
+  const [customerTrend, setCustomerTrend] = useState(null);   // null = no data yet
+  const [overdueTrend, setOverdueTrend] = useState(null);
+
+  // Visiting card extra fields
+  const [cardAddress, setCardAddress] = useState("");
+  const [cardTagline, setCardTagline] = useState("");
 
   // VoiceKhata Smart Suite States
   const [activeTool, setActiveTool] = useState(null); // 'cashbook' | 'visiting_card' | 'gst_calc' | null
@@ -207,6 +217,25 @@ export default function Dashboard() {
           setOverdueCustomersCount(overdue || 0);
           setHighRiskCount(highRisk || 0);
           setRecentActivityList(activity || []);
+
+          // Compute real trends: compare current totals vs stored previous-week snapshot
+          const prevSnap = JSON.parse(localStorage.getItem('dash_prev_snap') || 'null');
+          const nowSnap = { customers: totalCust || 0, overdue: overdue || 0, ts: Date.now() };
+          if (prevSnap && (Date.now() - prevSnap.ts) > 60 * 60 * 1000) {
+            // Only show trend if snapshot is older than 1 hour (avoids divide-by-zero on fresh loads)
+            const custChange = prevSnap.customers > 0
+              ? Math.round(((nowSnap.customers - prevSnap.customers) / prevSnap.customers) * 100)
+              : null;
+            const overdueChange = prevSnap.overdue > 0
+              ? Math.round(((nowSnap.overdue - prevSnap.overdue) / prevSnap.overdue) * 100)
+              : null;
+            setCustomerTrend(custChange);
+            setOverdueTrend(overdueChange);
+          }
+          // Save latest snapshot (overwrite only after 1h to preserve meaningful diff)
+          if (!prevSnap || (Date.now() - prevSnap.ts) > 60 * 60 * 1000) {
+            localStorage.setItem('dash_prev_snap', JSON.stringify(nowSnap));
+          }
 
           // Fetch active customers to build high risk list
           const custResponse = await apiClient.getCustomers(user?.id || '60b9b32b9b1d8e2df8a149f1');
@@ -331,10 +360,10 @@ export default function Dashboard() {
       <div className="relative z-10 px-5 mb-6">
         <div className="grid grid-cols-2 gap-3">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-            <StatsCard label="Total Customers" value={totalCustomersCount} icon={<Users size={15} />} color="blue" />
+            <StatsCard label="Total Customers" value={totalCustomersCount} icon={<Users size={15} />} color="blue" trend={customerTrend !== null ? customerTrend : undefined} />
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <StatsCard label="Overdue Today" value={overdueCustomersCount} icon={<Clock size={15} />} color="orange" />
+            <StatsCard label="Overdue Today" value={overdueCustomersCount} icon={<Clock size={15} />} color="orange" trend={overdueTrend !== null ? overdueTrend : undefined} />
           </motion.div>
         </div>
       </div>
@@ -605,92 +634,154 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display">Business Visiting Card</h3>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Design your premium business card to share with customers</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Design your premium business card to share instantly</p>
                     </div>
                     <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                       <CreditCard size={15} />
                     </div>
                   </div>
 
-                  {/* Customizable Themes Selector */}
-                  <div className="flex items-center gap-2 mb-4 bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-100 dark:border-slate-800/50">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Card Theme:</span>
+                  {/* Theme Selector */}
+                  <div className="flex items-center gap-2 mb-3 bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Theme:</span>
                     <div className="flex gap-2 flex-1 justify-end">
                       {[
-                        { id: "violet", label: "Violet", bg: "bg-indigo-600" },
-                        { id: "emerald", label: "Emerald", bg: "bg-emerald-600" },
-                        { id: "gold", label: "Royal Gold", bg: "bg-gradient-to-r from-amber-500 to-yellow-600" }
-                      ].map(t => (
+                        { id: "violet", label: "Dark", bg: "bg-slate-900" },
+                        { id: "emerald", label: "Forest", bg: "bg-emerald-800" },
+                        { id: "gold", label: "Royal", bg: "bg-gradient-to-r from-amber-600 to-yellow-500" }
+                      ].map(th => (
                         <button
-                          key={t.id}
-                          onClick={() => setCardTheme(t.id)}
-                          className={`w-5 h-5 rounded-full ${t.bg} border-2 transition-all cursor-pointer ${cardTheme === t.id ? "border-slate-800 dark:border-white scale-110" : "border-white dark:border-slate-900"}`}
-                          title={t.label}
-                        />
+                          key={th.id}
+                          onClick={() => setCardTheme(th.id)}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-bold border-2 transition-all cursor-pointer ${
+                            cardTheme === th.id
+                              ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400"
+                              : "border-transparent bg-white dark:bg-slate-900 text-slate-400"
+                          }`}
+                        >
+                          <span className={`w-3 h-3 rounded-full ${th.bg}`} />{th.label}
+                        </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Category editor */}
-                  <div className="mb-4">
-                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Business Category</label>
-                    <input
-                      type="text"
-                      value={cardCategory}
-                      onChange={(e) => setCardCategory(e.target.value)}
-                      placeholder="Retail & Kirana"
-                      className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none"
-                    />
+                  {/* Extra fields */}
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <div>
+                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Business Type</label>
+                      <input type="text" value={cardCategory} onChange={(e) => setCardCategory(e.target.value)} placeholder="Kirana / Retail" className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-800 dark:text-white text-xs font-semibold outline-none" />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Tagline (optional)</label>
+                      <input type="text" value={cardTagline} onChange={(e) => setCardTagline(e.target.value)} placeholder="Your slogan..." className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-800 dark:text-white text-xs font-semibold outline-none" />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Address (optional)</label>
+                      <input type="text" value={cardAddress} onChange={(e) => setCardAddress(e.target.value)} placeholder="Shop No. 5, Market Road, City" className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-800 dark:text-white text-xs font-semibold outline-none" />
+                    </div>
                   </div>
 
                   {/* HIGH-FIDELITY DIGITAL VISITING CARD PREVIEW */}
                   <motion.div
                     layout
-                    className={`w-full h-[180px] rounded-2xl p-5 relative overflow-hidden text-white flex flex-col justify-between shadow-md mb-5 ${
-                      cardTheme === "violet" ? "bg-slate-900 border border-slate-800" :
-                      cardTheme === "emerald" ? "bg-emerald-950 border border-emerald-900" :
-                      "bg-amber-950 border border-amber-900"
+                    id="visiting-card-preview"
+                    className={`w-full rounded-2xl px-5 py-4 relative overflow-hidden text-white flex flex-col justify-between shadow-xl mb-4 ${
+                      cardTheme === "violet" ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700/50" :
+                      cardTheme === "emerald" ? "bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 border border-emerald-700/50" :
+                      "bg-gradient-to-br from-amber-700 via-yellow-600 to-amber-800 border border-amber-500/50"
                     }`}
+                    style={{ minHeight: 180 }}
                   >
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-xl -translate-y-6 translate-x-6" />
+                    {/* Decorative blobs */}
+                    <div className="absolute top-0 right-0 w-28 h-28 bg-white/5 rounded-full blur-xl -translate-y-8 translate-x-8 pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full blur-xl translate-y-6 -translate-x-6 pointer-events-none" />
 
+                    {/* Top row */}
                     <div className="relative z-10 flex items-start justify-between">
                       <div>
-                        <h4 className="text-sm font-extrabold leading-tight tracking-tight font-display">{merchantProfile.shopName}</h4>
-                        <span className="text-[8px] font-bold uppercase px-2 py-0.5 bg-white/10 rounded-full mt-1.5 inline-block">{cardCategory}</span>
+                        <h4 className="text-base font-black leading-tight tracking-tight">{merchantProfile.shopName || 'Your Shop Name'}</h4>
+                        {cardTagline && <p className="text-[9px] text-white/60 mt-0.5 italic">{cardTagline}</p>}
+                        <span className="text-[8px] font-bold uppercase px-2 py-0.5 bg-white/15 rounded-full mt-1.5 inline-block">{cardCategory}</span>
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest opacity-60">VoiceKhata</span>
+                      {merchantProfile.profilePhoto ? (
+                        <img src={merchantProfile.profilePhoto} alt="logo" className="w-10 h-10 rounded-xl object-cover border border-white/20" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+                          <span className="text-sm font-black">{(merchantProfile.shopName || 'V')[0]}</span>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="relative z-10 flex justify-between items-end">
+                    {/* Middle divider */}
+                    <div className="relative z-10 border-t border-white/10 my-3" />
+
+                    {/* Bottom details grid */}
+                    <div className="relative z-10 grid grid-cols-2 gap-y-1.5">
                       <div>
-                        <p className="text-[8px] text-white/50 font-bold uppercase tracking-widest">Merchant Owner</p>
-                        <p className="text-xs font-extrabold">{merchantProfile.ownerName}</p>
+                        <p className="text-[8px] text-white/40 font-bold uppercase tracking-widest">Owner</p>
+                        <p className="text-xs font-extrabold">{merchantProfile.ownerName || 'Owner Name'}</p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-[11px] font-bold">{merchantProfile.phone}</p>
-                        {merchantProfile.upiId && <p className="text-[8px] text-white/60 mt-0.5">UPI: {merchantProfile.upiId}</p>}
-                      </div>
+                      {merchantProfile.phone && (
+                        <div className="text-right">
+                          <p className="text-[8px] text-white/40 font-bold uppercase tracking-widest">Mobile</p>
+                          <p className="text-xs font-bold">{merchantProfile.phone}</p>
+                        </div>
+                      )}
+                      {merchantProfile.email && (
+                        <div className="col-span-2">
+                          <p className="text-[8px] text-white/40 font-bold uppercase tracking-widest">Email</p>
+                          <p className="text-[10px] font-semibold text-white/80">{merchantProfile.email}</p>
+                        </div>
+                      )}
+                      {merchantProfile.upiId && (
+                        <div>
+                          <p className="text-[8px] text-white/40 font-bold uppercase tracking-widest">UPI Pay</p>
+                          <p className="text-[10px] font-bold text-white/80">{merchantProfile.upiId}</p>
+                        </div>
+                      )}
+                      {cardAddress && (
+                        <div className={merchantProfile.upiId ? "text-right" : "col-span-2"}>
+                          <p className="text-[8px] text-white/40 font-bold uppercase tracking-widest">Address</p>
+                          <p className="text-[9px] text-white/70 leading-tight">{cardAddress}</p>
+                        </div>
+                      )}
                     </div>
+
+                    {/* VoiceKhata watermark */}
+                    <div className="absolute bottom-3 right-4 text-[7px] font-black uppercase tracking-widest text-white/25">VoiceKhata ✦</div>
                   </motion.div>
 
-                  <div className="flex gap-2.5">
-                    <button
-                      onClick={() => setFeedbackMessage("Visiting card downloaded successfully.")}
-                      className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-850 dark:bg-slate-800 text-white font-bold text-xs rounded-lg cursor-pointer flex items-center justify-center gap-1.5"
-                    >
-                      💾 Download Card
-                    </button>
+                  {/* Action buttons */}
+                  <div className="grid grid-cols-2 gap-2 mb-3">
                     <button
                       onClick={() => {
-                        const msg = `*${merchantProfile.shopName}*\n\nOwner: ${merchantProfile.ownerName}\nPhone: ${merchantProfile.phone}\nUPI: ${merchantProfile.upiId}\n\nSupported by VoiceKhata`;
-                        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+                        const lines = [
+                          `*${merchantProfile.shopName || 'My Shop'}*`,
+                          cardTagline ? `_${cardTagline}_` : '',
+                          `📦 ${cardCategory}`,
+                          ``,
+                          `👤 *${merchantProfile.ownerName || 'Owner'}*`,
+                          merchantProfile.phone ? `📞 ${merchantProfile.phone}` : '',
+                          merchantProfile.email ? `📧 ${merchantProfile.email}` : '',
+                          merchantProfile.upiId ? `💳 UPI: ${merchantProfile.upiId}` : '',
+                          cardAddress ? `📍 ${cardAddress}` : '',
+                          ``,
+                          `_Powered by VoiceKhata_`
+                        ].filter(Boolean).join('\n');
+                        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(lines)}`, '_blank');
                       }}
-                      className="flex-1 py-2.5 bg-[#25D366] hover:bg-[#22c35e] text-white font-bold text-xs rounded-lg cursor-pointer flex items-center justify-center gap-1.5"
+                      className="py-2.5 bg-[#25D366] hover:bg-[#22c35e] text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      📲 Share WhatsApp
+                      📲 Share on WhatsApp
+                    </button>
+                    <button
+                      onClick={() => { setActiveTool('cashbook'); }}
+                      className="py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      📒 Open Cashbook
                     </button>
                   </div>
+                  <p className="text-center text-[9px] text-slate-400 dark:text-slate-600">Edit your name, phone, UPI &amp; photo in Settings → Edit Profile</p>
                 </div>
               )}
 
