@@ -586,7 +586,7 @@ export default function OnboardingPage() {
           <span>Secured by enterprise-grade ledger validation</span>
         </div>
         <p className="text-slate-650 text-[8px] max-w-xs mx-auto leading-relaxed">
-          By logging in, you agree to VoiceKhata's <span className="underline cursor-pointer">Terms of Service</span> and <span className="underline cursor-pointer">Privacy Policies</span>
+          By logging in, you agree to VoiceKhata's <span onClick={() => router.push('/terms')} className="underline cursor-pointer">Terms of Service</span> and <span onClick={() => router.push('/privacy')} className="underline cursor-pointer">Privacy Policies</span>
         </p>
       </div>
       {/* Invisible ReCAPTCHA Anchor */}
