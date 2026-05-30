@@ -4,6 +4,7 @@ const Customer = require('../models/Customer');
 const Entry = require('../models/Entry');
 const asyncHandler = require('../middleware/asyncHandler');
 const { getCustomerDetails } = require('../services/customerDetailsService');
+const { selfHealCustomerBalances } = require('./entryController');
 
 // POST /api/customers
 const createCustomer = asyncHandler(async (req, res) => {
@@ -35,19 +36,7 @@ const getCustomers = asyncHandler(async (req, res) => {
 
   // Sync balances for consistency
   for (let customer of customers) {
-    const pendingEntries = await Entry.find({
-      customerId: customer._id,
-      userId,
-      type: 'credit',
-      status: { $in: ['pending', 'partial', 'overdue'] },
-    }).lean();
-
-    const actualOwed = pendingEntries.reduce((sum, e) => sum + (e.remainingAmount ?? e.amount), 0);
-
-    if (customer.totalOwed !== actualOwed) {
-      customer.totalOwed = actualOwed;
-      await customer.save();
-    }
+    customer.totalOwed = await selfHealCustomerBalances(customer._id);
   }
 
   return res.json({
@@ -73,19 +62,7 @@ const getCustomerById = asyncHandler(async (req, res) => {
   }
 
   // Data consistency check: sync totalOwed with actual entries
-  const pendingEntries = await Entry.find({
-    customerId: customer._id,
-    userId: req.user.id,
-    type: 'credit',
-    status: { $in: ['pending', 'partial', 'overdue'] },
-  }).lean();
-
-  const actualOwed = pendingEntries.reduce((sum, e) => sum + (e.remainingAmount ?? e.amount), 0);
-
-  if (customer.totalOwed !== actualOwed) {
-    customer.totalOwed = actualOwed;
-    await customer.save();
-  }
+  customer.totalOwed = await selfHealCustomerBalances(customer._id);
 
   res.json({ success: true, data: customer });
 });
@@ -129,19 +106,7 @@ const getCustomerDetailsController = asyncHandler(async (req, res) => {
   }
 
   // Data consistency check: sync totalOwed with actual entries
-  const pendingEntries = await Entry.find({
-    customerId: id,
-    userId,
-    type: 'credit',
-    status: { $in: ['pending', 'partial'] },
-  }).lean();
-
-  const actualOwed = pendingEntries.reduce((sum, e) => sum + (e.remainingAmount ?? e.amount), 0);
-
-  if (result.customer.totalOwed !== actualOwed) {
-    await Customer.findByIdAndUpdate(id, { totalOwed: actualOwed });
-    result.customer.totalOwed = actualOwed;
-  }
+  result.customer.totalOwed = await selfHealCustomerBalances(id);
 
   res.json({ success: true, data: result });
 });

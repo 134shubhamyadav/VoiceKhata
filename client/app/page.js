@@ -347,7 +347,7 @@ export default function OnboardingPage() {
                   onClick={triggerGoogleAuth}
                   className="w-full py-3.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2.5 cursor-pointer transition-colors outline-none focus:outline-none"
                 >
-                  <img src="/google-logo.png" alt="Google" className="w-3.5 h-3.5 object-contain" /> Continue with Google
+                  Continue with Google
                 </button>
 
                 {/* Mobile Authentication */}

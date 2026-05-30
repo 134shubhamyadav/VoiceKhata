@@ -75,6 +75,21 @@ export default function CustomerDetail() {
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState("");
 
+  // Reminder review drawer states
+  const [isReminderOpen, setIsReminderOpen] = useState(false);
+  const [reminderTone, setReminderTone] = useState("friendly");
+  const [reminderMsg, setReminderMsg] = useState("");
+
+  const generatePresetMessage = (customerName, amount, tone) => {
+    const shopName = user?.shopName || "Our Store";
+    const templates = {
+      friendly: `Namaste ${customerName},\n\nThis is a reminder from ${shopName}.\n\nYour pending amount is ₹${amount.toLocaleString()}.\n\nPlease complete the payment.\n\nSupported by VoiceKhata`,
+      firm: `Namaste ${customerName},\n\nThis is an important reminder from ${shopName}.\n\nYour outstanding balance of ₹${amount.toLocaleString()} is overdue. Please settle this payment today to maintain your credit record.\n\nSupported by VoiceKhata`,
+      urgent: `Namaste ${customerName},\n\nThis is an URGENT notice from ${shopName}.\n\nYour pending amount of ₹${amount.toLocaleString()} is severely overdue. Please complete the payment immediately to avoid suspension of credit.\n\nSupported by VoiceKhata`
+    };
+    return templates[tone] || templates.friendly;
+  };
+
   // Record Cash Payment / Give Credit drawer states
   const [isRecordingPayment, setIsRecordingPayment] = useState(false);
   const [entryType, setEntryType] = useState("payment"); // 'payment' | 'credit'
@@ -102,7 +117,7 @@ export default function CustomerDetail() {
     setEditError("");
 
     try {
-      const response = await apiClient.updateCustomer(id, editName.trim(), cleanPhone || undefined);
+      const response = await apiClient.updateCustomer(id, { name: editName.trim(), phone: cleanPhone || null });
       if (response.success && response.data) {
         const updated = response.data;
         const initials = updated.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
@@ -216,80 +231,126 @@ export default function CustomerDetail() {
     }, 2000);
   };
 
-  const handleWhatsAppReminder = async () => {
+  const handleWhatsAppReminder = () => {
+    setReminderTone("friendly");
+    const initialMsg = generatePresetMessage(customer.name, customer.pending || 0, "friendly");
+    setReminderMsg(initialMsg);
+    setIsReminderOpen(true);
+  };
+
+  const handleToneChange = (tone) => {
+    setReminderTone(tone);
+    const updatedMsg = generatePresetMessage(customer.name, customer.pending || 0, tone);
+    setReminderMsg(updatedMsg);
+  };
+
+  const handleSendReminder = async () => {
     try {
       const pendingCredit = customer.transactions && customer.transactions.find(
         tx => tx.type === 'credit' && tx.status !== 'paid'
       );
-
       const entryId = pendingCredit ? pendingCredit.id : undefined;
-      const response = await apiClient.sendReminder(id, entryId);
+      const response = await apiClient.sendReminder(id, entryId, reminderTone, reminderMsg);
       
       if (response.success && response.data && response.data.whatsappLink) {
         window.open(response.data.whatsappLink, '_blank');
       } else {
-        const msg = pendingCredit 
-          ? `Namaste ${customer.name} ji! 🙏 Aapka ₹${pendingCredit.amount.toLocaleString()} ka pending udhaar record hai. Kripya samay pe wapas settle karein. — VoiceKhata`
-          : `Namaste ${customer.name} ji! 🙏 VoiceKhata pe aapka account balance fully clear hai. Dhanyawad!`;
-        window.open(`https://wa.me/${customer.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+        const cleanPhone = customer.phone.replace(/\D/g, '');
+        window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(reminderMsg)}`, '_blank');
       }
     } catch (err) {
-      console.warn("Could not trigger live WhatsApp link, using mock WhatsApp redirection.", err);
-      const msg = `Namaste ${customer.name} ji! 🙏 Aapka pending udhaar ₹${customer.pending.toLocaleString()} hai. Kripya jald hi clear karein. — VoiceKhata`;
-      window.open(`https://wa.me/${customer.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+      console.warn("Could not save live reminder to DB, opening native WhatsApp directly.", err);
+      const cleanPhone = customer.phone.replace(/\D/g, '');
+      window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(reminderMsg)}`, '_blank');
+    } finally {
+      setIsReminderOpen(false);
+      loadCustomerDetails();
+    }
+  };
+
+  const loadCustomerDetails = async () => {
+    try {
+      const custRes = await apiClient.getCustomerById(id);
+      if (custRes.success && custRes.data) {
+        const c = custRes.data;
+        const initials = c.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        
+        const entriesRes = await apiClient.getEntries({ customerId: id });
+        let txs = [];
+        const entriesList = entriesRes.data && (entriesRes.data.items || entriesRes.data.entries || entriesRes.data);
+        
+        if (entriesRes.success && Array.isArray(entriesList)) {
+          txs = entriesList.map(e => {
+            return {
+              id: e._id,
+              type: e.type,
+              amount: e.amount,
+              remainingAmount: e.remainingAmount,
+              date: new Date(e.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+              note: e.note || (e.type === 'credit' ? 'Grocery items' : 'Payment received'),
+              status: e.status
+            };
+          });
+        }
+
+        // Load active reminders history from server to show in reminders timeline
+        let remindersList = [];
+        try {
+          const remindersRes = await apiClient.getCustomerReminders(id);
+          if (remindersRes.success && Array.isArray(remindersRes.data)) {
+            remindersList = remindersRes.data.map(r => ({
+              id: r._id,
+              sentAt: new Date(r.sentAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) + ", " + new Date(r.sentAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+              status: r.status,
+              message: r.message
+            }));
+          }
+        } catch (e) {
+          console.warn("Could not fetch reminders history");
+        }
+
+        // Calculate cycle-based active/settled balances
+        const unpaidCredits = txs.filter(tx => tx.type === 'credit' && tx.status !== 'paid');
+        let pendingBal = c.totalOwed || 0;
+        let paidBal = 0;
+        let totalCreditBal = 0;
+
+        if (unpaidCredits.length > 0) {
+          totalCreditBal = unpaidCredits.reduce((sum, tx) => sum + tx.amount, 0);
+          paidBal = Math.max(0, totalCreditBal - pendingBal);
+        } else {
+          // All credits are paid, show the most recent credit's details as the last settled cycle
+          const creditTxs = txs.filter(tx => tx.type === 'credit');
+          if (creditTxs.length > 0) {
+            const lastCredit = creditTxs[0]; // transactions are sorted newest first
+            totalCreditBal = lastCredit.amount;
+            paidBal = lastCredit.amount;
+          }
+        }
+
+        setCustomer({
+          id: c._id,
+          name: c.name,
+          phone: c.phone || 'No phone number',
+          avatar: initials,
+          color: "from-indigo-500 to-indigo-650",
+          pending: pendingBal,
+          totalPaid: paidBal,
+          totalCredit: totalCreditBal,
+          risk: c.riskScore || 'low',
+          daysOverdue: c.riskScore === 'high' ? 12 : 0,
+          transactions: txs,
+          reminders: remindersList
+        });
+      }
+    } catch (err) {
+      console.warn("Could not fetch customer details from API, using offline mock data.");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    async function loadCustomerDetails() {
-      try {
-        const custRes = await apiClient.getCustomerById(id);
-        if (custRes.success && custRes.data) {
-          const c = custRes.data;
-          const initials = c.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-          
-          const entriesRes = await apiClient.getEntries({ customerId: id });
-          let txs = [];
-          let totalPaidRupees = 0;
-          const entriesList = entriesRes.data && (entriesRes.data.items || entriesRes.data.entries || entriesRes.data);
-          
-          if (entriesRes.success && Array.isArray(entriesList)) {
-            txs = entriesList.map(e => {
-              if (e.type === 'payment' && e.status === 'paid') {
-                totalPaidRupees += e.amount;
-              }
-              return {
-                id: e._id,
-                type: e.type,
-                amount: e.amount,
-                date: new Date(e.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-                note: e.note || (e.type === 'credit' ? 'Grocery items' : 'Payment received'),
-                status: e.status
-              };
-            });
-          }
-
-          setCustomer({
-            id: c._id,
-            name: c.name,
-            phone: c.phone || 'No phone number',
-            avatar: initials,
-            color: "from-indigo-500 to-indigo-650",
-            pending: (c.totalOwed || 0),
-            totalPaid: totalPaidRupees,
-            totalCredit: ((c.totalOwed || 0)) + totalPaidRupees,
-            risk: c.riskScore || 'low',
-            daysOverdue: c.riskScore === 'high' ? 12 : 0,
-            transactions: txs,
-            reminders: []
-          });
-        }
-      } catch (err) {
-        console.warn("Could not fetch customer details from API, using offline mock data.");
-      } finally {
-        setLoading(false);
-      }
-    }
     loadCustomerDetails();
   }, [id]);
 
@@ -487,11 +548,11 @@ export default function CustomerDetail() {
               className="fixed inset-0 bg-black z-45"
             />
             <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
+              initial={{ y: "100%", x: "-50%" }}
+              animate={{ y: 0, x: "-50%" }}
+              exit={{ y: "100%", x: "-50%" }}
               transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80"
+              className="fixed bottom-0 left-1/2 w-full max-w-[430px] bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80"
             >
               <div className="w-12 h-1 bg-slate-250 dark:bg-slate-800 rounded-full mx-auto mb-5" />
               <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">Edit Customer Details</h3>
@@ -558,11 +619,11 @@ export default function CustomerDetail() {
               className="fixed inset-0 bg-black z-45"
             />
             <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
+              initial={{ y: "100%", x: "-50%" }}
+              animate={{ y: 0, x: "-50%" }}
+              exit={{ y: "100%", x: "-50%" }}
               transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80"
+              className="fixed bottom-0 left-1/2 w-full max-w-[430px] bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80"
             >
               <div className="w-12 h-1 bg-slate-250 dark:bg-slate-800 rounded-full mx-auto mb-5" />
               <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">
@@ -628,6 +689,78 @@ export default function CustomerDetail() {
                   }`}
                 >
                   {savingPayment ? "Saving..." : entryType === 'payment' ? "Save Payment ✓" : "Save Credit ✓"}
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Slide-Up Message Review & Verification Drawer */}
+      <AnimatePresence>
+        {isReminderOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.3 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsReminderOpen(false)}
+              className="fixed inset-0 bg-black z-45"
+            />
+            <motion.div
+              initial={{ y: "100%", x: "-50%" }}
+              animate={{ y: 0, x: "-50%" }}
+              exit={{ y: "100%", x: "-50%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="fixed bottom-0 left-1/2 w-full max-w-[430px] bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80 max-h-[85vh] overflow-y-auto"
+            >
+              <div className="w-12 h-1 bg-slate-250 dark:bg-slate-800 rounded-full mx-auto mb-5" />
+              <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">Verify Reminder Message</h3>
+              <p className="text-xs text-slate-450 dark:text-slate-500 mb-5">Review, select tone and verify the message before sending on WhatsApp.</p>
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Select Message Tone</label>
+                  <div className="flex gap-2">
+                    {["friendly", "firm", "urgent"].map(tone => (
+                      <button
+                        key={tone}
+                        onClick={() => handleToneChange(tone)}
+                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border cursor-pointer capitalize outline-none focus:outline-none ${
+                          reminderTone === tone
+                            ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                            : "bg-slate-50 dark:bg-slate-955 text-slate-500 dark:text-slate-400 border-slate-200/50 dark:border-slate-800"
+                        }`}
+                      >
+                        {tone}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Reminder Text (Editable)</label>
+                  <textarea
+                    rows={6}
+                    value={reminderMsg}
+                    onChange={(e) => setReminderMsg(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-indigo-500 transition-colors resize-none leading-relaxed font-sans"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsReminderOpen(false)}
+                  className="flex-1 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-550 dark:text-slate-400 font-bold text-xs rounded-lg cursor-pointer outline-none"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSendReminder}
+                  className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-lg cursor-pointer flex items-center justify-center gap-1.5 outline-none transition-colors border-0"
+                >
+                  <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-3.5 h-3.5 object-contain" /> Confirm & Send
                 </button>
               </div>
             </motion.div>

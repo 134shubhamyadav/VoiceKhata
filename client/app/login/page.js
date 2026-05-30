@@ -27,7 +27,7 @@ export default function LoginPage() {
         onClick={handleGoogleLogin}
         className="px-6 py-3 bg-black text-white rounded-xl flex items-center justify-center gap-2.5 cursor-pointer hover:bg-slate-900 transition-colors"
       >
-        <img src="/google-logo.png" alt="Google" className="w-4 h-4 object-contain" /> Continue with Google
+        Continue with Google
       </button>
     </div>
   );

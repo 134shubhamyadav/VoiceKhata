@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { 
   Bell, TrendingUp, TrendingDown, AlertCircle, 
   ArrowUpRight, ArrowDownLeft, IndianRupee, Users, 
-  Clock, BookOpen, CreditCard, Calculator, ChevronRight 
+  Clock, BookOpen, CreditCard, Calculator, ChevronRight, Download
 } from "lucide-react";
 import { Card, StatsCard, Avatar, SectionHeader, RiskBadge, FloatingBlobs } from "@/components/ui";
 import { customers as mockCustomers, recentTransactions as mockTx, insights as mockInsights } from "@/lib/data";
@@ -188,6 +188,185 @@ export default function Dashboard() {
       localStorage.setItem('visiting_card_address', cardAddress);
     }
   }, [cardTheme, cardCategory, cardTagline, cardAddress]);
+
+  const handleDownloadCard = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 600;
+    canvas.height = 360;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // 1. Draw gradient background
+    const grad = ctx.createLinearGradient(0, 0, 600, 360);
+    if (cardTheme === "violet" || cardTheme === "classic_dark") {
+      grad.addColorStop(0, "#0f172a");
+      grad.addColorStop(0.5, "#1e293b");
+      grad.addColorStop(1, "#0f172a");
+    } else if (cardTheme === "emerald" || cardTheme === "forest") {
+      grad.addColorStop(0, "#064e3b");
+      grad.addColorStop(0.5, "#065f46");
+      grad.addColorStop(1, "#115e59");
+    } else if (cardTheme === "gold" || cardTheme === "royal") {
+      grad.addColorStop(0, "#b45309");
+      grad.addColorStop(0.5, "#ca8a04");
+      grad.addColorStop(1, "#92400e");
+    } else if (cardTheme === "navy") {
+      grad.addColorStop(0, "#1e1b4b");
+      grad.addColorStop(0.5, "#0f172a");
+      grad.addColorStop(1, "#172554");
+    } else if (cardTheme === "burgundy") {
+      grad.addColorStop(0, "#500724");
+      grad.addColorStop(0.5, "#450a0a");
+      grad.addColorStop(1, "#4c0519");
+    } else if (cardTheme === "black_gold") {
+      grad.addColorStop(0, "#020617");
+      grad.addColorStop(0.5, "#0f172a");
+      grad.addColorStop(1, "#020617");
+    } else if (cardTheme === "emerald_gold") {
+      grad.addColorStop(0, "#022c22");
+      grad.addColorStop(0.5, "#042f2e");
+      grad.addColorStop(1, "#064e3b");
+    } else {
+      grad.addColorStop(0, "#0f172a");
+      grad.addColorStop(1, "#1e293b");
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 600, 360);
+
+    // 2. Draw gold borders for gold themes
+    if (cardTheme === "black_gold" || cardTheme === "emerald_gold") {
+      ctx.strokeStyle = "#d97706";
+      ctx.lineWidth = 6;
+      ctx.strokeRect(3, 3, 594, 354);
+    } else {
+      ctx.strokeStyle = "rgba(255,255,255,0.08)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, 598, 358);
+    }
+
+    // 3. Draw decorative translucent circles
+    ctx.fillStyle = "rgba(255,255,255,0.02)";
+    ctx.beginPath();
+    ctx.arc(600, 0, 150, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(0, 360, 100, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4. Render Text Details
+    ctx.textBaseline = "top";
+
+    // Shop Name
+    ctx.fillStyle = (cardTheme === "black_gold" || cardTheme === "emerald_gold") ? "#fef3c7" : "#ffffff";
+    ctx.font = "bold 28px sans-serif";
+    ctx.fillText(merchantProfile.shopName || "My Shop Name", 40, 40);
+
+    // Tagline (if any)
+    let taglineOffset = 0;
+    if (cardTagline) {
+      ctx.fillStyle = "rgba(255,255,255,0.65)";
+      ctx.font = "italic 16px sans-serif";
+      ctx.fillText(cardTagline, 40, 75);
+      taglineOffset = 25;
+    }
+
+    // Category (if any)
+    if (cardCategory) {
+      ctx.fillStyle = "rgba(255,255,255,0.12)";
+      ctx.roundRect ? ctx.roundRect(40, 80 + taglineOffset, 120, 22, 11) : ctx.fillRect(40, 80 + taglineOffset, 120, 22);
+      ctx.fill();
+      
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px sans-serif";
+      ctx.fillText(cardCategory.toUpperCase(), 48, 85 + taglineOffset);
+    }
+
+    // Divider Line
+    ctx.strokeStyle = "rgba(255,255,255,0.12)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(40, 130 + taglineOffset);
+    ctx.lineTo(560, 130 + taglineOffset);
+    ctx.stroke();
+
+    // Details Grid
+    const detailsY = 150 + taglineOffset;
+    
+    // Owner
+    ctx.fillStyle = "rgba(255,255,255,0.45)";
+    ctx.font = "bold 12px sans-serif";
+    ctx.fillText("OWNER", 40, detailsY);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 18px sans-serif";
+    ctx.fillText(merchantProfile.ownerName || "Owner Name", 40, detailsY + 20);
+
+    // Mobile
+    if (merchantProfile.phone) {
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
+      ctx.font = "bold 12px sans-serif";
+      ctx.textAlign = "right";
+      ctx.fillText("MOBILE", 560, detailsY);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 18px sans-serif";
+      ctx.fillText(merchantProfile.phone, 560, detailsY + 20);
+      ctx.textAlign = "left";
+    }
+
+    // Email
+    let emailOffset = 0;
+    if (merchantProfile.email) {
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
+      ctx.font = "bold 12px sans-serif";
+      ctx.fillText("EMAIL", 40, detailsY + 55);
+      ctx.fillStyle = "rgba(255,255,255,0.95)";
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillText(merchantProfile.email, 40, detailsY + 75);
+      emailOffset = 50;
+    }
+
+    // UPI ID / Address
+    const upiAddressY = detailsY + 55 + emailOffset;
+    if (merchantProfile.upiId) {
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
+      ctx.font = "bold 12px sans-serif";
+      ctx.fillText("UPI PAY", 40, upiAddressY);
+      ctx.fillStyle = "rgba(255,255,255,0.95)";
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillText(merchantProfile.upiId, 40, upiAddressY + 20);
+    }
+
+    if (cardAddress) {
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
+      ctx.font = "bold 12px sans-serif";
+      if (merchantProfile.upiId) {
+        ctx.textAlign = "right";
+        ctx.fillText("ADDRESS", 560, upiAddressY);
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.font = "bold 13px sans-serif";
+        ctx.fillText(cardAddress, 560, upiAddressY + 20);
+        ctx.textAlign = "left";
+      } else {
+        ctx.fillText("ADDRESS", 40, upiAddressY);
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.font = "bold 13px sans-serif";
+        ctx.fillText(cardAddress, 40, upiAddressY + 20);
+      }
+    }
+
+    // Watermark (centered at bottom to avoid overlap)
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(255,255,255,0.25)";
+    ctx.font = "bold 11px sans-serif";
+    ctx.fillText("VOICEKHATA ✦", 300, 330);
+
+    // 5. Trigger download
+    const link = document.createElement("a");
+    link.download = `${(merchantProfile.shopName || "business").toLowerCase()}_card.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+
+    setFeedbackMessage("Visiting card downloaded successfully.");
+  };
 
   // GST Calculator State
   const [gstBasePrice, setGstBasePrice] = useState("");
@@ -718,11 +897,11 @@ export default function Dashboard() {
                       (cardTheme === "emerald" || cardTheme === "forest") ? "bg-gradient-to-br from-emerald-900 via-emerald-850 to-teal-905 border border-emerald-700/50 text-white" :
                       (cardTheme === "gold" || cardTheme === "royal") ? "bg-gradient-to-br from-amber-700 via-yellow-600 to-amber-805 border border-amber-500/50 text-white" :
                       cardTheme === "navy" ? "bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-955 border border-indigo-500/30 text-white" :
-                      cardTheme === "burgundy" ? "bg-gradient-to-br from-rose-950 via-red-950 to-rose-905 border border-rose-500/30 text-white" :
+                      cardTheme === "burgundy" ? "bg-gradient-to-br from-rose-955 via-red-950 to-rose-905 border border-rose-500/30 text-white" :
                       cardTheme === "black_gold" ? "bg-gradient-to-br from-slate-955 via-slate-900 to-slate-950 border border-amber-550/40 text-amber-100 shadow-[0_4px_20px_rgba(245,158,11,0.15)]" :
                       "bg-gradient-to-br from-emerald-950 via-teal-950 to-emerald-905 border border-yellow-550/30 text-emerald-100 shadow-[0_4px_20px_rgba(16,185,129,0.15)]"
                     }`}
-                    style={{ minHeight: 180 }}
+                    style={{ minHeight: 200 }}
                   >
                     {/* Decorative blobs */}
                     <div className="absolute top-0 right-0 w-28 h-28 bg-white/5 rounded-full blur-xl -translate-y-8 translate-x-8 pointer-events-none" />
@@ -779,8 +958,8 @@ export default function Dashboard() {
                       )}
                     </div>
 
-                    {/* VoiceKhata watermark */}
-                    <div className="absolute bottom-3 right-4 text-[7px] font-black uppercase tracking-widest text-white/25">VoiceKhata ✦</div>
+                    {/* VoiceKhata watermark shifted to bottom-center to prevent phone number overlap */}
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[7px] font-black uppercase tracking-widest text-white/25">VoiceKhata ✦</div>
                   </motion.div>
 
                   {/* Action buttons */}
@@ -798,19 +977,19 @@ export default function Dashboard() {
                           merchantProfile.upiId ? `UPI Pay: ${merchantProfile.upiId}` : '',
                           cardAddress ? `Address: ${cardAddress}` : '',
                           ``,
-                          `_Powered by VoiceKhata_`
+                          `Powered by VoiceKhata`
                         ].filter(Boolean).join('\n');
                         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(lines)}`, '_blank');
                       }}
-                      className="py-2.5 bg-[#25D366] hover:bg-[#22c35e] text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 shadow-sm transition-all duration-200"
+                      className="py-2.5 bg-[#25D366] hover:bg-[#22c35e] text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 shadow-sm transition-all duration-200 border-0 outline-none focus:outline-none"
                     >
                       <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-4 h-4 object-contain" /> Share on WhatsApp
                     </button>
                     <button
-                      onClick={() => { setActiveTool('cashbook'); }}
-                      className="py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5"
+                      onClick={handleDownloadCard}
+                      className="py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 border-0 outline-none focus:outline-none"
                     >
-                      📒 Open Cashbook
+                      <Download size={14} /> Download & Save
                     </button>
                   </div>
                   <p className="text-center text-[9px] text-slate-400 dark:text-slate-600">Edit your name, phone, UPI &amp; photo in Settings → Edit Profile</p>

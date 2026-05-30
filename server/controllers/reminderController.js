@@ -134,7 +134,7 @@ const getReminders = asyncHandler(async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit))
-      .populate("customerId", "name phone")
+      .populate("customerId", "name phone totalOwed")
       .populate("entryId", "amount type status dueDate"),
     Reminder.countDocuments(filter),
   ]);
@@ -153,9 +153,36 @@ const getReminders = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * DELETE /api/reminders/:id
+ * Deletes a reminder record manually.
+ */
+const deleteReminder = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid reminder ID" });
+  }
+
+  const reminder = await Reminder.findById(id).populate("customerId");
+  if (!reminder) {
+    return res.status(404).json({ success: false, message: "Reminder not found" });
+  }
+
+  if (reminder.customerId && reminder.customerId.userId.toString() !== userId) {
+    return res.status(403).json({ success: false, message: "Access denied. You do not own this record." });
+  }
+
+  await Reminder.findByIdAndDelete(id);
+
+  return res.status(200).json({ success: true, message: "Reminder deleted successfully" });
+});
+
 module.exports = {
   sendReminder: sendReminderHandler,
   sendReminderHandler,
   getCustomerReminders,
   getReminders,
+  deleteReminder,
 };

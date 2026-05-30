@@ -66,6 +66,76 @@ const resolveCustomer = async ({ customerId, customerName, userId, phone }, sess
   return null;
 };
 
+/**
+ * allocatePaymentFIFO
+ * Automatically allocates a payment amount to satisfy oldest outstanding credit entries.
+ */
+/**
+ * selfHealCustomerBalances
+ * Performs a complete retrospective FIFO reallocation of all payment entries 
+ * against all credit entries for a customer to guarantee consistency.
+ */
+const selfHealCustomerBalances = async (customerId, session = null) => {
+  const query = Entry.find({ customerId }).sort({ createdAt: 1 });
+  if (session) query.session(session);
+  const entries = await query;
+
+  const credits = entries.filter(e => e.type === 'credit');
+  const payments = entries.filter(e => e.type === 'payment');
+
+  // Reset all credit entries to pending status and remainingAmount to amount
+  for (const credit of credits) {
+    credit.remainingAmount = credit.amount;
+    credit.status = 'pending';
+  }
+
+  // Allocate payment amounts to credits in FIFO order
+  for (const payment of payments) {
+    let remainingPayment = payment.amount;
+    for (const credit of credits) {
+      if (remainingPayment <= 0) break;
+
+      const currentRemaining = credit.remainingAmount !== undefined ? credit.remainingAmount : credit.amount;
+      if (currentRemaining <= 0) continue;
+
+      if (remainingPayment >= currentRemaining) {
+        remainingPayment = parseFloat((remainingPayment - currentRemaining).toFixed(2));
+        credit.remainingAmount = 0;
+        credit.status = 'paid';
+      } else {
+        credit.remainingAmount = parseFloat((currentRemaining - remainingPayment).toFixed(2));
+        credit.status = 'partial';
+        remainingPayment = 0;
+      }
+    }
+  }
+
+  // Save all modified credit entries using direct findOneAndUpdate to bypass Mongoose document state issues
+  for (const credit of credits) {
+    const updateObj = { remainingAmount: credit.remainingAmount, status: credit.status };
+    if (session) {
+      await Entry.findOneAndUpdate({ _id: credit._id }, updateObj, { session });
+    } else {
+      await Entry.findOneAndUpdate({ _id: credit._id }, updateObj);
+    }
+  }
+
+  // Recalculate totalOwed
+  const totalOwed = credits.reduce((sum, e) => {
+    const remaining = e.remainingAmount !== undefined ? e.remainingAmount : e.amount;
+    return parseFloat((sum + remaining).toFixed(2));
+  }, 0);
+
+  // Update customer totalOwed using direct findOneAndUpdate
+  if (session) {
+    await Customer.findOneAndUpdate({ _id: customerId }, { totalOwed }, { session });
+  } else {
+    await Customer.findOneAndUpdate({ _id: customerId }, { totalOwed });
+  }
+
+  return totalOwed;
+};
+
 const deriveStatus = (type, explicitStatus) => {
   if (explicitStatus) return explicitStatus;
   return type === 'credit' ? 'pending' : 'paid';
@@ -186,8 +256,8 @@ const createEntry = asyncHandler(async (req, res) => {
       { session }
     );
 
-    customer.totalOwed = applyBalanceDelta(customer.totalOwed, numAmount, type);
-    await customer.save({ session });
+    // Dynamically self-heal customer balance and entries to ensure absolute consistency
+    await selfHealCustomerBalances(customer._id, session);
     await session.commitTransaction();
     session.endSession();
 
@@ -405,4 +475,5 @@ module.exports = {
   getReceipt,
   fetchPaymentHistory,
   getCustomerEntries,
+  selfHealCustomerBalances,
 };

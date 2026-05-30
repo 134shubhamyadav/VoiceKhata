@@ -122,4 +122,7 @@ export const apiClient = {
 
   getCustomerReminders: (customerId) =>
     request(`/reminders/customer/${customerId}`),
+
+  deleteReminder: (id) =>
+    request(`/reminders/${id}`, { method: "DELETE" }),
 };

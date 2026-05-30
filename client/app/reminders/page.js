@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { MessageCircle, Check, CheckCheck, Clock, Send, Bell, Zap, Plus, X, Edit3, ArrowRight, User } from "lucide-react";
+import { MessageCircle, Check, CheckCheck, Clock, Send, Bell, Zap, Plus, X, Edit3, ArrowRight, User, Trash2 } from "lucide-react";
 import { Avatar, FloatingBlobs } from "@/components/ui";
 import { useAuth } from "@/context/AuthContext";
 import { apiClient } from "@/lib/apiClient";
@@ -14,7 +14,7 @@ function StatusIcon({ status }) {
   return <Clock size={13} className="text-amber-400" />;
 }
 
-function ReminderCard({ r, i, onEdit, onRefresh }) {
+function ReminderCard({ r, i, onEdit, onRefresh, onDelete }) {
   const statusColors = {
     delivered: "border-l-blue-400",
     read: "border-l-emerald-400",
@@ -78,15 +78,22 @@ function ReminderCard({ r, i, onEdit, onRefresh }) {
             <div className="flex gap-2">
               <button 
                 onClick={handleResend} 
-                className="flex-1 py-2 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors outline-none focus:outline-none"
+                className="flex-[2] py-2 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors outline-none focus:outline-none"
               >
                 <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-3.5 h-3.5 object-contain" /> Resend
               </button>
               <button 
                 onClick={() => onEdit(r)} 
-                className="flex-1 py-2 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-xl flex items-center justify-center gap-1 cursor-pointer transition-colors outline-none focus:outline-none"
+                className="flex-[2] py-2 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-xl flex items-center justify-center gap-1 cursor-pointer transition-colors outline-none focus:outline-none"
               >
                 <Edit3 size={11} /> Edit & Send
+              </button>
+              <button 
+                onClick={() => onDelete(r.id)} 
+                className="flex-[0.6] py-2 text-[11px] font-bold text-rose-600 dark:text-rose-450 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-xl flex items-center justify-center cursor-pointer transition-colors border-0 outline-none focus:outline-none"
+                title="Delete Reminder Log"
+              >
+                <Trash2 size={12} />
               </button>
             </div>
           </div>
@@ -129,7 +136,7 @@ export default function RemindersPage() {
             entryId: r.entryId ? r.entryId._id : null,
             customer: customerName,
             avatar: initials,
-            amount: r.customerId ? (r.customerId.totalOwed || 0) : 0,
+            amount: r.snapshot && r.snapshot.amount !== null ? r.snapshot.amount : (r.customerId ? (r.customerId.totalOwed || 0) : 0),
             message: r.message,
             channel: r.channel || 'WhatsApp',
             sentAt: new Date(r.sentAt).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' }),
@@ -257,6 +264,18 @@ export default function RemindersPage() {
     }
   };
 
+  const handleDeleteReminder = async (reminderId) => {
+    if (!window.confirm("Are you sure you want to delete this reminder log manually?")) return;
+    try {
+      const response = await apiClient.deleteReminder(reminderId);
+      if (response.success) {
+        loadReminders();
+      }
+    } catch (err) {
+      console.error("Failed to delete reminder:", err.message);
+    }
+  };
+
   const stats = [
     { label: "Sent Today", value: reminders.length, icon: Send, color: "text-blue-500 bg-blue-50 dark:bg-blue-950/30" },
     { label: "Delivered", value: reminders.filter(r=>r.status==="delivered").length, icon: CheckCheck, color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/30" },
@@ -328,6 +347,7 @@ export default function RemindersPage() {
               i={i} 
               onEdit={handleEditClick} 
               onRefresh={loadReminders} 
+              onDelete={handleDeleteReminder}
             />
           ))
         )}
