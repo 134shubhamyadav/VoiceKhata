@@ -76,7 +76,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (loading) return;
 
-    const publicRoutes = ["/", "/login"];
+    const publicRoutes = ["/", "/login", "/terms", "/privacy"];
     const isPublic = publicRoutes.includes(pathname);
 
     if (!user && !isPublic) {
