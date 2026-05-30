@@ -64,6 +64,7 @@ export default function SettingsPage() {
   const [editOwnerName, setEditOwnerName] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editUpiId, setEditUpiId] = useState("");
+  const [editProfilePhoto, setEditProfilePhoto] = useState("");
 
   // Dark Mode State
   const [darkMode, setDarkMode] = useState(false);
@@ -155,7 +156,8 @@ export default function SettingsPage() {
       shopName: editShopName.trim(),
       ownerName: editOwnerName.trim(),
       phone: editPhone.trim(),
-      upiId: editUpiId.trim()
+      upiId: editUpiId.trim(),
+      profilePhoto: editProfilePhoto
     };
 
     setProfile(updated);
@@ -174,7 +176,7 @@ export default function SettingsPage() {
           language: resolvedLanguage,
           phone: updated.phone || undefined,
           email: user.email || undefined,
-          profilePhoto: user.profilePhoto || undefined,
+          profilePhoto: updated.profilePhoto || undefined,
           upiId: updated.upiId || undefined,
           businessType: user.businessType || "Kirana"
         });
@@ -220,6 +222,7 @@ export default function SettingsPage() {
                 setEditOwnerName(profile.ownerName);
                 setEditPhone(profile.phone);
                 setEditUpiId(profile.upiId);
+                setEditProfilePhoto(profile.profilePhoto || "");
                 setIsEditingProfile(true);
               }}
               className="px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl text-xs font-bold transition-all cursor-pointer outline-none"
@@ -369,6 +372,51 @@ export default function SettingsPage() {
                     placeholder="merchant@upi"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-xl text-slate-800 dark:text-white text-sm font-semibold outline-none focus:border-violet-500 transition-colors"
                   />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Profile Photo</label>
+                  <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-700 p-3 rounded-xl border border-slate-100 dark:border-slate-600">
+                    <div className="w-14 h-14 bg-white/20 dark:bg-slate-800 rounded-xl flex items-center justify-center overflow-hidden border border-slate-200/50 dark:border-slate-600 flex-shrink-0">
+                      {editProfilePhoto ? (
+                        <img src={editProfilePhoto} alt="Profile Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <Store size={22} className="text-slate-400" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id="profile-photo-upload"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setEditProfilePhoto(reader.result);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="profile-photo-upload"
+                        className="px-3.5 py-2 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold text-slate-750 dark:text-slate-200 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-colors inline-block"
+                      >
+                        Choose Photo
+                      </label>
+                      {editProfilePhoto && (
+                        <button
+                          type="button"
+                          onClick={() => setEditProfilePhoto("")}
+                          className="ml-2.5 text-xs font-bold text-red-500 hover:text-red-600 cursor-pointer border-0 bg-transparent outline-none"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 

@@ -78,9 +78,9 @@ function ReminderCard({ r, i, onEdit, onRefresh }) {
             <div className="flex gap-2">
               <button 
                 onClick={handleResend} 
-                className="flex-1 py-2 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl flex items-center justify-center gap-1 cursor-pointer transition-colors outline-none focus:outline-none"
+                className="flex-1 py-2 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors outline-none focus:outline-none"
               >
-                <MessageCircle size={11} /> Resend
+                <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-3.5 h-3.5 object-contain" /> Resend
               </button>
               <button 
                 onClick={() => onEdit(r)} 
@@ -445,7 +445,7 @@ export default function RemindersPage() {
                       : "bg-slate-200 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-300 dark:border-slate-800/60 shadow-none cursor-not-allowed"
                   }`}
                 >
-                  <MessageCircle size={14} /> Send & Save
+                  <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-3.5 h-3.5 object-contain" /> Send & Save
                 </button>
               </div>
             </motion.div>
@@ -513,7 +513,7 @@ export default function RemindersPage() {
                   onClick={handleEditSubmit}
                   className="flex-1 py-3.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-100 dark:shadow-none flex items-center justify-center gap-1.5 cursor-pointer border-0 outline-none focus:outline-none"
                 >
-                  <MessageCircle size={14} /> Send & Save
+                  <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-3.5 h-3.5 object-contain" /> Send & Save
                 </button>
               </div>
             </motion.div>

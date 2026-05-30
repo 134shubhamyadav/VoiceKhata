@@ -162,8 +162,32 @@ export default function Dashboard() {
   const [cashType, setCashType] = useState("in"); // 'in' | 'out'
 
   // Visiting Card Customization State
-  const [cardTheme, setCardTheme] = useState("violet"); // 'violet' | 'emerald' | 'gold'
-  const [cardCategory, setCardCategory] = useState("Retail & Kirana");
+  const [cardTheme, setCardTheme] = useState("classic_dark"); // 'classic_dark' | 'forest' | 'royal' | 'navy' | 'burgundy' | 'black_gold' | 'emerald_gold'
+  const [cardCategory, setCardCategory] = useState("");
+
+  // Auto-load visiting card customization from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('visiting_card_theme');
+      if (savedTheme) setCardTheme(savedTheme);
+      const savedCategory = localStorage.getItem('visiting_card_category');
+      if (savedCategory !== null) setCardCategory(savedCategory);
+      const savedTagline = localStorage.getItem('visiting_card_tagline');
+      if (savedTagline !== null) setCardTagline(savedTagline);
+      const savedAddress = localStorage.getItem('visiting_card_address');
+      if (savedAddress !== null) setCardAddress(savedAddress);
+    }
+  }, []);
+
+  // Auto-save visiting card customization to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('visiting_card_theme', cardTheme);
+      localStorage.setItem('visiting_card_category', cardCategory);
+      localStorage.setItem('visiting_card_tagline', cardTagline);
+      localStorage.setItem('visiting_card_address', cardAddress);
+    }
+  }, [cardTheme, cardCategory, cardTagline, cardAddress]);
 
   // GST Calculator State
   const [gstBasePrice, setGstBasePrice] = useState("");
@@ -360,10 +384,10 @@ export default function Dashboard() {
       <div className="relative z-10 px-5 mb-6">
         <div className="grid grid-cols-2 gap-3">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-            <StatsCard label="Total Customers" value={totalCustomersCount} icon={<Users size={15} />} color="blue" trend={customerTrend !== null ? customerTrend : undefined} />
+            <StatsCard label="Total Customers" value={totalCustomersCount} icon={<Users size={15} />} color="blue" />
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <StatsCard label="Overdue Today" value={overdueCustomersCount} icon={<Clock size={15} />} color="orange" trend={overdueTrend !== null ? overdueTrend : undefined} />
+            <StatsCard label="Overdue Today" value={overdueCustomersCount} icon={<Clock size={15} />} color="orange" />
           </motion.div>
         </div>
       </div>
@@ -644,22 +668,26 @@ export default function Dashboard() {
                   {/* Theme Selector */}
                   <div className="flex items-center gap-2 mb-3 bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-100 dark:border-slate-800/50">
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Theme:</span>
-                    <div className="flex gap-2 flex-1 justify-end">
+                    <div className="flex gap-2 flex-wrap flex-1 justify-end">
                       {[
-                        { id: "violet", label: "Dark", bg: "bg-slate-900" },
-                        { id: "emerald", label: "Forest", bg: "bg-emerald-800" },
-                        { id: "gold", label: "Royal", bg: "bg-gradient-to-r from-amber-600 to-yellow-500" }
+                        { id: "classic_dark", label: "Dark Onyx", bg: "bg-slate-900" },
+                        { id: "forest", label: "Forest", bg: "bg-emerald-800" },
+                        { id: "royal", label: "Royal Gold", bg: "bg-gradient-to-r from-amber-600 to-yellow-500" },
+                        { id: "navy", label: "Navy", bg: "bg-blue-900" },
+                        { id: "burgundy", label: "Burgundy", bg: "bg-rose-900" },
+                        { id: "black_gold", label: "Black Gold", bg: "bg-slate-950 border border-amber-500/50" },
+                        { id: "emerald_gold", label: "Emerald Gold", bg: "bg-emerald-950 border border-yellow-500/50" }
                       ].map(th => (
                         <button
                           key={th.id}
                           onClick={() => setCardTheme(th.id)}
-                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-bold border-2 transition-all cursor-pointer ${
-                            cardTheme === th.id
+                          className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-bold border-2 transition-all cursor-pointer ${
+                            cardTheme === th.id || (th.id === "classic_dark" && cardTheme === "violet") || (th.id === "forest" && cardTheme === "emerald") || (th.id === "royal" && cardTheme === "gold")
                               ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400"
                               : "border-transparent bg-white dark:bg-slate-900 text-slate-400"
                           }`}
                         >
-                          <span className={`w-3 h-3 rounded-full ${th.bg}`} />{th.label}
+                          <span className={`w-2.5 h-2.5 rounded-full ${th.bg}`} />{th.label}
                         </button>
                       ))}
                     </div>
@@ -685,10 +713,14 @@ export default function Dashboard() {
                   <motion.div
                     layout
                     id="visiting-card-preview"
-                    className={`w-full rounded-2xl px-5 py-4 relative overflow-hidden text-white flex flex-col justify-between shadow-xl mb-4 ${
-                      cardTheme === "violet" ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700/50" :
-                      cardTheme === "emerald" ? "bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 border border-emerald-700/50" :
-                      "bg-gradient-to-br from-amber-700 via-yellow-600 to-amber-800 border border-amber-500/50"
+                    className={`w-full rounded-2xl px-5 py-4 relative overflow-hidden text-white flex flex-col justify-between shadow-xl mb-4 transition-all duration-350 ${
+                      (cardTheme === "violet" || cardTheme === "classic_dark") ? "bg-gradient-to-br from-slate-900 via-slate-850 to-slate-905 border border-slate-700/50 text-white" :
+                      (cardTheme === "emerald" || cardTheme === "forest") ? "bg-gradient-to-br from-emerald-900 via-emerald-850 to-teal-905 border border-emerald-700/50 text-white" :
+                      (cardTheme === "gold" || cardTheme === "royal") ? "bg-gradient-to-br from-amber-700 via-yellow-600 to-amber-805 border border-amber-500/50 text-white" :
+                      cardTheme === "navy" ? "bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-955 border border-indigo-500/30 text-white" :
+                      cardTheme === "burgundy" ? "bg-gradient-to-br from-rose-950 via-red-950 to-rose-905 border border-rose-500/30 text-white" :
+                      cardTheme === "black_gold" ? "bg-gradient-to-br from-slate-955 via-slate-900 to-slate-950 border border-amber-550/40 text-amber-100 shadow-[0_4px_20px_rgba(245,158,11,0.15)]" :
+                      "bg-gradient-to-br from-emerald-950 via-teal-950 to-emerald-905 border border-yellow-550/30 text-emerald-100 shadow-[0_4px_20px_rgba(16,185,129,0.15)]"
                     }`}
                     style={{ minHeight: 180 }}
                   >
@@ -701,7 +733,7 @@ export default function Dashboard() {
                       <div>
                         <h4 className="text-base font-black leading-tight tracking-tight">{merchantProfile.shopName || 'Your Shop Name'}</h4>
                         {cardTagline && <p className="text-[9px] text-white/60 mt-0.5 italic">{cardTagline}</p>}
-                        <span className="text-[8px] font-bold uppercase px-2 py-0.5 bg-white/15 rounded-full mt-1.5 inline-block">{cardCategory}</span>
+                        {cardCategory && <span className="text-[8px] font-bold uppercase px-2 py-0.5 bg-white/15 rounded-full mt-1.5 inline-block">{cardCategory}</span>}
                       </div>
                       {merchantProfile.profilePhoto ? (
                         <img src={merchantProfile.profilePhoto} alt="logo" className="w-10 h-10 rounded-xl object-cover border border-white/20" />
@@ -758,21 +790,21 @@ export default function Dashboard() {
                         const lines = [
                           `*${merchantProfile.shopName || 'My Shop'}*`,
                           cardTagline ? `_${cardTagline}_` : '',
-                          `📦 ${cardCategory}`,
+                          cardCategory ? `Category: ${cardCategory}` : '',
                           ``,
-                          `👤 *${merchantProfile.ownerName || 'Owner'}*`,
-                          merchantProfile.phone ? `📞 ${merchantProfile.phone}` : '',
-                          merchantProfile.email ? `📧 ${merchantProfile.email}` : '',
-                          merchantProfile.upiId ? `💳 UPI: ${merchantProfile.upiId}` : '',
-                          cardAddress ? `📍 ${cardAddress}` : '',
+                          `Owner: *${merchantProfile.ownerName || 'Owner'}*`,
+                          merchantProfile.phone ? `Phone: ${merchantProfile.phone}` : '',
+                          merchantProfile.email ? `Email: ${merchantProfile.email}` : '',
+                          merchantProfile.upiId ? `UPI Pay: ${merchantProfile.upiId}` : '',
+                          cardAddress ? `Address: ${cardAddress}` : '',
                           ``,
                           `_Powered by VoiceKhata_`
                         ].filter(Boolean).join('\n');
                         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(lines)}`, '_blank');
                       }}
-                      className="py-2.5 bg-[#25D366] hover:bg-[#22c35e] text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5"
+                      className="py-2.5 bg-[#25D366] hover:bg-[#22c35e] text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 shadow-sm transition-all duration-200"
                     >
-                      📲 Share on WhatsApp
+                      <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-4 h-4 object-contain" /> Share on WhatsApp
                     </button>
                     <button
                       onClick={() => { setActiveTool('cashbook'); }}

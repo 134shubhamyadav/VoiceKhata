@@ -25,9 +25,9 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen">
       <button
         onClick={handleGoogleLogin}
-        className="px-6 py-3 bg-black text-white rounded-xl"
+        className="px-6 py-3 bg-black text-white rounded-xl flex items-center justify-center gap-2.5 cursor-pointer hover:bg-slate-900 transition-colors"
       >
-        Continue with Google
+        <img src="/google-logo.png" alt="Google" className="w-4 h-4 object-contain" /> Continue with Google
       </button>
     </div>
   );

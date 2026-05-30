@@ -374,9 +374,9 @@ export default function CustomerDetail() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="grid grid-cols-3 gap-2 mb-3.5">
           <button 
             onClick={handleWhatsAppReminder} 
-            className="py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] rounded-xl flex items-center justify-center gap-1 cursor-pointer outline-none focus:outline-none transition-colors"
+            className="py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] rounded-xl flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none transition-colors"
           >
-            <MessageCircle size={12} /> Remind
+            <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-3.5 h-3.5 object-contain" /> Remind
           </button>
           <button 
             onClick={() => {

@@ -31,7 +31,24 @@ const getCustomers = asyncHandler(async (req, res) => {
   else if (sort === "createdAt") sortOption = { createdAt: -1 };
 
   const query = { userId, isActive: true };
-  const customers = await Customer.find(query).sort(sortOption).lean();
+  const customers = await Customer.find(query).sort(sortOption);
+
+  // Sync balances for consistency
+  for (let customer of customers) {
+    const pendingEntries = await Entry.find({
+      customerId: customer._id,
+      userId,
+      type: 'credit',
+      status: { $in: ['pending', 'partial', 'overdue'] },
+    }).lean();
+
+    const actualOwed = pendingEntries.reduce((sum, e) => sum + (e.remainingAmount ?? e.amount), 0);
+
+    if (customer.totalOwed !== actualOwed) {
+      customer.totalOwed = actualOwed;
+      await customer.save();
+    }
+  }
 
   return res.json({
     success: true,
@@ -53,6 +70,21 @@ const getCustomerById = asyncHandler(async (req, res) => {
 
   if (!customer) {
     return res.status(404).json({ success: false, message: 'Customer not found or access denied.' });
+  }
+
+  // Data consistency check: sync totalOwed with actual entries
+  const pendingEntries = await Entry.find({
+    customerId: customer._id,
+    userId: req.user.id,
+    type: 'credit',
+    status: { $in: ['pending', 'partial', 'overdue'] },
+  }).lean();
+
+  const actualOwed = pendingEntries.reduce((sum, e) => sum + (e.remainingAmount ?? e.amount), 0);
+
+  if (customer.totalOwed !== actualOwed) {
+    customer.totalOwed = actualOwed;
+    await customer.save();
   }
 
   res.json({ success: true, data: customer });

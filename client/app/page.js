@@ -45,7 +45,7 @@ export default function OnboardingPage() {
   // Merchant Onboarding Profile State
   const [shopName, setShopName] = useState("");
   const [ownerName, setOwnerName] = useState("");
-  const [businessType, setBusinessType] = useState("Kirana");
+  const [businessType, setBusinessType] = useState("");
   const [language, setLanguage] = useState("English");
 
   const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
@@ -347,7 +347,7 @@ export default function OnboardingPage() {
                   onClick={triggerGoogleAuth}
                   className="w-full py-3.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2.5 cursor-pointer transition-colors outline-none focus:outline-none"
                 >
-                  <Mail size={14} className="text-indigo-400" /> Continue with Google
+                  <img src="/google-logo.png" alt="Google" className="w-3.5 h-3.5 object-contain" /> Continue with Google
                 </button>
 
                 {/* Mobile Authentication */}
