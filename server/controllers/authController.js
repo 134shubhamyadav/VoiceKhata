@@ -84,20 +84,21 @@ const verifyToken = async (req, res) => {
     let isNewUser = false;
     if (!user) {
       isNewUser = true;
-      // Use findOneAndUpdate+upsert on firebaseUid (never null, always unique)
-      // This avoids triggering the phone_1 unique index when phone is null
+      // Build insert payload — only include fields that have real values.
+      // NEVER set phone:null or email:null explicitly — sparse unique indexes
+      // still index null, causing E11000 when multiple Google users sign up.
+      const insertData = {
+        firebaseUid:          uid,
+        name:                 name    || "Merchant",
+        onboardingIncomplete: true,
+      };
+      if (email)        insertData.email        = email.toLowerCase().trim();
+      if (phone_number) insertData.phone        = phone_number;
+      if (picture)      insertData.profilePhoto = picture;
+
       user = await User.findOneAndUpdate(
         { firebaseUid: uid },
-        {
-          $setOnInsert: {
-            firebaseUid:          uid,
-            email:                email        || null,
-            phone:                phone_number || null,
-            name:                 name         || "Merchant",
-            profilePhoto:         picture      || null,
-            onboardingIncomplete: true,
-          },
-        },
+        { $setOnInsert: insertData },
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
       console.log(`[Auth] New merchant created for UID: ${uid}`);

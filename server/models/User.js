@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
       sparse: true,
       unique: true,
       match: [/^\+?[0-9]{10,15}$/, 'Enter a valid phone number'],
-      default: null,
+      // No default:null — absent field is ignored by sparse index
     },
     email: {
       type: String,
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
       sparse: true,
       unique: true,
       lowercase: true,
-      default: null,
+      // No default:null — absent field is ignored by sparse index
     },
     firebaseUid: {
       type: String,

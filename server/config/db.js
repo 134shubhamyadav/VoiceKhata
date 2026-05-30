@@ -1,27 +1,40 @@
 const mongoose = require("mongoose");
 
 /**
- * Fix: Drop the old non-sparse phone_1 index on users collection.
- * The original index was created without sparse:true, so multiple
- * Google sign-in users (who all have phone=null) hit E11000.
- * This migration drops & lets Mongoose recreate it correctly as sparse.
+ * Migration: Drop non-sparse unique indexes on users.phone and users.email.
+ *
+ * Background: MongoDB sparse unique indexes skip documents where the field
+ * is ABSENT. But if the field is explicitly set to null (via default:null),
+ * MongoDB DOES index the null value and enforces uniqueness — meaning only
+ * one user can have phone:null. This breaks Google sign-in for all users
+ * after the first.
+ *
+ * Fix: Drop the old indexes so Mongoose recreates them as sparse, AND ensure
+ * the model never writes null for absent optional fields.
  */
-const fixUserPhoneIndex = async () => {
+const fixUserIndexes = async () => {
   try {
-    const db = mongoose.connection.db;
-    const collection = db.collection("users");
+    const collection = mongoose.connection.db.collection("users");
     const indexes = await collection.indexes();
-    const phoneIndex = indexes.find(
-      (ix) => ix.name === "phone_1" && !ix.sparse
-    );
-    if (phoneIndex) {
-      await collection.dropIndex("phone_1");
-      console.log("[DB Migration] Dropped non-sparse phone_1 index on users. Will be recreated as sparse.");
+
+    for (const ix of indexes) {
+      const isPhoneIndex = ix.name === "phone_1";
+      const isEmailIndex = ix.name === "email_1";
+      const needsFix = (isPhoneIndex || isEmailIndex) && !ix.sparse;
+
+      if (needsFix) {
+        await collection.dropIndex(ix.name);
+        console.log(`[DB Migration] Dropped non-sparse ${ix.name} index — will be recreated as sparse.`);
+      }
     }
+
+    // Let Mongoose recreate indexes based on current schema definitions
+    const User = require("../models/User");
+    await User.syncIndexes();
+    console.log("[DB Migration] User indexes synced successfully.");
   } catch (err) {
-    // Index may not exist yet — safe to ignore
-    if (!err.message.includes("index not found")) {
-      console.warn("[DB Migration] Could not fix phone index:", err.message);
+    if (!err.message?.includes("index not found")) {
+      console.warn("[DB Migration] Could not fix user indexes:", err.message);
     }
   }
 };
@@ -31,8 +44,8 @@ const connectDB = async () => {
     const conn = await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI);
     console.log(`MongoDB connected: ${conn.connection.host}`);
 
-    // Run one-time index migrations
-    await fixUserPhoneIndex();
+    // Run one-time index migrations after connect
+    await fixUserIndexes();
   } catch (error) {
     console.error(`MongoDB connection error: ${error.message}`);
     process.exit(1);
