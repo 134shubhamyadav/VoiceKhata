@@ -9,6 +9,7 @@ const {
   getReceipt,
   fetchPaymentHistory,
   getCustomerEntries,
+  deleteEntry,
 } = require('../controllers/entryController');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { validateRequest } = require('../middleware/validation/validateRequest');
@@ -22,7 +23,7 @@ router.route('/').get(getEntries).post(validateRequest('entry'), createEntry);
 // Customer-specific entries (static segments must precede wildcard routes)
 router.get('/customer/:customerId', getCustomerEntries);
 
-router.route('/:id').get(getEntryById);
+router.route('/:id').get(getEntryById).delete(deleteEntry);
 router.route('/:id/status').patch(updateEntryStatus);
 
 // Payment

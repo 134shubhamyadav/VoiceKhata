@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { CheckCircle, MessageCircle, Link, ArrowRight, Share2 } from "lucide-react";
+import { CheckCircle, MessageCircle, Link, ArrowRight, Share2, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { apiClient } from "@/lib/apiClient";
 
 const successTranslations = {
   en: {
@@ -36,7 +37,9 @@ const successTranslations = {
     whatsappReminderTemplate: "*VoiceKhata Reminder*\n\n{customer}! 🙏 Your pending credit of ₹{amount} has been successfully recorded.\nNote: {note}\nDue Date: {dueDate}\n\nPay here: {link}\n\n*{shopName}*\nSupported by VoiceKhata",
     whatsappReceiptTemplate: "*Payment Confirmation*\n\nHello! You have successfully paid ₹{amount} to {shopName}.\nDate: {date}\n\nThank you! 🙏\n\n*{shopName}*\nSupported by VoiceKhata",
     whatsappReminderPreview: "\"{customer}! 🙏 Your pending credit of ₹{amount} has been recorded. Due date: {dueDate}. Pay here: pay.voicekhata.in/txn\"",
-    whatsappReceiptPreview: "\"*Payment Confirmation* You have paid ₹{amount} to {shopName}. Date: {date}. Thank you! 🙏\""
+    whatsappReceiptPreview: "\"*Payment Confirmation* You have paid ₹{amount} to {shopName}. Date: {date}. Thank you! 🙏\"",
+    cancelTransaction: "Cancel / Delete Transaction",
+    cancelling: "Cancelling..."
   },
   hi: {
     creditAdded: "उधार सफलतापूर्वक जोड़ा गया",
@@ -68,7 +71,9 @@ const successTranslations = {
     whatsappReminderTemplate: "*VoiceKhata Reminder*\n\n{customer} जी! 🙏 आपका ₹{amount} का लंबित उधार सफलतापूर्वक दर्ज कर लिया गया है।\nविवरण: {note}\nदेय तिथि: {dueDate}\n\nयहाँ भुगतान करें: {link}\n\n*{shopName}*\nVoiceKhata द्वारा समर्थित",
     whatsappReceiptTemplate: "*भुगतान पुष्टि*\n\nआपने {shopName} को ₹{amount} का भुगतान सफलतापूर्वक किया है।\nदिनांक: {date}\n\nधन्यवाद! 🙏\n\n*{shopName}*\nVoiceKhata द्वारा समर्थित",
     whatsappReminderPreview: "\"{customer} जी! 🙏 आपका ₹{amount} का लंबित उधार दर्ज हो गया है। देय तिथि: {dueDate}। भुगतान लिंक: pay.voicekhata.in/txn\"",
-    whatsappReceiptPreview: "\"*भुगतान पुष्टि* आपने {shopName} को ₹{amount} का भुगतान किया है। दिनांक: {date}। धन्यवाद! 🙏\""
+    whatsappReceiptPreview: "\"*भुगतान पुष्टि* आपने {shopName} को ₹{amount} का भुगतान किया है। दिनांक: {date}। धन्यवाद! 🙏\"",
+    cancelTransaction: "लेन-देन रद्द / हटाएं",
+    cancelling: "रद्द किया जा रहा है..."
   },
   ta: {
     creditAdded: "கடன் வெற்றிகரமாக சேர்க்கப்பட்டது",
@@ -212,6 +217,8 @@ export default function SuccessPage() {
     raw: "Ramesh ne aaj 2000 rupaye ka udhaar kiya kirana ke liye"
   });
   const [copied, setCopied] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState("");
 
   // Load language settings dynamically from merchant configuration
   const userLang = user?.language || "en";
@@ -228,6 +235,40 @@ export default function SuccessPage() {
       }
     }
   }, []);
+
+  const handleCancel = async () => {
+    if (!txData.id) return;
+    
+    const confirmCancel = window.confirm(
+      userLang === "hi" 
+        ? "क्या आप निश्चित रूप से इस लेन-देन को रद्द करना चाहते हैं?" 
+        : "Are you sure you want to cancel and delete this transaction?"
+    );
+    if (!confirmCancel) return;
+
+    setIsCancelling(true);
+    setCancelError("");
+
+    try {
+      await apiClient.deleteEntry(txData.id);
+      localStorage.removeItem('recent_transaction');
+      alert(
+        userLang === "hi"
+          ? "लेन-देन सफलतापूर्वक रद्द कर दिया गया।"
+          : "Transaction cancelled and deleted successfully."
+      );
+      router.push("/dashboard");
+    } catch (err) {
+      console.error("Failed to cancel transaction:", err);
+      setCancelError(
+        userLang === "hi"
+          ? "लेन-देन रद्द करने में विफल: " + err.message
+          : "Failed to cancel transaction: " + err.message
+      );
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   const handleCopy = () => {
     const linkText = `pay.voicekhata.in/txn-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -432,6 +473,26 @@ export default function SuccessPage() {
         >
           {t.goToDashboard}
         </button>
+
+        {cancelError && (
+          <div className="bg-red-500/5 border border-red-500/10 text-red-500 text-[10px] font-bold uppercase tracking-wider p-2.5 rounded-xl text-center">
+            {cancelError}
+          </div>
+        )}
+
+        {txData.id && (
+          <button 
+            onClick={handleCancel}
+            disabled={isCancelling}
+            className="w-full py-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/30 border border-rose-100/50 dark:border-rose-950/40 text-rose-550 font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 cursor-pointer transition-colors outline-none focus:outline-none border-0"
+          >
+            {isCancelling ? (
+              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-3.5 h-3.5 border-2 border-rose-500/20 border-t-rose-550 rounded-full" />
+            ) : (
+              <><Trash2 size={13} /> {t.cancelTransaction}</>
+            )}
+          </button>
+        )}
       </motion.div>
     </div>
   );

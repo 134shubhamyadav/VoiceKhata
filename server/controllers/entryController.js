@@ -466,6 +466,26 @@ const getCustomerEntries = asyncHandler(async (req, res) => {
   return res.status(200).json({ success: true, data: entries });
 });
 
+// DELETE /api/entries/:id
+const deleteEntry = asyncHandler(async (req, res) => {
+  const entry = await Entry.findOne({ _id: req.params.id, userId: req.user.id });
+
+  if (!entry) {
+    return res.status(404).json({ success: false, message: 'Entry not found or access denied.' });
+  }
+
+  const customerId = entry.customerId;
+
+  await Entry.deleteOne({ _id: req.params.id });
+
+  // Self-heal customer balances after transaction cancellation
+  if (customerId) {
+    await selfHealCustomerBalances(customerId);
+  }
+
+  res.json({ success: true, message: 'Transaction cancelled successfully.' });
+});
+
 module.exports = {
   createEntry,
   getEntries,
@@ -475,5 +495,6 @@ module.exports = {
   getReceipt,
   fetchPaymentHistory,
   getCustomerEntries,
+  deleteEntry,
   selfHealCustomerBalances,
 };

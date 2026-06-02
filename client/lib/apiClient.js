@@ -97,6 +97,8 @@ export const apiClient = {
 
   getReceipt: (id) => request(`/entries/${id}/receipt`),
 
+  deleteEntry: (id) => request(`/entries/${id}`, { method: "DELETE" }),
+
   // ── Voice ──────────────────────────────────────────────────────────────
   parseVoice: (text) =>
     request("/voice/parse", { method: "POST", body: JSON.stringify({ text }) }),

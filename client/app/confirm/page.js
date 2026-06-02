@@ -372,6 +372,7 @@ export default function UnifiedTransactionForm() {
       if (response.success) {
         localStorage.removeItem('voice_intent');
         localStorage.setItem('recent_transaction', JSON.stringify({
+          id: response.data.entry?._id || null,
           customer: response.data.customer?.name || response.data.entry?.customerId?.name || payload.customerName || 'Unknown Customer',
           amount: parsedAmount,
           type: payload.type,
