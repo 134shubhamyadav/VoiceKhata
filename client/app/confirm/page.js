@@ -385,6 +385,9 @@ export default function UnifiedTransactionForm() {
       }
     } catch (err) {
       console.warn("Could not save to live backend, executing offline fallback save.");
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('voice_intent');
+      }
       try {
         const dummyCustomerName = customerName.trim();
         localStorage.setItem('recent_transaction', JSON.stringify({

@@ -40,6 +40,14 @@ const customerSchema = new mongoose.Schema(
 );
 
 // Compound index: one user can't have duplicate phone numbers for customers
-customerSchema.index({ userId: 1, phone: 1 }, { unique: true, sparse: true });
+customerSchema.index(
+  { userId: 1, phone: 1 },
+  { 
+    unique: true, 
+    partialFilterExpression: { 
+      phone: { $type: "string" } 
+    } 
+  }
+);
 
 module.exports = mongoose.model('Customer', customerSchema);

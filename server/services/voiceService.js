@@ -117,7 +117,11 @@ const parseWithGemini = async (text) => {
     const parsed = JSON.parse(json);
 
     // Validate required fields
-    if (!parsed.amount || typeof parsed.amount !== "number" || parsed.amount <= 0) {
+    let amountVal = parsed.amount;
+    if (typeof amountVal === "string") {
+      amountVal = parseFloat(amountVal.replace(/,/g, ""));
+    }
+    if (!amountVal || isNaN(amountVal) || amountVal <= 0) {
       return null;
     }
     if (!["credit", "payment", "cashbook_out", "cashbook_in"].includes(parsed.type)) {
@@ -126,7 +130,7 @@ const parseWithGemini = async (text) => {
 
     return {
       customerName: parsed.customerName || null,
-      amount:       Math.round(Math.abs(parsed.amount)),
+      amount:       Math.round(Math.abs(amountVal)),
       type:         parsed.type,
       dueDate:      parsed.dueDate || null,
       note:         parsed.note    || null,
@@ -148,6 +152,16 @@ const HINDI_NUMBERS = {
   assi: 80, nabbe: 90, sau: 100, hazaar: 1000, lakh: 100000,
 };
 const MULTIPLIERS = { sau: 100, hazaar: 1000, lakh: 100000 };
+
+const ENGLISH_NUMBERS = {
+  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+  eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19,
+  twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90,
+  hundred: 100, thousand: 1000, lakh: 100000, lakhs: 100000, crore: 10000000, crores: 10000000
+};
+const ENGLISH_MULTIPLIERS = {
+  hundred: 100, thousand: 1000, lakh: 100000, lakhs: 100000, crore: 10000000, crores: 10000000
+};
 
 const CASHBOOK_OUT_WORDS = [
   "expense", "kharch", "kharch kiya", "chai", "tea", "rent", "salary",
@@ -175,20 +189,53 @@ const extractAmount = (text) => {
     if (val > 0) return Math.round(val);
   }
 
-  // Hindi words: "paanch hazaar", "do sau"
-  const words = text.toLowerCase().split(/\s+/);
+  // English words: "twelve thousand", "one lakh twenty thousand"
+  const cleanText = text.toLowerCase().replace(/[^a-z\s]/g, "");
+  const words = cleanText.split(/\s+/);
   let total = 0, current = 0;
+  let hasEnglishWord = false;
+
   for (const word of words) {
-    if (MULTIPLIERS[word]) {
-      current = current === 0 ? MULTIPLIERS[word] : current * MULTIPLIERS[word];
-      total += current;
-      current = 0;
-    } else if (HINDI_NUMBERS[word]) {
-      current += HINDI_NUMBERS[word];
+    if (ENGLISH_NUMBERS[word] !== undefined) {
+      hasEnglishWord = true;
+      const value = ENGLISH_NUMBERS[word];
+      if (ENGLISH_MULTIPLIERS[word] !== undefined) {
+        current = current === 0 ? value : current * value;
+        total += current;
+        current = 0;
+      } else {
+        current += value;
+      }
     }
   }
-  if (current > 0) total += current;
-  return total > 0 ? total : null;
+  if (hasEnglishWord) {
+    const finalVal = total + current;
+    if (finalVal > 0) return finalVal;
+  }
+
+  // Hindi words: "paanch hazaar", "do sau"
+  total = 0;
+  current = 0;
+  let hasHindiWord = false;
+  for (const word of words) {
+    if (HINDI_NUMBERS[word] !== undefined) {
+      hasHindiWord = true;
+      const value = HINDI_NUMBERS[word];
+      if (MULTIPLIERS[word] !== undefined) {
+        current = current === 0 ? value : current * value;
+        total += current;
+        current = 0;
+      } else {
+        current += value;
+      }
+    }
+  }
+  if (hasHindiWord) {
+    const finalVal = total + current;
+    if (finalVal > 0) return finalVal;
+  }
+
+  return null;
 };
 
 const extractCustomerName = (text) => {
