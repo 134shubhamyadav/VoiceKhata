@@ -30,7 +30,8 @@ export default function OnboardingPage() {
     user, 
     loading, 
     loginWithFirebaseToken, 
-    completeMerchantOnboarding 
+    completeMerchantOnboarding,
+    logout
   } = useAuth();
 
   const [step, setStep] = useState("splash"); // splash, auth-selector, mobile-input, otp-verify, merchant-setup
@@ -476,6 +477,12 @@ export default function OnboardingPage() {
           {/* STEP 5: MERCHANT PROFILE CONFIGURATION SETUP */}
           {step === "merchant-setup" && (
             <motion.div {...transitionConfig} key="merchant-setup" className="flex-1 flex flex-col justify-center">
+              <button 
+                onClick={logout} 
+                className="w-8 h-8 bg-slate-900 border border-slate-800 rounded-lg flex items-center justify-center cursor-pointer mb-6"
+              >
+                <ArrowLeft size={14} className="text-slate-400" />
+              </button>
               <div className="mb-6">
                 <div className="inline-flex items-center gap-1 bg-emerald-500/5 border border-emerald-500/10 rounded-lg px-2 py-0.5 mb-2.5">
                   <Check size={10} className="text-emerald-500" />
