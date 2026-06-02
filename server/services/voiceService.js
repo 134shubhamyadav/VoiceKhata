@@ -253,7 +253,14 @@ const extractCustomerName = (text) => {
   for (const re of patterns) {
     const m = text.match(re);
     if (m && m[1] && m[1].length > 1) {
-      const name = m[1].trim();
+      let name = m[1].trim();
+      // Strip starting Hinglish pronouns
+      const pronouns = ["me", "main", "maine", "i", "he", "she", "we", "they", "you", "mujhse", "mujhe", "mera", "meri"];
+      const words = name.split(/\s+/);
+      if (words.length > 1 && pronouns.includes(words[0].toLowerCase())) {
+        words.shift();
+        name = words.join(" ");
+      }
       // Capitalize first letter if it is English
       if (/^[a-zA-Z]/.test(name)) {
         return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
@@ -318,11 +325,31 @@ const detectType = (text) => {
   return "credit"; // safe default
 };
 
+const preProcessScaleWords = (text) => {
+  const multipliers = {
+    hazaar: 1000, hazar: 1000,
+    thousand: 1000, thousands: 1000,
+    lakh: 100000, lakhs: 100000,
+    crore: 10000000, crores: 10000000,
+    sau: 100, hundred: 100, hundreds: 100
+  };
+
+  let cleanText = text.toLowerCase();
+  const regex = /(\d+(?:\.\d+)?)\s*(hazaar|hazar|thousand|thousands|lakh|lakhs|crore|crores|sau|hundred|hundreds)\b/g;
+
+  return cleanText.replace(regex, (match, numStr, scaleWord) => {
+    const num = parseFloat(numStr);
+    const scale = multipliers[scaleWord];
+    return (num * scale).toString();
+  });
+};
+
 const ruleBasedParse = (text) => {
-  const amount       = extractAmount(text);
-  const customerName = extractCustomerName(text);
-  const type         = detectType(text);
-  let dueDate        = extractDueDate(text);
+  const processedText = preProcessScaleWords(text);
+  const amount       = extractAmount(processedText);
+  const customerName = extractCustomerName(processedText);
+  const type         = detectType(processedText);
+  let dueDate        = extractDueDate(processedText);
 
   // If transaction type is payment and no date is specified, automatically default to today
   if (type === "payment" && !dueDate) {
