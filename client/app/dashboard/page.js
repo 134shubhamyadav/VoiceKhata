@@ -161,6 +161,31 @@ export default function Dashboard() {
   const [cashNote, setCashNote] = useState("");
   const [cashType, setCashType] = useState("in"); // 'in' | 'out'
 
+  // Galla Denomination Counter States
+  const [qty500, setQty500] = useState("");
+  const [qty200, setQty200] = useState("");
+  const [qty100, setQty100] = useState("");
+  const [qty50, setQty50] = useState("");
+  const [qty20, setQty20] = useState("");
+  const [qty10, setQty10] = useState("");
+  const [qty5Coin, setQty5Coin] = useState("");
+  const [qty2Coin, setQty2Coin] = useState("");
+  const [qty1Coin, setQty1Coin] = useState("");
+  const [showAudit, setShowAudit] = useState(false);
+
+  const resetGalla = () => {
+    setQty500("");
+    setQty200("");
+    setQty100("");
+    setQty50("");
+    setQty20("");
+    setQty10("");
+    setQty5Coin("");
+    setQty2Coin("");
+    setQty1Coin("");
+    setShowAudit(false);
+  };
+
   // Visiting Card Customization State
   const [cardTheme, setCardTheme] = useState("classic_dark"); // 'classic_dark' | 'forest' | 'royal' | 'navy' | 'burgundy' | 'black_gold' | 'emerald_gold'
   const [cardCategory, setCardCategory] = useState("");
@@ -602,11 +627,12 @@ export default function Dashboard() {
       {/* Store Toolkit Redesign (Premium micro-interactions, distinct hover highlights, and dynamic colors) */}
       <div className="relative z-10 px-5 mb-6">
         <SectionHeader title={t.smartSuite} />
-        <div className="grid grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-2 gap-2.5">
           {[
             { label: "Cashbook", icon: BookOpen, sub: "Cash Flow Tracker", type: "cashbook", colorClass: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400", borderClass: "hover:border-emerald-300 dark:hover:border-emerald-800/80" },
+            { label: "Galla Counter", icon: IndianRupee, sub: "Cash Audit Tool", type: "galla_calc", colorClass: "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400", borderClass: "hover:border-amber-300 dark:hover:border-amber-800/80" },
             { label: "Visiting Card", icon: CreditCard, sub: "Share Card Maker", type: "visiting_card", colorClass: "bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400", borderClass: "hover:border-indigo-300 dark:hover:border-indigo-800/80" },
-            { label: "GST Calculator", icon: Calculator, sub: "Quick GST Billing", type: "gst_calc", colorClass: "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400", borderClass: "hover:border-amber-300 dark:hover:border-amber-800/80" }
+            { label: "GST Calculator", icon: Calculator, sub: "Quick GST Billing", type: "gst_calc", colorClass: "bg-teal-50 dark:bg-teal-950/30 text-teal-600 dark:text-teal-400", borderClass: "hover:border-teal-300 dark:hover:border-teal-800/80" }
           ].map(({ label, icon: Icon, sub, type, colorClass, borderClass }) => (
             <motion.button
               key={type}
@@ -615,6 +641,7 @@ export default function Dashboard() {
                 setCashAmount("");
                 setCashNote("");
                 setGstBasePrice("");
+                resetGalla();
                 setActiveTool(type);
               }}
               className={`flex flex-col items-center justify-between text-left p-3.5 bg-white dark:bg-slate-900 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.01)] border border-slate-100 dark:border-slate-850/80 cursor-pointer h-[105px] outline-none focus:outline-none transition-all duration-200 ${borderClass}`}
@@ -1110,6 +1137,195 @@ export default function Dashboard() {
                   </button>
                 </div>
               )}
+
+              {/* 4. GALLA DENOMINATION CALCULATOR TOOL */}
+              {activeTool === 'galla_calc' && (
+                <div>
+                   <div className="flex items-center justify-between mb-4">
+                     <div>
+                       <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display">Galla Cash Counter</h3>
+                       <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Physical cash denomination auditor & discrepancies checker</p>
+                     </div>
+                     <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                       <IndianRupee size={15} />
+                     </div>
+                   </div>
+
+                   {/* Counted Total Display Card */}
+                   {(() => {
+                     const total = 
+                       (parseInt(qty500) || 0) * 500 +
+                       (parseInt(qty200) || 0) * 200 +
+                       (parseInt(qty100) || 0) * 100 +
+                       (parseInt(qty50) || 0) * 50 +
+                       (parseInt(qty20) || 0) * 20 +
+                       (parseInt(qty10) || 0) * 10 +
+                       (parseInt(qty5Coin) || 0) * 5 +
+                       (parseInt(qty2Coin) || 0) * 2 +
+                       (parseInt(qty1Coin) || 0) * 1;
+
+                     return (
+                       <div className="bg-slate-950 dark:bg-slate-900 border border-slate-900 dark:border-slate-800 p-4.5 rounded-2xl mb-5 text-center relative overflow-hidden shadow-md">
+                         <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-xl pointer-events-none" />
+                         <span className="text-slate-400 text-[8px] font-bold uppercase tracking-widest block mb-1">TOTAL COUNTED CASH</span>
+                         <h4 className="text-2xl font-extrabold text-white tracking-tight">₹{total.toLocaleString()}</h4>
+                       </div>
+                     );
+                   })()}
+
+                   {/* Denomination Inputs Table Grid */}
+                   <div className="bg-slate-50/50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 rounded-xl p-4.5 mb-5 space-y-3">
+                     {[
+                       { label: "₹500", state: qty500, setter: setQty500, value: 500 },
+                       { label: "₹200", state: qty200, setter: setQty200, value: 200 },
+                       { label: "₹100", state: qty100, setter: setQty100, value: 100 },
+                       { label: "₹50", state: qty50, setter: setQty50, value: 50 },
+                       { label: "₹20", state: qty20, setter: setQty20, value: 20 },
+                       { label: "₹10", state: qty10, setter: setQty10, value: 10 },
+                       { label: "₹5 Coin", state: qty5Coin, setter: setQty5Coin, value: 5 },
+                       { label: "₹2 Coin", state: qty2Coin, setter: setQty2Coin, value: 2 },
+                       { label: "₹1 Coin", state: qty1Coin, setter: setQty1Coin, value: 1 }
+                     ].map((item) => (
+                       <div key={item.label} className="flex items-center justify-between gap-3 border-b border-slate-100/50 dark:border-slate-855/20 last:border-0 pb-2.5 last:pb-0">
+                         <div className="w-16 flex flex-col">
+                           <span className="text-xs font-extrabold text-slate-700 dark:text-slate-350">{item.label}</span>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <span className="text-[10px] text-slate-400 font-bold">×</span>
+                           <input
+                             type="number"
+                             value={item.state}
+                             onChange={(e) => {
+                               const val = e.target.value;
+                               if (val === "" || (parseInt(val) >= 0 && !isNaN(parseInt(val)))) {
+                                 item.setter(val);
+                               }
+                             }}
+                             placeholder="0"
+                             className="w-16 px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-bold text-center outline-none focus:border-indigo-500 transition-colors"
+                           />
+                         </div>
+                         <div className="w-24 text-right">
+                           <span className="text-xs font-extrabold text-slate-650 dark:text-slate-400">
+                             ₹{((parseInt(item.state) || 0) * item.value).toLocaleString()}
+                           </span>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+
+                   {/* Audit panel */}
+                   {showAudit && (
+                     <motion.div
+                       initial={{ opacity: 0, y: 10 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       className="mb-5"
+                     >
+                       {(() => {
+                         const total = 
+                           (parseInt(qty500) || 0) * 500 +
+                           (parseInt(qty200) || 0) * 200 +
+                           (parseInt(qty100) || 0) * 100 +
+                           (parseInt(qty50) || 0) * 50 +
+                           (parseInt(qty20) || 0) * 20 +
+                           (parseInt(qty10) || 0) * 10 +
+                           (parseInt(qty5Coin) || 0) * 5 +
+                           (parseInt(qty2Coin) || 0) * 2 +
+                           (parseInt(qty1Coin) || 0) * 1;
+
+                         // Sum of Today's Digital Cashbook In entries
+                         const todayDateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                         
+                         // Get cash in entries for today from state
+                         const todayCashIn = cashbookEntries
+                           .filter(e => e.type === "in" && e.date.startsWith(todayDateStr))
+                           .reduce((sum, e) => sum + e.amount, 0);
+
+                         const discrepancy = total - todayCashIn;
+
+                         return (
+                           <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80 p-4 rounded-xl space-y-3.5">
+                             <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-900">
+                               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Physical Counted Cash</span>
+                               <span className="text-xs font-extrabold text-slate-800 dark:text-white">₹{total.toLocaleString()}</span>
+                             </div>
+                             <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-900">
+                               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Today's Digital Cash In</span>
+                               <span className="text-xs font-extrabold text-slate-800 dark:text-white">₹{todayCashIn.toLocaleString()}</span>
+                             </div>
+
+                             {discrepancy === 0 ? (
+                               <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-lg text-center flex items-center justify-center gap-2">
+                                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                                 <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Match Confirmed (Zero Discrepancy)</span>
+                               </div>
+                             ) : discrepancy > 0 ? (
+                               <div className="bg-teal-500/10 border border-teal-500/20 p-3 rounded-lg text-center flex flex-col gap-1 items-center justify-center">
+                                 <div className="flex items-center justify-center gap-2">
+                                   <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse" />
+                                   <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">Cash Surplus Detected</span>
+                                 </div>
+                                 <span className="text-xs font-black text-teal-600 dark:text-teal-400">Surplus: +₹{discrepancy.toLocaleString()}</span>
+                               </div>
+                             ) : (
+                               <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-center flex flex-col gap-1 items-center justify-center">
+                                 <div className="flex items-center justify-center gap-2">
+                                   <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                                   <span className="text-[10px] font-black text-red-500 dark:text-red-400 uppercase tracking-widest">Cash Shortage Detected</span>
+                                 </div>
+                                 <span className="text-xs font-black text-red-500 dark:text-red-400">Shortage: -₹{Math.abs(discrepancy).toLocaleString()}</span>
+                               </div>
+                             )}
+
+                             {discrepancy !== 0 && (
+                               <button
+                                 onClick={() => {
+                                   const isShortage = discrepancy < 0;
+                                   const absAmt = Math.abs(discrepancy);
+                                   
+                                   const newEntry = {
+                                     id: Date.now(),
+                                     type: isShortage ? "out" : "in",
+                                     amount: absAmt,
+                                     note: isShortage ? "Galla Cash Shortage Adjustment" : "Galla Cash Surplus Adjustment",
+                                     date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) + ", " + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                                   };
+
+                                   const updated = [newEntry, ...cashbookEntries];
+                                   setCashbookEntries(updated);
+                                   localStorage.setItem('cashbook_entries', JSON.stringify(updated));
+
+                                   setFeedbackMessage(`Cashbook adjusted successfully with ₹${absAmt.toLocaleString()} ${isShortage ? "out-flow" : "in-flow"}.`);
+                                   setShowAudit(false);
+                                 }}
+                                 className="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 dark:hover:bg-slate-750 text-indigo-650 dark:text-indigo-400 font-bold text-[10px] rounded-lg tracking-wider uppercase border border-indigo-150/30 dark:border-slate-700 cursor-pointer transition-colors outline-none focus:outline-none"
+                               >
+                                 Adjust Cashbook Balance ✓
+                               </button>
+                             )}
+                           </div>
+                         );
+                       })()}
+                     </motion.div>
+                   )}
+
+                   {/* Audit Action Controls */}
+                   <div className="grid grid-cols-2 gap-3 pb-8">
+                     <button
+                       onClick={resetGalla}
+                       className="py-2.5 bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center outline-none focus:outline-none border border-slate-150 dark:border-slate-800 transition-colors"
+                     >
+                       Reset Counter
+                     </button>
+                     <button
+                       onClick={() => setShowAudit(true)}
+                       className="py-2.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center outline-none focus:outline-none shadow-sm transition-colors"
+                     >
+                       Match with Cashbook
+                     </button>
+                   </div>
+                 </div>
+               )}
             </motion.div>
           </>
         )}

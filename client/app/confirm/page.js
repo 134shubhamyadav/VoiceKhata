@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Edit3, Mic, User, IndianRupee, Calendar, Tag, Zap, ChevronRight, ArrowLeft } from "lucide-react";
+import { CheckCircle, Edit3, Mic, User, IndianRupee, Calendar, Tag, Zap, ChevronRight, ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/context/AuthContext";
 
@@ -203,6 +203,51 @@ export default function UnifiedTransactionForm() {
   const [voiceRawText, setVoiceRawText] = useState("");
   const [confidence, setConfidence] = useState(94);
 
+  // Database Customers Dropdown States
+  const [dbCustomers, setDbCustomers] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [filteredCustomers, setFilteredCustomers] = useState([]);
+
+  // Load actual customers on mount
+  useEffect(() => {
+    async function loadCustomers() {
+      try {
+        const userId = user?.id || '60b9b32b9b1d8e2df8a149f1';
+        const response = await apiClient.getCustomers(userId);
+        if (response.success && response.data && response.data.items) {
+          setDbCustomers(response.data.items);
+        }
+      } catch (err) {
+        console.warn("Could not load database customers:", err);
+      }
+    }
+    if (user) {
+      loadCustomers();
+    }
+  }, [user]);
+
+  // Filter dropdown customers list
+  useEffect(() => {
+    if (!customerName.trim()) {
+      setFilteredCustomers(dbCustomers);
+    } else {
+      const term = customerName.toLowerCase();
+      const matches = dbCustomers.filter(c => c.name.toLowerCase().includes(term));
+      setFilteredCustomers(matches);
+    }
+  }, [customerName, dbCustomers]);
+
+  // Click away to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showDropdown && !e.target.closest(".customer-select-container")) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [showDropdown]);
+
   // Reusable Form States
   const [customerName, setCustomerName] = useState("");
   const [amount, setAmount] = useState("");
@@ -276,6 +321,7 @@ export default function UnifiedTransactionForm() {
 
   const selectCustomer = (name) => {
     setCustomerName(name);
+    setShowDropdown(false);
   };
 
   const selectAmount = (amt) => {
@@ -462,19 +508,69 @@ export default function UnifiedTransactionForm() {
           <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2.5">
             {isCashbook ? t.categoryLabel : t.customerLabel}
           </label>
-          <div className="relative">
+          <div className="relative customer-select-container">
             {isCashbook ? (
-              <Tag size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+              <Tag size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 z-10" />
             ) : (
-              <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+              <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 z-10" />
             )}
             <input 
               type="text"
               value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
+              onFocus={() => { if (!isCashbook) setShowDropdown(true); }}
+              onClick={() => { if (!isCashbook) setShowDropdown(true); }}
+              onChange={(e) => {
+                setCustomerName(e.target.value);
+                if (!isCashbook) setShowDropdown(true);
+              }}
               placeholder={isCashbook ? t.categoryPlaceholder : t.customerPlaceholder}
-              className="w-full bg-slate-50/50 focus:bg-white dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-xs font-semibold text-slate-800 dark:text-white placeholder:text-slate-350 focus:outline-none focus:border-indigo-500 transition-all"
+              className="w-full bg-slate-50/50 focus:bg-white dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800 rounded-lg py-2.5 pl-10 pr-10 text-xs font-semibold text-slate-800 dark:text-white placeholder:text-slate-350 focus:outline-none focus:border-indigo-500 transition-all relative z-0"
             />
+            {!isCashbook && (
+              <button
+                type="button"
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-550 hover:text-slate-600 outline-none focus:outline-none cursor-pointer z-10"
+              >
+                {showDropdown ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
+            )}
+
+            {!isCashbook && showDropdown && (filteredCustomers.length > 0 || (customerName.trim() !== "" && !dbCustomers.some(c => c.name.toLowerCase() === customerName.trim().toLowerCase()))) && (
+              <div className="absolute left-0 right-0 mt-1.5 bg-white dark:bg-slate-900 border border-slate-200/85 dark:border-slate-800 rounded-xl shadow-lg z-50 max-h-[180px] overflow-y-auto no-scrollbar animate-in fade-in slide-in-from-top-1 duration-150">
+                {filteredCustomers.map((c) => (
+                  <button
+                    key={c._id}
+                    type="button"
+                    onClick={() => {
+                      setCustomerName(c.name);
+                      setShowDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-850/60 transition-colors border-b border-slate-55/20 dark:border-slate-855/20 last:border-0 cursor-pointer outline-none"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>{c.name}</span>
+                      {c.phone && <span className="text-[10px] text-slate-400 dark:text-slate-550 font-bold">{c.phone}</span>}
+                    </div>
+                  </button>
+                ))}
+
+                {customerName.trim() !== "" && !dbCustomers.some(c => c.name.toLowerCase() === customerName.trim().toLowerCase()) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold text-indigo-650 dark:text-indigo-400 hover:bg-indigo-50/40 dark:hover:bg-indigo-950/20 transition-colors border-b border-slate-55/20 dark:border-slate-855/20 last:border-0 cursor-pointer outline-none"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>New Customer: "{customerName.trim()}"</span>
+                      <span className="text-[9px] uppercase tracking-wider font-bold text-indigo-500">(Will be created)</span>
+                    </div>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Smart Suggestions */}
