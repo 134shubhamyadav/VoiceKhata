@@ -375,7 +375,7 @@ export default function UnifiedTransactionForm() {
           customer: response.data.customer?.name || response.data.entry?.customerId?.name || payload.customerName || 'Unknown Customer',
           amount: parsedAmount,
           type: payload.type,
-          dueDate: payload.dueDate ? new Date(payload.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'None',
+          dueDate: payload.dueDate ? new Date(payload.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'None',
           note: payload.note,
           raw: isVoiceEntry ? voiceRawText : "Manual ledger entry"
         }));
@@ -394,7 +394,7 @@ export default function UnifiedTransactionForm() {
           customer: dummyCustomerName,
           amount: parsedAmount,
           type: transactionType,
-          dueDate: dueDate ? new Date(dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'None',
+          dueDate: dueDate ? new Date(dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'None',
           note: note.trim() || (transactionType === "credit" ? "Udhaar entry" : "Payment record"),
           raw: isVoiceEntry ? voiceRawText : "Manual ledger entry"
         }));

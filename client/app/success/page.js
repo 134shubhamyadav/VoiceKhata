@@ -252,7 +252,7 @@ export default function SuccessPage() {
 
     const formattedAmount = txData.amount.toLocaleString();
     const linkText = `pay.voicekhata.in/txn-${Math.floor(1000 + Math.random() * 9000)}`;
-    const dateText = txData.dueDate || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    const dateText = txData.dueDate || new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const noteText = txData.note || "None";
     
     if (txData.type === 'credit') {
