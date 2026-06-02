@@ -545,14 +545,14 @@ export default function CustomerDetail() {
               animate={{ opacity: 0.3 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsEditing(false)}
-              className="fixed inset-0 bg-black z-45"
+              className="fixed inset-0 bg-black z-55"
             />
             <motion.div
               initial={{ y: "100%", x: "-50%" }}
               animate={{ y: 0, x: "-50%" }}
               exit={{ y: "100%", x: "-50%" }}
               transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="fixed bottom-0 left-1/2 w-full max-w-[430px] bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80"
+              className="fixed bottom-0 left-1/2 w-full max-w-[430px] bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-60 shadow-2xl border-t border-slate-100 dark:border-slate-800/80 max-h-[85vh] overflow-y-auto"
             >
               <div className="w-12 h-1 bg-slate-250 dark:bg-slate-800 rounded-full mx-auto mb-5" />
               <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">Edit Customer Details</h3>
@@ -616,14 +616,14 @@ export default function CustomerDetail() {
               animate={{ opacity: 0.3 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsRecordingPayment(false)}
-              className="fixed inset-0 bg-black z-45"
+              className="fixed inset-0 bg-black z-55"
             />
             <motion.div
               initial={{ y: "100%", x: "-50%" }}
               animate={{ y: 0, x: "-50%" }}
               exit={{ y: "100%", x: "-50%" }}
               transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="fixed bottom-0 left-1/2 w-full max-w-[430px] bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80"
+              className="fixed bottom-0 left-1/2 w-full max-w-[430px] bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-60 shadow-2xl border-t border-slate-100 dark:border-slate-800/80 max-h-[85vh] overflow-y-auto"
             >
               <div className="w-12 h-1 bg-slate-250 dark:bg-slate-800 rounded-full mx-auto mb-5" />
               <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">
