@@ -63,9 +63,7 @@ export default function CustomerDetail() {
   const { id } = useParams();
   const router = useRouter();
 
-  const mockC = mockCustomers.find(x => x.id === id) || mockCustomers[0];
-
-  const [customer, setCustomer] = useState(mockC);
+  const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Edit customer details drawer states
@@ -82,12 +80,44 @@ export default function CustomerDetail() {
 
   const generatePresetMessage = (customerName, amount, tone) => {
     const shopName = user?.shopName || "Our Store";
-    const templates = {
-      friendly: `Namaste ${customerName},\n\nThis is a reminder from ${shopName}.\n\nYour pending amount is ₹${amount.toLocaleString()}.\n\nPlease complete the payment.\n\nSupported by VoiceKhata`,
-      firm: `Namaste ${customerName},\n\nThis is an important reminder from ${shopName}.\n\nYour outstanding balance of ₹${amount.toLocaleString()} is overdue. Please settle this payment today to maintain your credit record.\n\nSupported by VoiceKhata`,
-      urgent: `Namaste ${customerName},\n\nThis is an URGENT notice from ${shopName}.\n\nYour pending amount of ₹${amount.toLocaleString()} is severely overdue. Please complete the payment immediately to avoid suspension of credit.\n\nSupported by VoiceKhata`
+    const userLang = user?.language || "en";
+
+    // Multilingual message templates
+    const langTemplates = {
+      en: {
+        friendly: `Namaste ${customerName},\n\nThis is a reminder from ${shopName}.\n\nYour pending amount is ₹${amount.toLocaleString()}.\n\nPlease complete the payment.\n\nSupported by VoiceKhata`,
+        firm: `Namaste ${customerName},\n\nThis is an important reminder from ${shopName}.\n\nYour outstanding balance of ₹${amount.toLocaleString()} is overdue. Please settle this payment today to maintain your credit record.\n\nSupported by VoiceKhata`,
+        urgent: `Namaste ${customerName},\n\nThis is an URGENT notice from ${shopName}.\n\nYour pending amount of ₹${amount.toLocaleString()} is severely overdue. Please complete the payment immediately.\n\nSupported by VoiceKhata`
+      },
+      hi: {
+        friendly: `नमस्ते ${customerName},\n\nयह ${shopName} की तरफ से एक रिमाइंडर है।\n\nआपकी लंबित राशि ₹${amount.toLocaleString()} है।\n\nकृपया भुगतान पूरा करें।\n\nSupported by VoiceKhata`,
+        firm: `नमस्ते ${customerName},\n\nयह ${shopName} की तरफ से एक महत्वपूर्ण रिमाइंडर है।\n\nआपका बकाया ₹${amount.toLocaleString()} अभी तक नहीं चुका है। कृपया आज ही भुगतान करें।\n\nSupported by VoiceKhata`,
+        urgent: `नमस्ते ${customerName},\n\n${shopName} की तरफ से अत्यावश्यक सूचना।\n\nआपकी बकाया राशि ₹${amount.toLocaleString()} बहुत अधिक समय से लंबित है। तुरंत भुगतान करें।\n\nSupported by VoiceKhata`
+      },
+      ta: {
+        friendly: `வணக்கம் ${customerName},\n\nஇது ${shopName} இலிருந்து ஒரு நினைவூட்டல் ஆகும்.\n\nஉங்கள் நிலுவையில் உள்ள தொகை ₹${amount.toLocaleString()} ஆகும்.\n\nதயவுசெய்து கட்டணத்தை முடிக்கவும்.\n\nSupported by VoiceKhata`,
+        firm: `வணக்கம் ${customerName},\n\nஇது ${shopName} இலிருந்து முக்கியமான நினைவூட்டல்.\n\nஉங்கள் நிலுவை ₹${amount.toLocaleString()} இன்னும் செலுத்தப்படவில்லை. இன்றே செலுத்தவும்.\n\nSupported by VoiceKhata`,
+        urgent: `வணக்கம் ${customerName},\n\n${shopName} இலிருந்து அவசர அறிவிப்பு.\n\nஉங்கள் நிலுவை ₹${amount.toLocaleString()} உடனடியாக செலுத்தவும்.\n\nSupported by VoiceKhata`
+      },
+      mr: {
+        friendly: `नमस्ते ${customerName},\n\nहा ${shopName} कडून एक स्मरणपत्र आहे.\n\nतुमची प्रलंबित रक्कम ₹${amount.toLocaleString()} आहे.\n\nकृपया पेमेंट पूर्ण करा.\n\nSupported by VoiceKhata`,
+        firm: `नमस्ते ${customerName},\n\nहे ${shopName} कडून महत्त्वाचे स्मरणपत्र आहे.\n\nतुमची थकबाकी ₹${amount.toLocaleString()} अद्याप भरली नाही. कृपया आज भरा.\n\nSupported by VoiceKhata`,
+        urgent: `नमस्ते ${customerName},\n\n${shopName} कडून तातडीची सूचना.\n\nतुमची थकबाकी ₹${amount.toLocaleString()} खूप उशीर झालेली आहे. ताबडतोब भरा.\n\nSupported by VoiceKhata`
+      },
+      gu: {
+        friendly: `નમસ્તે ${customerName},\n\nઆ ${shopName} તરફથી રીમાઇન્ડર છે.\n\nતમારી બાકી રકમ ₹${amount.toLocaleString()} છે.\n\nકૃપા કરીને ચુકવણી પૂર્ણ કરો.\n\nSupported by VoiceKhata`,
+        firm: `નમસ્તે ${customerName},\n\nઆ ${shopName} તરફથી મહત્વપૂર્ણ રીમાઇન્ડર છે.\n\nતમારી બાકી ₹${amount.toLocaleString()} હજુ ચૂકવાઈ નથી. આજે ચૂકવો.\n\nSupported by VoiceKhata`,
+        urgent: `નમસ્તે ${customerName},\n\n${shopName} તરફથી તાત્કાલિક સૂચના.\n\nતમારી બાકી ₹${amount.toLocaleString()} તરત ચૂકવો.\n\nSupported by VoiceKhata`
+      },
+      bho: {
+        friendly: `प्रणाम ${customerName},\n\nई ${shopName} के तरफ से एगो रिमाइंडर बा।\n\nराउर बाकी रुपया ₹${amount.toLocaleString()} बा।\n\nकृपया भुगतान पूरा करीं।\n\nSupported by VoiceKhata`,
+        firm: `प्रणाम ${customerName},\n\nई ${shopName} के तरफ से जरूरी संदेश बा।\n\nराउर ₹${amount.toLocaleString()} के बकाया अभियो ना भरल गइल। आज भरीं।\n\nSupported by VoiceKhata`,
+        urgent: `प्रणाम ${customerName},\n\n${shopName} के तरफ से तुरंत सूचना।\n\nराउर ₹${amount.toLocaleString()} के बकाया तुरंते चुकाईं।\n\nSupported by VoiceKhata`
+      }
     };
-    return templates[tone] || templates.friendly;
+
+    const selectedLang = langTemplates[userLang] ? userLang : "en";
+    return langTemplates[selectedLang][tone] || langTemplates[selectedLang].friendly;
   };
 
   // Record Cash Payment / Give Credit drawer states
@@ -353,6 +383,38 @@ export default function CustomerDetail() {
   useEffect(() => {
     loadCustomerDetails();
   }, [id]);
+
+  if (!customer) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] pb-28 relative">
+        {/* Skeleton Header */}
+        <div className="bg-slate-950 dark:bg-slate-900 border-b border-slate-900 px-5 pt-12 pb-7">
+          <div className="flex items-center justify-between mb-6">
+            <button onClick={() => router.back()} className="w-8 h-8 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center cursor-pointer">
+              <ArrowLeft size={15} className="text-slate-400" />
+            </button>
+          </div>
+          <div className="flex items-center gap-3.5 animate-pulse">
+            <div className="w-12 h-12 rounded-xl bg-slate-800" />
+            <div className="space-y-2">
+              <div className="w-32 h-4 bg-slate-800 rounded" />
+              <div className="w-24 h-3 bg-slate-800 rounded" />
+            </div>
+          </div>
+        </div>
+        {/* Skeleton Body */}
+        <div className="px-5 pt-5 space-y-4 animate-pulse">
+          <div className="grid grid-cols-3 gap-3">
+            {[1,2,3].map(i => <div key={i} className="h-16 bg-slate-100 dark:bg-slate-800 rounded-xl" />)}
+          </div>
+          <div className="h-20 bg-slate-100 dark:bg-slate-800 rounded-xl" />
+          <div className="grid grid-cols-3 gap-2">
+            {[1,2,3].map(i => <div key={i} className="h-12 bg-slate-100 dark:bg-slate-800 rounded-xl" />)}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] pb-28 overflow-hidden relative transition-colors duration-200">

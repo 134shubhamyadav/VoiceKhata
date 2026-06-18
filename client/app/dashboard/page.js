@@ -112,7 +112,9 @@ const dashboardTranslations = {
 export default function Dashboard() {
   const router = useRouter();
   const { user } = useAuth();
-  const t = dashboardTranslations.en;
+  // Use the user's saved language preference for UI translations
+  const lang = user?.language && dashboardTranslations[user.language] ? user.language : "en";
+  const t = dashboardTranslations[lang];
   
   // Real States
   const [loading, setLoading] = useState(true);
@@ -522,6 +524,39 @@ export default function Dashboard() {
       window.removeEventListener('focus', handleFocus);
     };
   }, []);
+
+  // Show skeleton while loading to prevent flash of zero values
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] pb-28 relative">
+        <div className="px-5 pt-12 pb-4">
+          <div className="h-4 w-36 bg-slate-200 dark:bg-slate-800 rounded animate-pulse mb-1" />
+          <div className="h-6 w-48 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
+        </div>
+        <div className="px-5 mb-6 animate-pulse">
+          <div className="bg-slate-950 rounded-2xl p-5 space-y-4">
+            <div className="h-3 w-40 bg-slate-800 rounded" />
+            <div className="h-8 w-28 bg-slate-800 rounded" />
+            <div className="h-3 w-32 bg-slate-800 rounded" />
+            <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-800">
+              {[1,2,3].map(i => <div key={i} className="h-8 bg-slate-800 rounded" />)}
+            </div>
+          </div>
+        </div>
+        <div className="px-5 mb-6 animate-pulse">
+          <div className="grid grid-cols-2 gap-3">
+            {[1,2].map(i => <div key={i} className="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl" />)}
+          </div>
+        </div>
+        <div className="px-5 animate-pulse">
+          <div className="h-4 w-32 bg-slate-200 dark:bg-slate-800 rounded mb-3" />
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-4 space-y-3">
+            {[1,2,3].map(i => <div key={i} className="h-10 bg-slate-100 dark:bg-slate-800 rounded" />)}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] pb-28 min-w-full relative transition-colors duration-200">

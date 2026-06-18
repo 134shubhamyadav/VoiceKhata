@@ -203,6 +203,15 @@ export default function UnifiedTransactionForm() {
   const [voiceRawText, setVoiceRawText] = useState("");
   const [confidence, setConfidence] = useState(94);
 
+  // Reusable Form States — declared BEFORE any useEffect that references them
+  const [customerName, setCustomerName] = useState("");
+  const [amount, setAmount] = useState("");
+  const [transactionType, setTransactionType] = useState("credit");
+  const [dueDate, setDueDate] = useState("");
+  const [note, setNote] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const isCashbook = transactionType === "cashbook_in" || transactionType === "cashbook_out";
+
   // Database Customers Dropdown States
   const [dbCustomers, setDbCustomers] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -248,14 +257,7 @@ export default function UnifiedTransactionForm() {
     return () => document.removeEventListener("click", handleClickOutside);
   }, [showDropdown]);
 
-  // Reusable Form States
-  const [customerName, setCustomerName] = useState("");
-  const [amount, setAmount] = useState("");
-  const [transactionType, setTransactionType] = useState("credit"); // credit (Udhaar Do) or payment (Payment Lo)
-  const [dueDate, setDueDate] = useState("");
-  const [note, setNote] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const isCashbook = transactionType === "cashbook_in" || transactionType === "cashbook_out";
+  // (Form states moved above — see top of component)
 
   // Populate form from URL query parameters (Manual path) or LocalStorage (Voice path)
   useEffect(() => {

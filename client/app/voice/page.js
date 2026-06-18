@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Mic, X, Zap, Volume2 } from "lucide-react";
@@ -12,13 +12,18 @@ const transcripts = [
   "Bought vegetables for five hundred rupees"
 ];
 
+// Pre-generate stable random heights — NEVER call Math.random() inside animate
+// because that causes a new value every render → React hydration crash
+const WAVE_HEIGHTS = Array.from({ length: 28 }, () => Math.random() * 32 + 10);
+const WAVE_DURATIONS = Array.from({ length: 28 }, () => 0.6 + Math.random() * 0.3);
+
 function WaveBar({ i, active }) {
   return (
     <motion.div
       className="w-[3px] rounded-full"
       style={{ background: active ? "#6366F1" : "#1E293B" }}
-      animate={active ? { height: [8, Math.random() * 32 + 10, 8] } : { height: 8 }}
-      transition={{ duration: 0.6 + Math.random() * 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.03 }}
+      animate={active ? { height: [8, WAVE_HEIGHTS[i], 8] } : { height: 8 }}
+      transition={{ duration: WAVE_DURATIONS[i], repeat: Infinity, ease: "easeInOut", delay: i * 0.03 }}
     />
   );
 }
@@ -125,7 +130,9 @@ const voiceTranslations = {
 export default function VoicePage() {
   const router = useRouter();
   const { user } = useAuth();
-  const t = voiceTranslations.en;
+  // Use user's saved language preference for the UI
+  const lang = user?.language && voiceTranslations[user.language] ? user.language : "en";
+  const t = voiceTranslations[lang];
   const [state, setState] = useState("idle"); // idle, listening, processing, done
   const [transcript, setTranscript] = useState("");
   const [progress, setProgress] = useState(0);
