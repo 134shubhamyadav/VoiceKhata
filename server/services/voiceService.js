@@ -45,7 +45,7 @@ Analyse the following voice transcript and extract the transaction details.
 The merchant may speak in Hindi (both Devnagari script and Hinglish), English, Marathi, Gujarati, or Bhojpuri.
 
 Common patterns:
-- "Ramesh ko 500 diye" → credit, amount=500, customer=Ramesh
+- "mene Yash ko 5000 udhar diye hai vah kal vapas karega" → credit, amount=5000, customer=Yash, dueDate=tomorrow
 - "Suresh ne 1000 diya" → payment received, amount=1000, customer=Suresh
 - "शुभम में 5 रुपए दिए" → payment received, amount=5, customer=Shubham, dueDate=${new Date().toISOString().split("T")[0]}
 - "सतीश को 800 का उधार" → credit, amount=800, customer=Satish
@@ -53,6 +53,7 @@ Common patterns:
 - "2000 chai ke liye kharch kiya" → cashbook_out, amount=2000, note=Chai
 - "aaj 3000 sales hui" → cashbook_in, amount=3000
 - "Priya ko 700 kal tak dena hai" → credit, dueDate=tomorrow
+- "maine Anil ko 50 diya, parso lautaega" → credit, amount=50, customer=Anil, dueDate=2 days from today
 
 ENGLISH SENTENCE PATTERNS (very important):
 - "I give Ramesh 5000" → credit, customer=Ramesh, amount=5000
@@ -61,17 +62,17 @@ ENGLISH SENTENCE PATTERNS (very important):
 - "I give NAME AMOUNT and he will give me back in X days" → credit, customer=NAME, amount=AMOUNT, dueDate=X days from today
 - "Ramesh owes me 2000" → credit, customer=Ramesh, amount=2000
 - "Priya paid me 1500" → payment, customer=Priya, amount=1500
-- "received 500 from Suresh" → payment, customer=Suresh, amount=500
 - "he will give me back in 30 days" → dueDate = 30 days from today
 - "give me back after 30 days" → dueDate = 30 days from today
 - "return in X days" → dueDate = X days from today
 
 CUSTOMER NAME EXTRACTION (critical):
-- Look for proper nouns (capitalized names) immediately after "give", "gave", "to", "from", "for"
+- Look for proper nouns (capitalized names) immediately after "give", "gave", "to", "from", "for", "ko", "ne"
 - "I give Ramesh" → Ramesh is the customer
-- "give to Priya" → Priya is the customer
+- "mene Yash ko" → Yash is the customer
 - "Suresh paid" → Suresh is the customer
-- If no clear customer name found, set customerName to null (do NOT set "Unknown Customer")
+- PRONOUNS ARE NOT NAMES. Ignore words like "maine", "mene", "I", "me", "wo", "usne", "vah", "tumne". Never return these as the customer name.
+- If no clear person name found, set customerName to null (do NOT set "Unknown Customer")
 
 DUE DATE EXTRACTION:
 - "30 days back" = 30 days from today
@@ -255,11 +256,13 @@ const extractCustomerName = (text) => {
     if (m && m[1] && m[1].length > 1) {
       let name = m[1].trim();
       // Strip starting Hinglish pronouns
-      const pronouns = ["me", "main", "maine", "i", "he", "she", "we", "they", "you", "mujhse", "mujhe", "mera", "meri"];
+      const pronouns = ["me", "main", "maine", "mene", "i", "he", "she", "we", "they", "you", "mujhse", "mujhe", "mera", "meri", "vah", "wo", "usne"];
       const words = name.split(/\s+/);
       if (words.length > 1 && pronouns.includes(words[0].toLowerCase())) {
         words.shift();
         name = words.join(" ");
+      } else if (words.length === 1 && pronouns.includes(words[0].toLowerCase())) {
+        return null;
       }
       // Capitalize first letter if it is English
       if (/^[a-zA-Z]/.test(name)) {

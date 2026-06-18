@@ -197,7 +197,8 @@ const confirmTranslations = {
 export default function UnifiedTransactionForm() {
   const router = useRouter();
   const { user } = useAuth();
-  const t = confirmTranslations.en;
+  const lang = user?.language && confirmTranslations[user.language] ? user.language : "en";
+  const t = confirmTranslations[lang];
   const [confirmed, setConfirmed] = useState(false);
   const [isVoiceEntry, setIsVoiceEntry] = useState(false);
   const [voiceRawText, setVoiceRawText] = useState("");
