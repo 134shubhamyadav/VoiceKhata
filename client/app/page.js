@@ -6,6 +6,7 @@ import { Shield, Sparkles, ChevronRight, ArrowLeft, Mail, Phone, Store, Check } 
 import { signInWithPopup, GoogleAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { apiClient } from "@/lib/apiClient";
 
 // Waveform Animation for Splash Hero
 function Waveform() {
@@ -50,6 +51,11 @@ export default function OnboardingPage() {
   const [language, setLanguage] = useState("English");
 
   const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
+
+  // Wake up server on mount
+  useEffect(() => {
+    apiClient.ping();
+  }, []);
 
   // Redirect and load state if already authenticated but onboarding incomplete
   useEffect(() => {

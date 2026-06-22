@@ -284,11 +284,6 @@ export default function SettingsPage() {
           <SettingRow icon={Globe} label="Voice Language" value={lang} action={() => {}} last />
         </SettingSection>
 
-        {/* Security */}
-        <SettingSection title="Security & Privacy">
-          <SettingRow icon={Shield} label="App Lock" value="PIN / Biometric" action={() => {}} color="bg-blue-50 text-blue-500 dark:bg-blue-950/40 dark:text-blue-400" />
-          <SettingRow icon={Shield} label="Data Backup" value="Auto backup enabled" action={() => {}} last />
-        </SettingSection>
 
         {/* Logout */}
         <motion.button 

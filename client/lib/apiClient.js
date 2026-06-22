@@ -56,6 +56,9 @@ export const apiClient = {
 
   getMe: () => request("/auth/me"),
 
+  // Ping endpoint to wake up server
+  ping: () => request("/health").catch(() => {}),
+
   // ── Customers ──────────────────────────────────────────────────────────
   getCustomers: (userId, sort) => {
     const params = new URLSearchParams();
