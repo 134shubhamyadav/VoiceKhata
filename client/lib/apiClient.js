@@ -106,6 +106,9 @@ export const apiClient = {
   parseVoice: (text) =>
     request("/voice/parse", { method: "POST", body: JSON.stringify({ text }) }),
 
+  chatVoice: (message, history) =>
+    request("/voice/chat", { method: "POST", body: JSON.stringify({ message, history }) }),
+
   // ── Dashboard & Insights ───────────────────────────────────────────────
   getDashboardSummary: () => request("/dashboard/summary"),
 
