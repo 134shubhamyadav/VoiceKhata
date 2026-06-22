@@ -54,6 +54,7 @@ Common patterns:
 - "aaj 3000 sales hui" → cashbook_in, amount=3000
 - "Priya ko 700 kal tak dena hai" → credit, dueDate=tomorrow
 - "maine Anil ko 50 diya, parso lautaega" → credit, amount=50, customer=Anil, dueDate=2 days from today
+- "मैंने अनिल को 50 दिया, परसों लौटाएगा" → credit, amount=50, customer=Anil, dueDate=2 days from today
 
 ENGLISH SENTENCE PATTERNS (very important):
 - "I give Ramesh 5000" → credit, customer=Ramesh, amount=5000
@@ -74,7 +75,10 @@ CUSTOMER NAME EXTRACTION (critical):
 - PRONOUNS ARE NOT NAMES. Ignore words like "maine", "mene", "I", "me", "wo", "usne", "vah", "tumne". Never return these as the customer name.
 - If no clear person name found, set customerName to null (do NOT set "Unknown Customer")
 
-DUE DATE EXTRACTION:
+DUE DATE EXTRACTION (FOR ALL LANGUAGES):
+- Always translate relative dates spoken in ANY language to YYYY-MM-DD.
+- Examples of "Tomorrow" (+1 day): 'kal' (Hindi), 'udya' / 'उद्या' (Marathi), 'kale' / 'કાલે' (Gujarati), 'naalai' / 'நாளை' (Tamil), 'bihaan' (Bhojpuri).
+- Examples of "Day after tomorrow" (+2 days): 'parso' / 'परसों' (Hindi), 'parva' / 'परवा' (Marathi), 'param divase' / 'પરમ દિવસે' (Gujarati), 'naalai marunaal' / 'நாளை மறுநாள்' (Tamil).
 - "30 days back" = 30 days from today
 - "give back in X days" = X days from today
 - "he will give me X days back" = X days from today
@@ -292,11 +296,20 @@ const extractDueDate = (text) => {
     return dt.toISOString().split("T")[0];
   };
 
-  if (/aaj|today/.test(t))                   return addDays(0);
-  if (/kal|tomorrow/.test(t))                return addDays(1);
-  if (/parso|day after/.test(t))             return addDays(2);
-  if (/hafte\s*mein|next\s*week/.test(t))    return addDays(7);
-  if (/mahine\s*mein|next\s*month/.test(t))  return addDays(30);
+  // Today: aaj, aaja, aaje, indru, aaju
+  if (/aaj|today|आज|aaja|aaje|આજે|indru|இன்று|aaju|आजु/.test(t)) return addDays(0);
+  
+  // Tomorrow: kal, udya, kale, naali, bihaan
+  if (/kal|tomorrow|कल|udya|उद्या|kale|કાલે|naalai|நாளை|bihaan|बिहान/.test(t)) return addDays(1);
+  
+  // Day After Tomorrow: parso, parva, param divase, naalai marunaal
+  if (/parso|parson|day after|परसों|परसो|parva|परवा|param divase|પરમ દિવસે|naalai marunaal|நாளை மறுநாள்/.test(t)) return addDays(2);
+  
+  // Next week: pudhchya, aavta avadiye, adutha vaaram
+  if (/hafte\s*mein|next\s*week|हफ्ते|सप्ताह|pudhchya aathavdyat|पुढच्या आठवड्यात|aavta avadiye|આવતા અઠવાડિયે|adutha vaaram|அடுத்த வாரம்/.test(t)) return addDays(7);
+  
+  // Next month: pudhchya mahinyat, aavta mahine, adutha maatham
+  if (/mahine\s*mein|next\s*month|महीने|महीना|pudhchya mahinyat|पुढच्या महिन्यात|aavta mahine|આવતા મહિને|adutha maatham|அடுத்த மாதம்/.test(t)) return addDays(30);
 
   const daysMatch = t.match(/(\d+)\s*(?:din|days?)\s*(?:mein|baad|later)/);
   if (daysMatch) return addDays(parseInt(daysMatch[1]));
