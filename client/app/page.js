@@ -327,14 +327,14 @@ export default function OnboardingPage() {
       
       {/* Top Graphic Area (Visible on Auth Steps) */}
       {(step === "auth-selector" || step === "mobile-input" || step === "otp-verify") && (
-        <div className="w-full bg-[#F5F8FF] pt-4 pb-2 rounded-b-[32px] shadow-[0_4px_20px_rgba(0,0,0,0.02)] mb-4 shrink-0 relative">
+        <div className="w-full relative mb-8 shrink-0 rounded-b-[36px] overflow-hidden shadow-sm">
           <button 
             onClick={() => {
               if (step === "otp-verify") setStep("mobile-input");
               else if (step === "mobile-input") setStep("auth-selector");
               else if (step === "auth-selector") setStep("splash");
             }}
-            className="absolute top-4 left-4 z-10 p-2 bg-white rounded-full shadow-sm text-slate-600 hover:text-slate-900 transition-colors"
+            className="absolute top-4 left-4 z-10 p-2 bg-white/90 backdrop-blur-md rounded-full shadow-md text-slate-800 hover:text-black transition-colors"
             aria-label="Go Back"
           >
             <ChevronRight className="rotate-180" size={20} />
