@@ -6,7 +6,7 @@ import { User, Globe, Bell, Mic, Shield, ChevronRight, Store, Phone, LogOut, Moo
 import { Toggle, FloatingBlobs } from "@/components/ui";
 import { useAuth } from "@/context/AuthContext";
 
-const languages = ["English", "Hindi", "Tamil", "Marathi", "Gujarati", "Bhojpuri"];
+const languages = ["English", "Hindi", "Marathi"];
 
 function SettingSection({ title, children }) {
   return (
@@ -75,10 +75,7 @@ export default function SettingsPage() {
       const languageMap = {
         en: "English",
         hi: "Hindi",
-        ta: "Tamil",
-        mr: "Marathi",
-        gu: "Gujarati",
-        bho: "Bhojpuri"
+        mr: "Marathi"
       };
       setLang(languageMap[user.language] || "English");
       setProfile({
@@ -125,10 +122,7 @@ export default function SettingsPage() {
     const resolvedLanguage = 
       selectedLang === "English" ? "en" :
       selectedLang === "Hindi" ? "hi" :
-      selectedLang === "Tamil" ? "ta" :
-      selectedLang === "Marathi" ? "mr" :
-      selectedLang === "Gujarati" ? "gu" :
-      selectedLang === "Bhojpuri" ? "bho" : "hi";
+      selectedLang === "Marathi" ? "mr" : "en";
 
     if (completeMerchantOnboarding && user) {
       try {
@@ -151,10 +145,7 @@ export default function SettingsPage() {
     const resolvedLanguage = 
       lang === "English" ? "en" :
       lang === "Hindi" ? "hi" :
-      lang === "Tamil" ? "ta" :
-      lang === "Marathi" ? "mr" :
-      lang === "Gujarati" ? "gu" :
-      lang === "Bhojpuri" ? "bho" : "hi";
+      lang === "Marathi" ? "mr" : "en";
 
     const updated = {
       ...profile,

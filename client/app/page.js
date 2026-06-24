@@ -279,10 +279,7 @@ export default function OnboardingPage() {
     const resolvedLanguage = 
       language === "English" ? "en" :
       language === "Hindi" ? "hi" :
-      language === "Tamil" ? "ta" :
-      language === "Marathi" ? "mr" :
-      language === "Gujarati" ? "gu" :
-      language === "Bhojpuri" ? "bho" : "hi";
+      language === "Marathi" ? "mr" : "en";
 
     const profileData = {
       name: ownerName.trim() || "Yaksh Patel",
@@ -657,7 +654,7 @@ export default function OnboardingPage() {
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Bookkeeping Language</label>
                   <div className="flex flex-wrap gap-2">
-                    {["English", "Hindi", "Tamil", "Marathi", "Gujarati", "Bhojpuri"].map((langCode) => (
+                    {["English", "Hindi", "Marathi"].map((langCode) => (
                       <button
                         key={langCode}
                         type="button"

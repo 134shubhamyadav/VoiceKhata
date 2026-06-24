@@ -55,6 +55,8 @@ Common patterns:
 - "Priya ko 700 kal tak dena hai" → credit, dueDate=tomorrow
 - "maine Anil ko 50 diya, parso lautaega" → credit, amount=50, customer=Anil, dueDate=2 days from today
 - "मैंने अनिल को 50 दिया, परसों लौटाएगा" → credit, amount=50, customer=Anil, dueDate=2 days from today
+- "Ramesh la 500 udhar dile" → credit, amount=500, customer=Ramesh
+- "Suresh kadun 200 aale" → payment, amount=200, customer=Suresh
 
 ENGLISH SENTENCE PATTERNS (very important):
 - "I give Ramesh 5000" → credit, customer=Ramesh, amount=5000
@@ -68,11 +70,11 @@ ENGLISH SENTENCE PATTERNS (very important):
 - "return in X days" → dueDate = X days from today
 
 CUSTOMER NAME EXTRACTION (critical):
-- Look for proper nouns (capitalized names) immediately after "give", "gave", "to", "from", "for", "ko", "ne"
+- Look for proper nouns (capitalized names) immediately after "give", "gave", "to", "from", "for", "ko", "ne", "la", "kadun"
 - "I give Ramesh" → Ramesh is the customer
 - "mene Yash ko" → Yash is the customer
 - "Suresh paid" → Suresh is the customer
-- PRONOUNS ARE NOT NAMES. Ignore words like "maine", "mene", "I", "me", "wo", "usne", "vah", "tumne". Never return these as the customer name.
+- PRONOUNS ARE NOT NAMES. Ignore words like "maine", "mene", "I", "me", "wo", "usne", "vah", "tumne", "mi", "tumi", "tyane". Never return these as the customer name.
 - If no clear person name found, set customerName to null (do NOT set "Unknown Customer")
 
 DUE DATE EXTRACTION (FOR ALL LANGUAGES):
@@ -87,8 +89,8 @@ DUE DATE EXTRACTION (FOR ALL LANGUAGES):
 - Payment type: if no date mentioned, use today as dueDate
 
 Transaction type rules:
-- "diya", "denge", "udhaar diya", "credit", "liya", "baki", "give", "gave", "I give" → type = "credit"
-- "aaya", "mila", "payment mili", "vasuli", "collected", "ne diya", "ne diye", "paid", "received from" → type = "payment"
+- "diya", "denge", "dile", "udhaar diya", "credit", "liya", "ghetle", "baki", "give", "gave", "I give" → type = "credit"
+- "aaya", "mila", "aale", "jama", "payment mili", "vasuli", "collected", "ne diya", "ne diye", "paid", "received from" → type = "payment"
 - "kharch", "expense", "chai", "petrol", "rent", "salary" → type = "cashbook_out"
 - "sales", "bikri", "aaj ki", "galla", "income" → type = "cashbook_in"
 
