@@ -437,7 +437,7 @@ export default function SuccessPage() {
                 </div>
                 <button 
                   onClick={handleCopy} 
-                  className="text-[9px] bg-slate-900 hover:bg-slate-850 dark:bg-slate-800 text-slate-800 dark:text-white px-2.5 py-1.5 rounded-lg font-bold transition-colors cursor-pointer outline-none focus:outline-none"
+                  className="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-white px-3 py-1.5 rounded-lg font-bold transition-colors cursor-pointer outline-none focus:outline-none"
                 >
                   {copied ? t.copied : t.copy}
                 </button>
@@ -446,7 +446,7 @@ export default function SuccessPage() {
 
             <button 
               onClick={handleShareWhatsApp} 
-              className="w-full py-3 bg-[#25D366] hover:bg-[#20ba5a] text-slate-800 dark:text-slate-800 dark:text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer outline-none focus:outline-none"
+              className="w-full py-3 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-[13px] rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer outline-none focus:outline-none"
             >
               <Share2 size={13} /> {t.shareReceipt}
             </button>
