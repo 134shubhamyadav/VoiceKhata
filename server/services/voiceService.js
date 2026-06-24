@@ -187,6 +187,13 @@ const MARATHI_NUMBERS = {
 };
 const MARATHI_MULTIPLIERS = { shambhar: 100, she: 100, hajar: 1000, lakh: 100000 };
 
+const DEVNAGARI_NUMBERS = {
+  "एक": 1, "दोन": 2, "दो": 2, "तीन": 3, "चार": 4, "पाच": 5, "पांच": 5, "सहा": 6, "छह": 6, "सात": 7, "आठ": 8, "नऊ": 9, "नौ": 9,
+  "दहा": 10, "दस": 10, "वीस": 20, "बीस": 20, "तीस": 30, "चाळीस": 40, "चालीस": 40, "पन्नास": 50, "पचास": 50, "साठ": 60, "साठ": 60, 
+  "सत्तर": 70, "ऐंशी": 80, "अस्सी": 80, "नव्वद": 90, "नब्बे": 90, "शंभर": 100, "सौ": 100, "हजार": 1000, "लाख": 100000
+};
+const DEVNAGARI_MULTIPLIERS = { "शंभर": 100, "सौ": 100, "हजार": 1000, "लाख": 100000 };
+
 const CASHBOOK_OUT_WORDS = [
   "expense", "kharch", "kharch kiya", "chai", "tea", "rent", "salary",
   "petrol", "fuel", "bill", "electricity", "samosa", "snack", "food",
@@ -213,8 +220,8 @@ const extractAmount = (text) => {
     if (val > 0) return Math.round(val);
   }
 
-  // English words: "twelve thousand", "one lakh twenty thousand"
-  const cleanText = text.toLowerCase().replace(/[^a-z\s]/g, "");
+  // Clean text: keep english letters, spaces, and devnagari characters
+  const cleanText = text.toLowerCase().replace(/[^\u0900-\u097Fa-z\s]/g, "");
   const words = cleanText.split(/\s+/);
   let total = 0, current = 0;
   let hasEnglishWord = false;
@@ -277,6 +284,28 @@ const extractAmount = (text) => {
     }
   }
   if (hasMarathiWord) {
+    const finalVal = total + current;
+    if (finalVal > 0) return finalVal;
+  }
+
+  // Devnagari words: "दोन हजार", "पाचशे", "दो सौ"
+  total = 0;
+  current = 0;
+  let hasDevnagariWord = false;
+  for (const word of words) {
+    if (DEVNAGARI_NUMBERS[word] !== undefined) {
+      hasDevnagariWord = true;
+      const value = DEVNAGARI_NUMBERS[word];
+      if (DEVNAGARI_MULTIPLIERS[word] !== undefined) {
+        current = current === 0 ? value : current * value;
+        total += current;
+        current = 0;
+      } else {
+        current += value;
+      }
+    }
+  }
+  if (hasDevnagariWord) {
     const finalVal = total + current;
     if (finalVal > 0) return finalVal;
   }
