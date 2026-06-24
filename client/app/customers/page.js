@@ -66,6 +66,7 @@ export default function CustomersPage() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -96,6 +97,8 @@ export default function CustomersPage() {
         }
       } catch (err) {
         console.warn("Could not load real customers, using offline mock data instead.");
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -194,16 +197,25 @@ export default function CustomersPage() {
 
       {/* Customers List container with zero-state empty states */}
       <div className="relative z-10 px-5">
-        {customers.length === 0 ? (
+        {loading ? (
+          <div className="flex flex-col gap-3 mt-4">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="h-20 bg-white dark:bg-slate-900 rounded-2xl animate-pulse shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]" />
+            ))}
+          </div>
+        ) : customers.length === 0 ? (
           <div className="text-center py-16 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
             <Users size={32} className="mx-auto mb-3 opacity-30 text-slate-400" />
             <p className="text-xs font-bold text-slate-700 dark:text-slate-200">No customers yet</p>
             <p className="text-[10px] text-slate-400 mt-1 max-w-[200px] mx-auto leading-relaxed">Start by recording your first transaction or tapping the plus button above.</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-slate-400">
-            <Search size={24} className="mx-auto mb-3 opacity-20" />
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">No customer matching search</p>
+          <div className="text-center py-16 px-6">
+            <div className="w-16 h-16 bg-white dark:bg-slate-900 shadow-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-slate-800">
+              <Search className="w-6 h-6 text-slate-300 dark:text-slate-600" />
+            </div>
+            <h3 className="text-slate-700 dark:text-slate-200 font-bold mb-1">No customers found</h3>
+            <p className="text-slate-400 dark:text-slate-500 text-xs">Try adjusting your search or add a new customer to your khata.</p>
           </div>
         ) : (
           filtered.map((c, i) => (

@@ -190,25 +190,35 @@ export default function SettingsPage() {
         <h1 className="text-2xl font-black text-slate-800 dark:text-white mb-1">Settings</h1>
         <p className="text-xs text-slate-400 dark:text-slate-500 mb-5">App preferences & account</p>
 
-        {/* Profile card */}
+        {/* Profile card - Premium UI */}
         <motion.div 
           initial={{ opacity: 0, y: 15 }} 
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-violet-600 to-indigo-800 rounded-3xl p-5 mb-6 relative overflow-hidden shadow-lg shadow-violet-200/40 dark:shadow-none"
+          className="bg-gradient-to-br from-violet-600 via-purple-700 to-indigo-900 rounded-[28px] p-6 mb-6 relative overflow-hidden shadow-[0_15px_30px_-10px_rgba(124,58,237,0.5)] dark:shadow-none border border-white/10"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-8 translate-x-8" />
-          <div className="relative z-10 flex items-center justify-between">
+          {/* Glassy reflection effects */}
+          <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+            <div className="absolute -top-[50%] -right-[10%] w-[70%] h-[150%] bg-gradient-to-b from-white/20 to-transparent rotate-12 blur-2xl" />
+            <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-pink-500/30 rounded-full blur-3xl" />
+          </div>
+
+          <div className="relative z-10 flex items-center justify-between gap-3">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 border border-white/10">
-                {profile.profilePhoto ? (
-                  <img src={profile.profilePhoto} alt="Profile Photo" className="w-full h-full object-cover" />
-                ) : (
-                  <Store size={26} className="text-white" />
-                )}
+              <div className="w-16 h-16 bg-white/20 p-[1px] rounded-2xl shadow-inner backdrop-blur-sm">
+                <div className="w-full h-full bg-gradient-to-br from-violet-500 to-indigo-600 rounded-[15px] flex items-center justify-center overflow-hidden border border-white/10 shadow-sm">
+                  {profile.profilePhoto ? (
+                    <img src={profile.profilePhoto} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <Store size={28} className="text-white drop-shadow-md" />
+                  )}
+                </div>
               </div>
               <div>
-                <p className="text-slate-800 dark:text-white font-black text-base leading-tight">{profile.shopName || "My Store"}</p>
-                <p className="text-violet-200 text-xs mt-1 truncate max-w-[170px]">{profile.phone || profile.email || "No contact info"}</p>
+                <p className="text-white font-black text-[19px] leading-tight tracking-wide drop-shadow-sm">{profile.shopName || "My Store"}</p>
+                <div className="flex items-center gap-1.5 mt-1.5 opacity-90">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse shadow-[0_0_5px_rgba(110,231,183,0.8)]" />
+                  <p className="text-violet-100 text-xs font-semibold tracking-wider truncate max-w-[150px]">{profile.phone || profile.email || "No contact info"}</p>
+                </div>
               </div>
             </div>
             
@@ -221,9 +231,9 @@ export default function SettingsPage() {
                 setEditProfilePhoto(profile.profilePhoto || "");
                 setIsEditingProfile(true);
               }}
-              className="px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl text-xs font-bold transition-all cursor-pointer outline-none"
+              className="p-3 bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md text-white rounded-[14px] transition-all cursor-pointer outline-none shadow-sm flex-shrink-0 active:scale-95"
             >
-              Edit Profile
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
             </button>
           </div>
         </motion.div>
