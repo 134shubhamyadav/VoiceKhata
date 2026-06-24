@@ -418,47 +418,62 @@ export default function OnboardingPage() {
 
           {/* STEP 2: AUTHENTICATION OPTIONS SELECTOR */}
           {step === "auth-selector" && (
-            <motion.div {...transitionConfig} key="auth-selector" className="flex-1 flex flex-col justify-center">
-              <div className="mb-6">
-                <h2 className="text-[22px] font-black font-display tracking-tight text-slate-900 mb-1.5">Welcome Back :)</h2>
-                <p className="text-[11px] text-slate-500 font-medium leading-relaxed">Choose your preferred login channel to continue.</p>
+            <motion.div {...transitionConfig} key="auth-selector" className="flex-1 flex flex-col justify-center py-4">
+              <div className="mb-8">
+                <h2 className="text-[28px] font-black font-display tracking-tight text-slate-900 mb-2">Welcome Back :)</h2>
+                <p className="text-[14px] text-slate-500 font-medium leading-relaxed">Choose your preferred login channel to continue.</p>
               </div>
 
               {otpError && (
-                <div className="bg-red-50 border border-red-100 text-red-500 text-[10px] font-bold uppercase tracking-wider p-3 rounded-lg mb-5 text-center">
+                <div className="mb-6 p-4 bg-red-50 text-red-600 text-[13px] rounded-xl font-medium border border-red-100 flex items-center gap-2">
+                  <AlertCircle size={18} />
                   {otpError}
                 </div>
               )}
 
               <div className="space-y-4">
+                {/* Google Button */}
                 <button 
-                  onClick={triggerGoogleAuth}
-                  className="w-full py-3.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs rounded-full flex items-center justify-center gap-2.5 cursor-pointer transition-colors outline-none shadow-sm"
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                  className="w-full py-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-[15px] rounded-2xl flex items-center justify-center gap-3 cursor-pointer transition-all shadow-sm outline-none"
                 >
-                  <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G" className="w-4 h-4" />
+                  <FcGoogle size={22} />
                   Continue with Google
                 </button>
 
+                {/* Mobile Button */}
                 <button 
-                  onClick={() => setStep("mobile-input")}
-                  className="w-full py-3.5 bg-[#4285F4] hover:bg-[#3367D6] text-white font-bold text-xs rounded-full flex items-center justify-center gap-2.5 cursor-pointer transition-colors outline-none shadow-md"
+                  onClick={() => {
+                    setOtpError("");
+                    setStep("mobile-input");
+                  }}
+                  disabled={loading}
+                  className="w-full py-4 bg-[#1877F2] hover:bg-[#166fe5] text-white font-bold text-[15px] rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-md outline-none"
                 >
-                  <Phone size={14} /> Continue with Mobile Number
-                </button>
-
-                <div className="relative flex items-center py-2">
-                  <div className="flex-grow border-t border-slate-200"></div>
-                  <span className="flex-shrink-0 mx-4 text-slate-400 text-[10px] font-medium uppercase tracking-wider">Hackathon Demo</span>
-                  <div className="flex-grow border-t border-slate-200"></div>
-                </div>
-
-                <button 
-                  onClick={handleDemoLogin}
-                  className="w-full py-3.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-600 font-bold text-xs rounded-full flex items-center justify-center gap-2.5 cursor-pointer transition-colors outline-none shadow-sm"
-                >
-                  <Sparkles size={14} /> Instant Demo Login
+                  <Phone size={18} />
+                  Continue with Mobile Number
                 </button>
               </div>
+
+              {/* Demo Login Option */}
+              <div className="relative my-8 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-100"></div>
+                </div>
+                <div className="relative bg-white px-4 text-[11px] font-bold text-slate-300 tracking-widest uppercase">
+                  Hackathon Demo
+                </div>
+              </div>
+
+              <button 
+                onClick={handleDemoLogin}
+                disabled={loading}
+                className="w-full py-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-100 font-bold text-[15px] rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-colors outline-none"
+              >
+                <Sparkles size={18} />
+                Instant Demo Login
+              </button>
             </motion.div>
           )}
 
@@ -509,32 +524,27 @@ export default function OnboardingPage() {
             </motion.div>
           )}
 
-          {/* STEP 4: OTP VERIFICATION VIEW */}
+          {/* STEP 4: OTP VERIFICATION */}
           {step === "otp-verify" && (
-            <motion.div {...transitionConfig} key="otp-verify" className="flex-1 flex flex-col">
-              <button 
-                onClick={() => setStep("mobile-input")} 
-                className="w-8 h-8 bg-white border border-slate-200 rounded-full flex items-center justify-center cursor-pointer mb-6 shadow-sm"
-              >
-                <ArrowLeft size={14} className="text-slate-500" />
-              </button>
-
+            <motion.div {...transitionConfig} key="otp-verify" className="flex-1 flex flex-col justify-center py-4">
               <div className="mb-8">
-                <h2 className="text-2xl font-black font-display tracking-tight text-slate-900 mb-2">Verify Mobile</h2>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                  Enter the 6-digit verification code sent to <span className="text-slate-700 font-bold">+91 {mobileNumber}</span>.
+                <h2 className="text-[28px] font-black font-display tracking-tight text-slate-900 mb-2">Verify OTP</h2>
+                <p className="text-[14px] text-slate-500 font-medium leading-relaxed">
+                  Sent to <span className="font-bold text-slate-800">+91 {mobileNumber}</span>
+                  <button onClick={() => setStep("mobile-input")} className="ml-2 text-[#4285F4] font-bold hover:underline">Edit</button>
                 </p>
               </div>
 
               {otpError && (
-                <div className="bg-red-50 border border-red-100 text-red-500 text-[10px] font-bold uppercase tracking-wider p-3 rounded-lg mb-5 text-center">
+                <div className="mb-6 p-4 bg-red-50 text-red-600 text-[13px] rounded-xl font-medium border border-red-100 flex items-center gap-2">
+                  <AlertCircle size={18} />
                   {otpError}
                 </div>
               )}
 
               <div className="space-y-6">
                 <div>
-                  <div className="flex gap-2 justify-center">
+                  <div className="flex gap-2 justify-between">
                     {otp.map((digit, i) => (
                       <input 
                         key={i}
@@ -544,7 +554,7 @@ export default function OnboardingPage() {
                         value={digit}
                         onChange={(e) => handleOtpChange(i, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                        className="w-10 h-12 bg-[#F8FAFC] border border-slate-200 focus:border-[#4285F4] focus:ring-4 focus:ring-[#4285F4]/10 rounded-xl text-center text-base font-black text-slate-800 focus:outline-none transition-all"
+                        className="w-12 h-14 sm:w-14 sm:h-16 bg-slate-50 border border-slate-200 focus:border-[#4285F4] focus:ring-4 focus:ring-[#4285F4]/10 rounded-xl text-center text-xl sm:text-2xl font-black text-slate-800 focus:outline-none transition-all"
                       />
                     ))}
                   </div>
@@ -552,11 +562,11 @@ export default function OnboardingPage() {
 
                 <div className="text-center">
                   {resendTimer > 0 ? (
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Resend OTP in {resendTimer}s</p>
+                    <p className="text-[11px] sm:text-[12px] text-slate-400 font-bold uppercase tracking-widest">Resend OTP in {resendTimer}s</p>
                   ) : (
                     <button 
                       onClick={handleResendOtp}
-                      className="text-[10px] text-[#4285F4] font-bold uppercase tracking-widest cursor-pointer hover:text-[#3367D6] bg-transparent border-0 outline-none"
+                      className="text-[11px] sm:text-[12px] text-[#4285F4] font-bold uppercase tracking-widest cursor-pointer hover:text-[#3367D6] bg-transparent border-0 outline-none"
                     >
                       Resend Code
                     </button>
@@ -566,11 +576,11 @@ export default function OnboardingPage() {
                 <button 
                   onClick={() => handleVerifyOtp()}
                   disabled={otp.some(digit => digit === "") || isVerifyingOtp}
-                  className="w-full py-3.5 bg-[#4285F4] hover:bg-[#3367D6] disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold text-xs rounded-full flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-md outline-none"
+                  className="w-full py-4 bg-[#4285F4] hover:bg-[#3367D6] disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold text-[15px] rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-md outline-none"
                 >
                   {isVerifyingOtp ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : "Verify & Continue"}
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : "Verify & Secure Login"}
                 </button>
               </div>
             </motion.div>
