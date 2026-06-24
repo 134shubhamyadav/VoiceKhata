@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -339,54 +340,68 @@ export default function OnboardingPage() {
           {step === "splash" && (
             <>
 
-              <motion.div {...transitionConfig} key="splash" className="flex-1 flex flex-col items-center justify-center text-center mt-20 relative z-10">
-                {/* Animated Ambient Background */}
-                <div className="absolute w-72 h-72 bg-[#4285F4]/10 rounded-full blur-[80px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-                <div className="absolute w-48 h-48 bg-indigo-500/10 rounded-full blur-[60px] top-1/3 right-4 pointer-events-none animate-pulse" style={{ animationDuration: '4s' }} />
+              {/* Full Screen Faded Background Image */}
+              <div className="absolute inset-0 z-0 overflow-hidden bg-white pointer-events-none">
+                 <Image 
+                    src="/splash-graphic.png" 
+                    alt="VoiceKhata Splash Background" 
+                    fill 
+                    priority
+                    className="object-cover object-top opacity-90"
+                 />
+                 <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent" />
+              </div>
 
-              <motion.div 
-                initial={{ scale: 0.8, opacity: 0 }} 
-                animate={{ scale: 1, opacity: 1 }} 
-                transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
-                className="relative mb-10"
-              >
-                {/* Pulsing ring behind logo */}
-                <div className="absolute inset-0 bg-[#4285F4]/20 rounded-[28px] blur-md animate-ping" style={{ animationDuration: '3s' }} />
+              <motion.div {...transitionConfig} key="splash" className="flex-1 flex flex-col justify-between w-full h-full relative z-10 px-6 py-12">
                 
-                {/* Premium Glassmorphic Logo Presentation */}
-                <div className="relative w-28 h-28 rounded-[28px] bg-white/70 backdrop-blur-md border border-white/60 flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.08)] overflow-hidden p-1 z-10">
-                  <img src="/logo.png" alt="VoiceKhata Logo" className="w-full h-full object-contain rounded-[24px] select-none" />
+                {/* Top Section: Logo in top-center */}
+                <div className="flex flex-col items-center mt-6 text-center">
+                  <motion.div 
+                    initial={{ scale: 0.8, opacity: 0 }} 
+                    animate={{ scale: 1, opacity: 1 }} 
+                    transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
+                    className="relative mb-6"
+                  >
+                    {/* Pulsing ring behind logo */}
+                    <div className="absolute inset-0 bg-[#4285F4]/30 rounded-[24px] blur-xl animate-ping" style={{ animationDuration: '3s' }} />
+                    
+                    {/* Premium Glassmorphic Logo Presentation */}
+                    <div className="relative w-24 h-24 rounded-[24px] bg-white/70 backdrop-blur-md border border-white/80 flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] overflow-hidden p-2 z-10">
+                      <img src="/logo.png" alt="VoiceKhata Logo" className="w-full h-full object-contain rounded-[18px] select-none" />
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    initial={{ y: -20, opacity: 0 }} 
+                    animate={{ y: 0, opacity: 1 }} 
+                    transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.2 }}
+                    className="space-y-2 max-w-sm relative z-10"
+                  >
+                    <h1 className="text-[36px] font-black leading-tight tracking-tight font-display text-slate-900 drop-shadow-md">
+                      VoiceKhata
+                    </h1>
+                    <p className="text-slate-800 text-[15px] leading-relaxed max-w-[240px] mx-auto font-bold drop-shadow-md">
+                      Bolke Rakho Hisaab.
+                    </p>
+                  </motion.div>
                 </div>
-              </motion.div>
 
-              <motion.div 
-                initial={{ y: 20, opacity: 0 }} 
-                animate={{ y: 0, opacity: 1 }} 
-                transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.2 }}
-                className="space-y-4 max-w-sm mb-10 relative z-10"
-              >
-                {/* Gradient Header */}
-                <h1 className="text-3xl font-black leading-tight tracking-tight font-display bg-gradient-to-r from-slate-900 via-[#1e293b] to-slate-700 bg-clip-text text-transparent">
-                  Welcome Back :)<br />
-                </h1>
-                <p className="text-slate-500 text-[13px] leading-relaxed max-w-[260px] mx-auto font-medium">
-                  To keep connected with us please login with your personal information.
-                </p>
-              </motion.div>
+                {/* Bottom Section: Button near the table */}
+                <div className="w-full mt-auto pb-6 relative flex justify-center">
+                  <motion.button 
+                    initial={{ y: 20, opacity: 0 }} 
+                    animate={{ y: 0, opacity: 1 }} 
+                    transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.3 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setStep("auth-selector")}
+                    className="group relative w-full max-w-[320px] py-4 bg-gradient-to-r from-[#4285F4] to-[#3367D6] hover:from-[#3367D6] hover:to-[#2857b8] text-white font-bold text-[16px] rounded-full flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 shadow-[0_8px_25px_0_rgba(66,133,244,0.5)] hover:shadow-[0_12px_30px_rgba(66,133,244,0.4)] hover:-translate-y-1 outline-none mx-auto z-10 border-[3px] border-[#1e3a8a]"
+                  >
+                    Get Started 
+                    <ChevronRight size={20} className="transition-transform duration-300 group-hover:translate-x-1 text-white" />
+                  </motion.button>
+                </div>
 
-              {/* Gradient Floating Button with micro-animation */}
-              <motion.button 
-                initial={{ y: 20, opacity: 0 }} 
-                animate={{ y: 0, opacity: 1 }} 
-                transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.3 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setStep("auth-selector")}
-                className="group relative w-full max-w-[280px] py-4 bg-gradient-to-r from-[#4285F4] to-[#3367D6] hover:from-[#3367D6] hover:to-[#2857b8] text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 shadow-[0_4px_14px_0_rgba(66,133,244,0.39)] hover:shadow-[0_6px_20px_rgba(66,133,244,0.23)] hover:-translate-y-0.5 outline-none focus:outline-none mx-auto z-10"
-              >
-                Get Started 
-                <ChevronRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
-              </motion.button>
-            </motion.div>
+              </motion.div>
             </>
           )}
 
