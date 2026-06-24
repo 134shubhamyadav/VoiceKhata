@@ -141,8 +141,30 @@ export default function OnboardingPage() {
     setOtpError("");
     setLoadingVerify(true);
 
+    const DEMO_NUMBERS = ["9999999999", "8888888888", "1234567890", "1111111111", "0000000000"];
+
     try {
       if (typeof window === "undefined") return;
+
+      // Hackathon Demo Mode Bypass
+      if (DEMO_NUMBERS.includes(mobileNumber)) {
+        console.log("[Auth] Demo number detected, skipping SMS verification.");
+        window.confirmationResult = {
+          confirm: async (code) => {
+            return {
+              user: {
+                getIdToken: async () => `demo-${mobileNumber}`
+              }
+            };
+          }
+        };
+        setAuthMethod("mobile");
+        setResendTimer(30);
+        setOtp(["1", "2", "3", "4", "5", "6"]); // Pre-fill OTP for convenience
+        setStep("otp-verify");
+        setLoadingVerify(false);
+        return;
+      }
 
       console.log("[Auth] Setting up RecaptchaVerifier...");
       if (window.recaptchaVerifier) {
