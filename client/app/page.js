@@ -418,6 +418,9 @@ export default function OnboardingPage() {
                       className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 pl-16 pr-4 text-xs font-bold text-white placeholder:text-slate-655 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/5 transition-all"
                     />
                   </div>
+                  <p className="mt-3 text-[10px] text-indigo-400/80 font-medium leading-relaxed bg-indigo-500/10 p-2.5 rounded-lg border border-indigo-500/20">
+                    <strong className="text-indigo-300">Hackathon Judges:</strong> Use <strong className="text-white">9999999999</strong>, <strong className="text-white">8888888888</strong>, or <strong className="text-white">1234567890</strong> for instant demo access (bypasses Firebase SMS verification).
+                  </p>
                 </div>
 
                 <button 
