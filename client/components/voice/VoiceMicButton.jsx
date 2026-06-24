@@ -25,7 +25,7 @@ export default function VoiceMicButton({ onClick, isActive = false }) {
           ease: "easeInOut",
         }}
         onClick={onClick}
-        className="relative z-10 w-[62px] h-[62px] rounded-[18px] bg-slate-900 dark:bg-indigo-600 shadow-[0_4px_12px_rgba(79,70,229,0.15)] flex items-center justify-center cursor-pointer border border-white/5 select-none outline-none focus:outline-none focus:ring-0 active:bg-slate-800"
+        className="relative z-10 w-[62px] h-[62px] rounded-[18px] bg-[#4285F4] shadow-[0_4px_12px_rgba(79,70,229,0.15)] flex items-center justify-center cursor-pointer border border-white/5 select-none outline-none focus:outline-none focus:ring-0 active:bg-[#3367D6]"
       >
         {/* Soft elegant highlight reflection */}
         <div className="absolute inset-0.5 rounded-[16px] bg-white/5 pointer-events-none" />

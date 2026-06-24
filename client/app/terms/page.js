@@ -31,11 +31,11 @@ export default function TermsOfServicePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white pb-16 relative overflow-hidden transition-colors duration-200">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-slate-800 dark:text-white pb-16 relative overflow-hidden transition-colors duration-200">
       <FloatingBlobs />
       
       {/* Radial overlay */}
-      <div className="absolute w-72 h-72 bg-indigo-500/5 rounded-full blur-[80px] top-10 right-10 pointer-events-none" />
+      <div className="absolute w-72 h-72 bg-[#4285F4]/5 rounded-full blur-[80px] top-10 right-10 pointer-events-none" />
       <div className="absolute w-72 h-72 bg-slate-500/5 rounded-full blur-[80px] bottom-10 left-10 pointer-events-none" />
 
       <div className="relative z-10 px-6 pt-12 pb-4 max-w-[500px] mx-auto">
@@ -43,16 +43,16 @@ export default function TermsOfServicePage() {
         <div className="flex items-center justify-between mb-8">
           <button 
             onClick={() => router.push("/")} 
-            className="w-8 h-8 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center cursor-pointer outline-none focus:outline-none transition-all hover:bg-white/10"
+            className="w-8 h-8 bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-lg flex items-center justify-center cursor-pointer outline-none focus:outline-none transition-all hover:bg-slate-50 dark:hover:bg-white/10 shadow-sm dark:shadow-none"
           >
             <ArrowLeft size={15} className="text-slate-400" />
           </button>
-          <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">Legal Framework</span>
+          <span className="text-[10px] text-[#4285F4] font-bold uppercase tracking-wider">Legal Framework</span>
         </div>
 
         {/* Hero title */}
         <div className="mb-8">
-          <h1 className="text-2xl font-black text-white leading-tight font-display tracking-tight">
+          <h1 className="text-2xl font-black text-slate-800 dark:text-white leading-tight font-display tracking-tight">
             Terms of Service
           </h1>
           <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-1.5">Last Updated: May 2026</p>
@@ -66,13 +66,13 @@ export default function TermsOfServicePage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.08 }}
-              className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4.5"
+              className="bg-white dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-4.5 shadow-sm dark:shadow-none"
             >
               <div className="flex items-center gap-2.5 mb-2.5">
-                <div className="w-7 h-7 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400 flex-shrink-0">
+                <div className="w-7 h-7 bg-[#4285F4]/10 rounded-lg flex items-center justify-center text-[#4285F4] flex-shrink-0">
                   <Icon size={14} />
                 </div>
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">{title}</h3>
+                <h3 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">{title}</h3>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed font-semibold">{content}</p>
             </motion.div>
@@ -80,7 +80,7 @@ export default function TermsOfServicePage() {
         </div>
 
         {/* Bottom signoff */}
-        <div className="text-center bg-slate-950 border border-slate-900 rounded-2xl p-4">
+        <div className="text-center bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 shadow-sm dark:shadow-none">
           <p className="text-slate-500 text-[10px] leading-relaxed font-semibold">
             If you have any questions regarding these merchant terms, please email our security team at legal@voicekhata.in
           </p>

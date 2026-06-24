@@ -203,6 +203,7 @@ export default function UnifiedTransactionForm() {
   const [isVoiceEntry, setIsVoiceEntry] = useState(false);
   const [voiceRawText, setVoiceRawText] = useState("");
   const [confidence, setConfidence] = useState(94);
+  const [autoSaveTriggered, setAutoSaveTriggered] = useState(false);
 
   // Reusable Form States — declared BEFORE any useEffect that references them
   const [customerName, setCustomerName] = useState("");
@@ -456,6 +457,17 @@ export default function UnifiedTransactionForm() {
     }
   };
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get('autoSave') === 'true' && customerName && amount && !autoSaveTriggered) {
+        setAutoSaveTriggered(true);
+        handleSave({ preventDefault: () => {} });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customerName, amount, autoSaveTriggered]);
+
   const suggestions = transactionType === "cashbook_out" ? recentCashbookOut : transactionType === "cashbook_in" ? recentCashbookIn : recentCustomers;
 
   return (
@@ -466,7 +478,7 @@ export default function UnifiedTransactionForm() {
           <ArrowLeft size={16} className="text-slate-400" />
         </button>
         <div className="flex flex-col items-center">
-          <h1 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display">{t.titleText}</h1>
+          <h1 className="text-sm font-black text-slate-800 dark:text-slate-800 dark:text-white uppercase tracking-wider font-display">{t.titleText}</h1>
           <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5">{t.titleSub}</p>
         </div>
         <div className="w-9" />
@@ -477,7 +489,7 @@ export default function UnifiedTransactionForm() {
           <div className="space-y-3 mb-4">
             <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/30 rounded-xl p-4.5 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center text-white">
+                <div className="w-8 h-8 rounded-lg bg-[#4285F4] flex items-center justify-center text-white">
                   <Mic size={15} />
                 </div>
                 <div>
@@ -485,7 +497,7 @@ export default function UnifiedTransactionForm() {
                   <p className="text-[9px] text-slate-400 mt-0.5">{t.confidence}: {confidence}%</p>
                 </div>
               </div>
-              <button onClick={() => router.push("/voice")} className="px-3 py-1.5 bg-indigo-650 hover:bg-indigo-750 text-white font-bold text-[9px] rounded-lg uppercase tracking-wider transition-colors">
+              <button onClick={() => router.push("/voice")} className="px-3 py-1.5 bg-indigo-650 hover:bg-[#3367D6] text-slate-800 dark:text-white font-bold text-[9px] rounded-lg uppercase tracking-wider transition-colors">
                 {t.reRecord}
               </button>
             </div>
@@ -527,7 +539,7 @@ export default function UnifiedTransactionForm() {
                 if (!isCashbook) setShowDropdown(true);
               }}
               placeholder={isCashbook ? t.categoryPlaceholder : t.customerPlaceholder}
-              className="w-full bg-slate-50/50 focus:bg-white dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800 rounded-lg py-2.5 pl-10 pr-10 text-xs font-semibold text-slate-800 dark:text-white placeholder:text-slate-350 focus:outline-none focus:border-indigo-500 transition-all relative z-0"
+              className="w-full bg-slate-50/50 focus:bg-white dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 rounded-lg py-2.5 pl-10 pr-10 text-xs font-semibold text-slate-800 dark:text-white placeholder:text-slate-350 focus:outline-none focus:border-[#4285F4] transition-all relative z-0"
             />
             {!isCashbook && (
               <button
@@ -564,11 +576,11 @@ export default function UnifiedTransactionForm() {
                     onClick={() => {
                       setShowDropdown(false);
                     }}
-                    className="w-full text-left px-4 py-2.5 text-xs font-semibold text-indigo-650 dark:text-indigo-400 hover:bg-indigo-50/40 dark:hover:bg-indigo-950/20 transition-colors border-b border-slate-55/20 dark:border-slate-855/20 last:border-0 cursor-pointer outline-none"
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold text-indigo-650 dark:text-[#4285F4] hover:bg-indigo-50/40 dark:hover:bg-indigo-950/20 transition-colors border-b border-slate-55/20 dark:border-slate-855/20 last:border-0 cursor-pointer outline-none"
                   >
                     <div className="flex items-center justify-between">
                       <span>New Customer: "{customerName.trim()}"</span>
-                      <span className="text-[9px] uppercase tracking-wider font-bold text-indigo-500">(Will be created)</span>
+                      <span className="text-[9px] uppercase tracking-wider font-bold text-[#4285F4]">(Will be created)</span>
                     </div>
                   </button>
                 )}
@@ -586,7 +598,7 @@ export default function UnifiedTransactionForm() {
                 key={c}
                 type="button"
                 onClick={() => selectCustomer(c)}
-                className="px-2.5 py-1 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 text-[9px] font-bold text-slate-550 dark:text-slate-400 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-850 outline-none focus:outline-none"
+                className="px-2.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-[9px] font-bold text-slate-550 dark:text-slate-400 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-850 outline-none focus:outline-none"
               >
                 {c}
               </button>
@@ -604,7 +616,7 @@ export default function UnifiedTransactionForm() {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder={t.amountPlaceholder}
-              className="w-full bg-slate-50/50 focus:bg-white dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800 rounded-lg py-2.5 pl-9 pr-4 text-xs font-bold text-slate-800 dark:text-white placeholder:text-slate-350 focus:outline-none focus:border-indigo-500 transition-all"
+              className="w-full bg-slate-50/50 focus:bg-white dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 rounded-lg py-2.5 pl-9 pr-4 text-xs font-bold text-slate-800 dark:text-white placeholder:text-slate-350 focus:outline-none focus:border-[#4285F4] transition-all"
             />
           </div>
 
@@ -616,7 +628,7 @@ export default function UnifiedTransactionForm() {
                 key={amt}
                 type="button"
                 onClick={() => selectAmount(amt)}
-                className="px-2.5 py-1 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 text-[9px] font-bold text-slate-550 dark:text-slate-400 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-850 outline-none focus:outline-none"
+                className="px-2.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-[9px] font-bold text-slate-550 dark:text-slate-400 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-850 outline-none focus:outline-none"
               >
                 ₹{amt.toLocaleString()}
               </button>
@@ -641,13 +653,13 @@ export default function UnifiedTransactionForm() {
                 className={`py-2.5 rounded-lg text-center text-[10px] font-bold uppercase tracking-wider border transition-all cursor-pointer outline-none focus:outline-none ${
                   transactionType === type.id
                     ? type.id === "credit"
-                      ? "bg-indigo-600 border-indigo-650 text-white shadow-sm"
+                      ? "bg-[#4285F4] border-indigo-650 text-white shadow-sm"
                       : type.id === "payment"
                       ? "bg-emerald-600 border-emerald-650 text-white shadow-sm"
                       : type.id === "cashbook_out"
                       ? "bg-rose-600 border-rose-650 text-white shadow-sm"
                       : "bg-teal-600 border-teal-650 text-white shadow-sm"
-                    : "bg-slate-50 dark:bg-slate-950 text-slate-400 dark:text-slate-500 border-slate-100 dark:border-slate-800"
+                    : "bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 border-slate-100 dark:border-slate-800"
                 }`}
               >
                 {type.label}
@@ -680,7 +692,7 @@ export default function UnifiedTransactionForm() {
                 className="absolute inset-0 w-full opacity-0 cursor-pointer z-20"
               />
               {/* Styled background box */}
-              <div className="w-full h-full bg-slate-50/50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800 rounded-lg" />
+              <div className="w-full h-full bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 rounded-lg" />
             </div>
 
             {/* Smart Due Date suggestions */}
@@ -697,7 +709,7 @@ export default function UnifiedTransactionForm() {
                     key={d.days}
                     type="button"
                     onClick={() => selectDueDate(d.days)}
-                    className="px-2.5 py-1 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 text-[9px] font-bold text-slate-550 dark:text-slate-400 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-850 outline-none focus:outline-none"
+                    className="px-2.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-[9px] font-bold text-slate-550 dark:text-slate-400 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-850 outline-none focus:outline-none"
                   >
                     {d.label}
                   </button>
@@ -717,7 +729,7 @@ export default function UnifiedTransactionForm() {
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder={t.notesPlaceholder}
-              className="w-full bg-slate-50/50 focus:bg-white dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-xs font-semibold text-slate-800 dark:text-white placeholder:text-slate-350 focus:outline-none focus:border-indigo-500 transition-all"
+              className="w-full bg-slate-50/50 focus:bg-white dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-xs font-semibold text-slate-800 dark:text-white placeholder:text-slate-350 focus:outline-none focus:border-[#4285F4] transition-all"
             />
           </div>
         </div>
@@ -729,7 +741,7 @@ export default function UnifiedTransactionForm() {
         <button
           type="submit"
           disabled={confirmed}
-          className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none transition-colors mt-6"
+          className="w-full py-3.5 bg-[#4285F4] hover:bg-[#3367D6] text-slate-800 dark:text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none transition-colors mt-6"
         >
           {confirmed ? (
             <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full" />

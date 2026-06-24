@@ -62,14 +62,14 @@ export default function BottomNavigation() {
                 size={18}
                 className={`relative z-10 mb-1 transition-all duration-200 ${
                   isActive 
-                    ? "text-indigo-600 dark:text-indigo-400 scale-102" 
+                    ? "text-[#4285F4] dark:text-[#4285F4] scale-102" 
                     : "text-slate-400 dark:text-slate-500 hover:text-slate-500"
                 }`}
               />
               
               <span
                 className={`relative z-10 text-[9px] font-bold tracking-tight transition-colors ${
-                  isActive ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400 dark:text-slate-500"
+                  isActive ? "text-[#4285F4] dark:text-[#4285F4]" : "text-slate-400 dark:text-slate-500"
                 }`}
               >
                 {tab.label}

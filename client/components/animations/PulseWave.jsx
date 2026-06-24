@@ -7,7 +7,7 @@ export default function PulseWave() {
       {[1, 2].map((index) => (
         <motion.div
           key={index}
-          className="absolute rounded-[18px] border border-indigo-500/5 dark:border-indigo-400/5"
+          className="absolute rounded-[18px] border border-[#4285F4]/5 dark:border-[#4285F4]/5"
           style={{ width: "62px", height: "62px" }}
           initial={{ scale: 1, opacity: 0.4 }}
           animate={{

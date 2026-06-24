@@ -17,7 +17,7 @@ function RiskMeter({ level }) {
         <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Risk Level</span>
         <RiskBadge level={level} />
       </div>
-      <div className="h-2 bg-slate-105 dark:bg-slate-950 rounded-full overflow-hidden">
+      <div className="h-2 bg-slate-105 dark:bg-slate-900 rounded-full overflow-hidden">
         <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ delay: 0.3, duration: 0.8 }}
           className={`h-full bg-gradient-to-r ${color} rounded-full`} />
       </div>
@@ -363,7 +363,7 @@ export default function CustomerDetail() {
           name: c.name,
           phone: c.phone || 'No phone number',
           avatar: initials,
-          color: "from-indigo-500 to-indigo-650",
+          color: "from-[#4285F4] to-indigo-650",
           pending: pendingBal,
           totalPaid: paidBal,
           totalCredit: totalCreditBal,
@@ -388,7 +388,7 @@ export default function CustomerDetail() {
     return (
       <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] pb-28 relative">
         {/* Skeleton Header */}
-        <div className="bg-slate-950 dark:bg-slate-900 border-b border-slate-900 px-5 pt-12 pb-7">
+        <div className="bg-white dark:bg-slate-900 border-b border-slate-900 px-5 pt-12 pb-7">
           <div className="flex items-center justify-between mb-6">
             <button onClick={() => router.back()} className="w-8 h-8 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center cursor-pointer">
               <ArrowLeft size={15} className="text-slate-400" />
@@ -420,8 +420,8 @@ export default function CustomerDetail() {
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] pb-28 overflow-hidden relative transition-colors duration-200">
       
       {/* Sleek Flat Obsidian Panel Header */}
-      <div className="bg-slate-950 dark:bg-slate-900 border-b border-slate-900 dark:border-slate-800/80 px-5 pt-12 pb-7 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-900 dark:border-slate-800/80 px-5 pt-12 pb-7 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#4285F4]/5 rounded-full blur-2xl pointer-events-none" />
         
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-6">
@@ -439,7 +439,7 @@ export default function CustomerDetail() {
             <div className="flex items-center gap-3.5">
               <Avatar initials={customer.avatar} color={customer.color} size="lg" />
               <div>
-                <h1 className="text-base font-black text-white leading-tight font-display">{customer.name}</h1>
+                <h1 className="text-base font-black text-slate-800 dark:text-white leading-tight font-display">{customer.name}</h1>
                 <p className="text-slate-400 text-xs mt-0.5">{customer.phone}</p>
                 <div className="mt-1.5">
                   <RiskBadge level={customer.risk} />
@@ -468,7 +468,7 @@ export default function CustomerDetail() {
           {[
             { label: "Pending", val: `₹${customer.pending.toLocaleString()}`, color: "text-orange-500", bg: "bg-orange-500/5 border-orange-500/10" },
             { label: "Paid", val: `₹${customer.totalPaid.toLocaleString()}`, color: "text-emerald-500", bg: "bg-emerald-500/5 border-emerald-500/10" },
-            { label: "Total Credit", val: `₹${customer.totalCredit.toLocaleString()}`, color: "text-indigo-500", bg: "bg-indigo-500/5 border-indigo-500/10" },
+            { label: "Total Credit", val: `₹${customer.totalCredit.toLocaleString()}`, color: "text-[#4285F4]", bg: "bg-[#4285F4]/5 border-[#4285F4]/10" },
           ].map(({ label, val, color, bg }) => (
             <div key={label} className={`rounded-xl p-3 border text-center ${bg}`}>
               <p className={`text-sm font-extrabold font-display leading-tight ${color}`}>{val}</p>
@@ -497,7 +497,7 @@ export default function CustomerDetail() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="grid grid-cols-3 gap-2 mb-3.5">
           <button 
             onClick={handleWhatsAppReminder} 
-            className="py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] rounded-xl flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none transition-colors"
+            className="py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white font-bold text-[10px] rounded-xl flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none transition-colors"
           >
             <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-3.5 h-3.5 object-contain" /> Remind
           </button>
@@ -509,7 +509,7 @@ export default function CustomerDetail() {
               setEntryType("payment");
               setIsRecordingPayment(true);
             }} 
-            className="py-3 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-[10px] rounded-xl flex items-center justify-center gap-1 cursor-pointer outline-none focus:outline-none transition-colors"
+            className="py-3 bg-[#4285F4] hover:bg-[#3367D6] text-slate-800 dark:text-white font-bold text-[10px] rounded-xl flex items-center justify-center gap-1 cursor-pointer outline-none focus:outline-none transition-colors"
           >
             <IndianRupee size={12} /> Got Payment
           </button>
@@ -521,7 +521,7 @@ export default function CustomerDetail() {
               setEntryType("credit");
               setIsRecordingPayment(true);
             }} 
-            className="py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[10px] rounded-xl flex items-center justify-center gap-1 cursor-pointer outline-none focus:outline-none transition-colors"
+            className="py-3 bg-orange-500 hover:bg-orange-600 text-slate-800 dark:text-white font-bold text-[10px] rounded-xl flex items-center justify-center gap-1 cursor-pointer outline-none focus:outline-none transition-colors"
           >
             <TrendingDown size={12} /> Give Credit
           </button>
@@ -537,7 +537,7 @@ export default function CustomerDetail() {
           <button 
             onClick={handleSimulateUPI} 
             disabled={simulatingUPI}
-            className={`py-2.5 bg-slate-900 border border-slate-800 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none ${simulatingUPI ? "opacity-60" : ""}`}
+            className={`py-2.5 bg-slate-900 border border-slate-800 text-slate-800 dark:text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none ${simulatingUPI ? "opacity-60" : ""}`}
           >
             {simulatingUPI ? (
               <span className="flex items-center gap-1">
@@ -554,10 +554,10 @@ export default function CustomerDetail() {
           <motion.div 
             initial={{ opacity: 0, y: -6 }} 
             animate={{ opacity: 1, y: 0 }} 
-            className="mb-5 bg-indigo-500/5 border border-indigo-500/10 rounded-xl p-3 flex items-center gap-2.5"
+            className="mb-5 bg-[#4285F4]/5 border border-[#4285F4]/10 rounded-xl p-3 flex items-center gap-2.5"
           >
-            <span className="w-3.5 h-3.5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-            <p className="text-[10px] text-indigo-700 dark:text-indigo-400 font-bold uppercase tracking-wider">Simulating Paytm webhook auto-update for ₹500...</p>
+            <span className="w-3.5 h-3.5 border-2 border-[#4285F4] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+            <p className="text-[10px] text-[#3367D6] dark:text-[#4285F4] font-bold uppercase tracking-wider">Simulating Paytm webhook auto-update for ₹500...</p>
           </motion.div>
         )}
 
@@ -585,7 +585,7 @@ export default function CustomerDetail() {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] text-slate-400 dark:text-slate-550 font-medium">{r.sentAt}</span>
                     <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
-                      r.status === "delivered" ? "bg-indigo-50/50 text-indigo-600 border-indigo-100 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/30" :
+                      r.status === "delivered" ? "bg-indigo-50/50 text-[#4285F4] border-indigo-100 dark:bg-indigo-950/20 dark:text-[#4285F4] dark:border-indigo-900/30" :
                       r.status === "read" ? "bg-emerald-50/50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30" : 
                       "bg-slate-50 text-slate-550 border-slate-200"
                     }`}>{r.status}</span>
@@ -617,7 +617,7 @@ export default function CustomerDetail() {
               className="fixed bottom-0 left-1/2 w-full max-w-[430px] bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-60 shadow-2xl border-t border-slate-100 dark:border-slate-800/80 max-h-[85vh] overflow-y-auto"
             >
               <div className="w-12 h-1 bg-slate-250 dark:bg-slate-800 rounded-full mx-auto mb-5" />
-              <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">Edit Customer Details</h3>
+              <h3 className="text-sm font-black text-slate-800 dark:text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">Edit Customer Details</h3>
               <p className="text-xs text-slate-400 dark:text-slate-500 mb-5">Update merchant account metadata parameters.</p>
               
               {editError && (
@@ -634,7 +634,7 @@ export default function CustomerDetail() {
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     placeholder="Enter full name"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-[#4285F4] transition-colors"
                   />
                 </div>
                 <div>
@@ -644,7 +644,7 @@ export default function CustomerDetail() {
                     value={editPhone}
                     onChange={(e) => setEditPhone(e.target.value)}
                     placeholder="Enter 10-digit mobile number"
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-855 dark:text-white text-xs font-semibold outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-855 dark:text-white text-xs font-semibold outline-none focus:border-[#4285F4] transition-colors"
                   />
                 </div>
               </div>
@@ -659,7 +659,7 @@ export default function CustomerDetail() {
                 <button
                   onClick={handleSaveEdit}
                   disabled={savingEdit}
-                  className="flex-1 py-2.5 bg-indigo-650 hover:bg-indigo-750 text-white font-bold text-xs rounded-lg cursor-pointer flex items-center justify-center outline-none focus:outline-none transition-colors"
+                  className="flex-1 py-2.5 bg-indigo-650 hover:bg-[#3367D6] text-slate-800 dark:text-white font-bold text-xs rounded-lg cursor-pointer flex items-center justify-center outline-none focus:outline-none transition-colors"
                 >
                   {savingEdit ? "Saving..." : "Save Changes ✓"}
                 </button>
@@ -688,7 +688,7 @@ export default function CustomerDetail() {
               className="fixed bottom-0 left-1/2 w-full max-w-[430px] bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-60 shadow-2xl border-t border-slate-100 dark:border-slate-800/80 max-h-[85vh] overflow-y-auto"
             >
               <div className="w-12 h-1 bg-slate-250 dark:bg-slate-800 rounded-full mx-auto mb-5" />
-              <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">
+              <h3 className="text-sm font-black text-slate-800 dark:text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">
                 {entryType === 'payment' ? 'Record Cash Payment' : 'Give Credit (Udhaar)'}
               </h3>
               <p className="text-xs text-slate-400 dark:text-slate-500 mb-5">
@@ -708,7 +708,7 @@ export default function CustomerDetail() {
                     type="text"
                     value={customer.name}
                     disabled
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-lg text-slate-400 text-xs font-semibold outline-none cursor-not-allowed"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg text-slate-400 text-xs font-semibold outline-none cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -720,7 +720,7 @@ export default function CustomerDetail() {
                       value={paymentAmount}
                       onChange={(e) => setPaymentAmount(e.target.value)}
                       placeholder="500"
-                      className="w-full pl-8 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-indigo-500 transition-all"
+                      className="w-full pl-8 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-[#4285F4] transition-all"
                     />
                   </div>
                 </div>
@@ -731,7 +731,7 @@ export default function CustomerDetail() {
                     value={paymentNotes}
                     onChange={(e) => setPaymentNotes(e.target.value)}
                     placeholder={`${customer.name} ne 500 cash diye`}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-indigo-500 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-[#4285F4] transition-all"
                   />
                 </div>
               </div>
@@ -746,8 +746,8 @@ export default function CustomerDetail() {
                 <button
                   onClick={handleSavePayment}
                   disabled={savingPayment}
-                  className={`flex-1 py-2.5 text-white font-bold text-xs rounded-lg cursor-pointer flex items-center justify-center outline-none focus:outline-none transition-colors ${
-                    entryType === 'payment' ? 'bg-indigo-600 hover:bg-indigo-750' : 'bg-orange-500 hover:bg-orange-600'
+                  className={`flex-1 py-2.5 text-slate-800 dark:text-white font-bold text-xs rounded-lg cursor-pointer flex items-center justify-center outline-none focus:outline-none transition-colors ${
+                    entryType === 'payment' ? 'bg-[#4285F4] hover:bg-[#3367D6]' : 'bg-orange-500 hover:bg-orange-600'
                   }`}
                 >
                   {savingPayment ? "Saving..." : entryType === 'payment' ? "Save Payment ✓" : "Save Credit ✓"}
@@ -777,7 +777,7 @@ export default function CustomerDetail() {
               className="fixed bottom-0 left-1/2 w-full max-w-[430px] bg-white dark:bg-slate-900 rounded-t-[24px] p-5 pb-16 z-50 shadow-2xl border-t border-slate-100 dark:border-slate-800/80 max-h-[85vh] overflow-y-auto"
             >
               <div className="w-12 h-1 bg-slate-250 dark:bg-slate-800 rounded-full mx-auto mb-5" />
-              <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">Verify Reminder Message</h3>
+              <h3 className="text-sm font-black text-slate-800 dark:text-slate-800 dark:text-white uppercase tracking-wider font-display mb-0.5">Verify Reminder Message</h3>
               <p className="text-xs text-slate-450 dark:text-slate-500 mb-5">Review, select tone and verify the message before sending on WhatsApp.</p>
 
               <div className="space-y-4 mb-6">
@@ -790,7 +790,7 @@ export default function CustomerDetail() {
                         onClick={() => handleToneChange(tone)}
                         className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border cursor-pointer capitalize outline-none focus:outline-none ${
                           reminderTone === tone
-                            ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                            ? "bg-[#4285F4] text-white border-[#4285F4] shadow-sm"
                             : "bg-slate-50 dark:bg-slate-955 text-slate-500 dark:text-slate-400 border-slate-200/50 dark:border-slate-800"
                         }`}
                       >
@@ -806,7 +806,7 @@ export default function CustomerDetail() {
                     rows={6}
                     value={reminderMsg}
                     onChange={(e) => setReminderMsg(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-indigo-500 transition-colors resize-none leading-relaxed font-sans"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-[#4285F4] transition-colors resize-none leading-relaxed font-sans"
                   />
                 </div>
               </div>
@@ -820,7 +820,7 @@ export default function CustomerDetail() {
                 </button>
                 <button
                   onClick={handleSendReminder}
-                  className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-lg cursor-pointer flex items-center justify-center gap-1.5 outline-none transition-colors border-0"
+                  className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white font-bold text-xs rounded-lg cursor-pointer flex items-center justify-center gap-1.5 outline-none transition-colors border-0"
                 >
                   <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-3.5 h-3.5 object-contain" /> Confirm & Send
                 </button>

@@ -15,7 +15,7 @@ export default function FloatingGlow() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="w-16 h-16 rounded-full bg-indigo-500 blur-md absolute opacity-5"
+        className="w-16 h-16 rounded-full bg-[#4285F4] blur-md absolute opacity-5"
       />
     </div>
   );

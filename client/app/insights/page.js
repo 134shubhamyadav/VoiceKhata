@@ -192,7 +192,7 @@ export default function InsightsPage() {
   const lowPct = totalCustCount > 0 ? Math.round((lowRiskCount / totalCustCount) * 100) : 50;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-28 relative text-slate-800 dark:text-white transition-colors duration-200">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] pb-28 relative text-slate-800 dark:text-white transition-colors duration-200">
       <FloatingBlobs />
       <div className="relative z-10 px-4 pt-12 pb-4">
         <h1 className="text-2xl font-black text-slate-800 dark:text-white mb-1">Insights</h1>
@@ -200,7 +200,7 @@ export default function InsightsPage() {
 
         {totalCustCount === 0 ? (
           <div className="text-center py-16 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm mb-5">
-            <BarChart2 size={36} className="mx-auto mb-3 opacity-30 text-indigo-500 dark:text-indigo-400" />
+            <BarChart2 size={36} className="mx-auto mb-3 opacity-30 text-[#4285F4] dark:text-[#4285F4]" />
             <p className="text-sm font-bold text-slate-800 dark:text-white">Waiting for Transaction Data</p>
             <p className="text-xs text-slate-450 dark:text-slate-500 mt-2.5 max-w-[280px] mx-auto leading-relaxed font-semibold">
               Once you add customers and record credit or payments, AI-powered risk scoring, recovery rates, and trend analysis will dynamically populate here.

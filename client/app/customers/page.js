@@ -76,7 +76,7 @@ export default function CustomersPage() {
         if (response.success && response.data && response.data.items) {
           const mapped = response.data.items.map((c, i) => {
             const initials = c.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-            const avatars = ["from-indigo-500 to-indigo-650", "from-slate-700 to-slate-850", "from-orange-500 to-orange-600", "from-emerald-500 to-emerald-600", "from-pink-500 to-pink-600"];
+            const avatars = ["from-[#4285F4] to-indigo-650", "from-slate-700 to-slate-850", "from-orange-500 to-orange-600", "from-emerald-500 to-emerald-600", "from-pink-500 to-pink-600"];
             
             return {
               id: c._id,
@@ -135,13 +135,13 @@ export default function CustomersPage() {
       <div className="relative z-10 px-5 pt-12 pb-4">
         <div className="flex items-center justify-between mb-4.5">
           <div>
-            <h1 className="text-xl font-black text-slate-800 dark:text-white tracking-tight font-display">Customers</h1>
+            <h1 className="text-xl font-black text-slate-800 dark:text-slate-800 dark:text-white tracking-tight font-display">Customers</h1>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5">{customers.length} customers • ₹{totalPending.toLocaleString()} pending</p>
           </div>
           <motion.button 
             whileTap={{ scale: 0.93 }}
             onClick={() => router.push("/confirm?manual=true")}
-            className="w-9 h-9 bg-slate-900 dark:bg-indigo-650 rounded-xl flex items-center justify-center cursor-pointer shadow-sm border border-white/5 outline-none focus:outline-none"
+            className="w-9 h-9 bg-[#4285F4] hover:bg-[#3367D6] rounded-xl flex items-center justify-center cursor-pointer shadow-sm border border-white/5 outline-none focus:outline-none"
           >
             <Plus size={16} className="text-white" />
           </motion.button>
@@ -154,7 +154,7 @@ export default function CustomersPage() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search business accounts..."
-            className="w-full bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 rounded-xl py-3 pl-10 pr-4 text-xs font-semibold text-slate-800 dark:text-white placeholder:text-slate-350 dark:placeholder:text-slate-655 focus:outline-none focus:border-indigo-500/70 focus:ring-2 focus:ring-indigo-500/5 transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]"
+            className="w-full bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 rounded-xl py-3 pl-10 pr-4 text-xs font-semibold text-slate-800 dark:text-white placeholder:text-slate-350 dark:placeholder:text-slate-655 focus:outline-none focus:border-[#4285F4]/70 focus:ring-2 focus:ring-[#4285F4]/5 transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]"
           />
         </div>
 
@@ -166,7 +166,7 @@ export default function CustomersPage() {
               onClick={() => setFilter(val)}
               className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer border outline-none focus:outline-none ${
                 filter === val 
-                  ? "bg-slate-900 dark:bg-indigo-600 text-white border-slate-900 dark:border-indigo-600 shadow-sm" 
+                  ? "bg-[#4285F4] text-white border-[#4285F4] shadow-sm" 
                   : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-100 dark:border-slate-850"
               }`}
             >

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 // Premium Button Component
 export function Button({ children, variant = "primary", className = "", onClick, disabled, size = "md" }) {
   const variants = {
-    primary: "bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/10 active:shadow-none border border-indigo-700/20 dark:bg-indigo-500 dark:hover:bg-indigo-600",
+    primary: "bg-[#4285F4] hover:bg-[#3367D6] text-white shadow-sm shadow-[#4285F4]/10 active:shadow-none border border-[#3367D6]/20 dark:bg-[#4285F4] dark:hover:bg-[#4285F4]",
     secondary: "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700/80",
     ghost: "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50",
     danger: "bg-red-500 hover:bg-red-600 text-white shadow-sm shadow-red-500/10 border border-red-600/20",
@@ -48,11 +48,11 @@ export function Card({ children, className = "", onClick, glass = false }) {
 // Stats Card Redesign
 export function StatsCard({ label, value, sub, icon, color = "blue", trend }) {
   const colors = {
-    blue: "text-indigo-600 bg-indigo-50 border-indigo-100/50 dark:text-indigo-400 dark:bg-indigo-950/20 dark:border-indigo-900/30",
+    blue: "text-[#4285F4] bg-indigo-50 border-indigo-100/50 dark:text-[#4285F4] dark:bg-indigo-950/20 dark:border-indigo-900/30",
     orange: "text-orange-600 bg-orange-50 border-orange-100/50 dark:text-orange-400 dark:bg-orange-950/20 dark:border-orange-900/30",
     green: "text-emerald-600 bg-emerald-50 border-emerald-100/50 dark:text-emerald-400 dark:bg-emerald-950/20 dark:border-emerald-900/30",
     red: "text-red-600 bg-red-50 border-red-100/50 dark:text-red-400 dark:bg-red-950/20 dark:border-red-900/30",
-    violet: "text-indigo-600 bg-indigo-50 border-indigo-100/50 dark:text-indigo-400 dark:bg-indigo-950/20 dark:border-indigo-900/30",
+    violet: "text-[#4285F4] bg-indigo-50 border-indigo-100/50 dark:text-[#4285F4] dark:bg-indigo-950/20 dark:border-indigo-900/30",
   };
   return (
     <Card className="p-4.5">
@@ -70,7 +70,7 @@ export function StatsCard({ label, value, sub, icon, color = "blue", trend }) {
           </span>
         )}
       </div>
-      <div className="text-xl font-bold text-slate-800 dark:text-white font-display mt-3.5 tracking-tight">{value}</div>
+      <div className="text-xl font-bold text-slate-800 dark:text-slate-800 dark:text-white font-display mt-3.5 tracking-tight">{value}</div>
       <div className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1">{label}</div>
       {sub && <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{sub}</div>}
     </Card>
@@ -92,14 +92,14 @@ export function RiskBadge({ level }) {
 }
 
 // Rounded-Square Avatar
-export function Avatar({ initials, color = "from-indigo-500 to-indigo-600", size = "md" }) {
+export function Avatar({ initials, color = "from-[#4285F4] to-[#4285F4]", size = "md" }) {
   const sizes = { 
     sm: "w-8 h-8 text-xs rounded-lg", 
     md: "w-10 h-10 text-sm rounded-xl", 
     lg: "w-12 h-12 text-base rounded-2xl" 
   };
   return (
-    <div className={`bg-gradient-to-br ${color} flex items-center justify-center font-bold text-white flex-shrink-0 select-none shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] ${sizes[size]}`}>
+    <div className={`bg-gradient-to-br ${color} flex items-center justify-center font-bold text-slate-800 dark:text-white flex-shrink-0 select-none shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] ${sizes[size]}`}>
       {initials}
     </div>
   );
@@ -113,7 +113,7 @@ export function SectionHeader({ title, action, actionLabel }) {
       {action && (
         <button 
           onClick={action} 
-          className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 cursor-pointer transition-colors"
+          className="text-xs font-semibold text-[#4285F4] dark:text-[#4285F4] hover:text-[#3367D6] cursor-pointer transition-colors"
         >
           {actionLabel || "See all"}
         </button>
@@ -138,7 +138,7 @@ export function PageHeader({ title, subtitle, back, action }) {
           </button>
         )}
         <div>
-          <h1 className="text-base font-black text-slate-800 dark:text-white tracking-tight">{title}</h1>
+          <h1 className="text-base font-black text-slate-800 dark:text-slate-800 dark:text-white tracking-tight">{title}</h1>
           {subtitle && <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{subtitle}</p>}
         </div>
       </div>
@@ -151,7 +151,7 @@ export function PageHeader({ title, subtitle, back, action }) {
 export function Loader() {
   return (
     <div className="flex items-center justify-center py-10">
-      <div className="w-6 h-6 border-2 border-indigo-100 border-t-indigo-600 rounded-full animate-spin dark:border-indigo-900/30 dark:border-t-indigo-400" />
+      <div className="w-6 h-6 border-2 border-indigo-100 border-t-[#4285F4] rounded-full animate-spin dark:border-indigo-900/30 dark:border-t-[#4285F4]" />
     </div>
   );
 }
@@ -161,7 +161,7 @@ export function Toggle({ enabled, onChange }) {
   return (
     <button
       onClick={() => onChange(!enabled)}
-      className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${enabled ? "bg-indigo-600" : "bg-slate-200 dark:bg-slate-800"}`}
+      className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${enabled ? "bg-[#4285F4]" : "bg-slate-200 dark:bg-slate-800"}`}
     >
       <motion.div
         animate={{ x: enabled ? 22 : 2 }}
@@ -184,7 +184,7 @@ export function Input({ label, placeholder, value, onChange, type = "text", icon
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`w-full bg-slate-50/50 focus:bg-white dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 rounded-xl py-3 text-sm text-slate-800 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600 shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)] focus:outline-none focus:border-indigo-500/70 focus:ring-2 focus:ring-indigo-500/5 transition-all ${icon ? "pl-11 pr-4.5" : "px-4.5"}`}
+          className={`w-full bg-slate-50/50 focus:bg-white dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 rounded-xl py-3 text-sm text-slate-800 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600 shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)] focus:outline-none focus:border-[#4285F4]/70 focus:ring-2 focus:ring-[#4285F4]/5 transition-all ${icon ? "pl-11 pr-4.5" : "px-4.5"}`}
         />
       </div>
     </div>
@@ -195,7 +195,7 @@ export function Input({ label, placeholder, value, onChange, type = "text", icon
 export function FloatingBlobs() {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      <div className="blob w-72 h-72 bg-indigo-500/10 -top-20 -right-20 dark:bg-indigo-500/5" />
+      <div className="blob w-72 h-72 bg-[#4285F4]/10 -top-20 -right-20 dark:bg-[#4285F4]/5" />
       <div className="blob w-56 h-56 bg-orange-500/10 bottom-20 -left-20 dark:bg-orange-500/5" />
     </div>
   );

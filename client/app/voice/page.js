@@ -209,7 +209,11 @@ export default function VoicePage() {
           } finally {
             clearInterval(prog);
             setProgress(100);
-            setState("done");
+            if (typeof window !== 'undefined' && localStorage.getItem('voicekhata_voice_confirm') === 'false') {
+              router.push('/confirm?autoSave=true');
+            } else {
+              setState("done");
+            }
           }
         }
       }, 40);
@@ -266,7 +270,11 @@ export default function VoicePage() {
         } finally {
           clearInterval(prog);
           setProgress(100);
-          setState("done");
+          if (typeof window !== 'undefined' && localStorage.getItem('voicekhata_voice_confirm') === 'false') {
+            router.push('/confirm?autoSave=true');
+          } else {
+            setState("done");
+          }
         }
       };
 
@@ -352,18 +360,18 @@ export default function VoicePage() {
   const confirm = () => router.push("/confirm");
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] flex flex-col overflow-hidden relative">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] flex flex-col overflow-hidden relative">
       {/* Precision ambient glow orbs */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#4285F4]/5 rounded-full blur-[80px] pointer-events-none" />
 
       {/* Modern thin header */}
       <div className="relative z-10 flex items-center justify-between px-5 pt-12 pb-6">
-        <button onClick={() => router.back()} className="w-9 h-9 rounded-xl border border-slate-800 flex items-center justify-center cursor-pointer hover:bg-slate-900/60">
+        <button onClick={() => router.back()} className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-transparent flex shadow-sm items-center justify-center cursor-pointer hover:bg-slate-900/60">
           <X size={16} className="text-slate-400" />
         </button>
         <div className="flex items-center gap-1.5 bg-indigo-950/30 border border-indigo-900/30 rounded-lg px-2.5 py-1">
-          <Zap size={10} className="text-indigo-400" />
-          <span className="text-[10px] text-indigo-400 font-extrabold uppercase tracking-widest font-display">Voice Ledger</span>
+          <Zap size={10} className="text-[#4285F4]" />
+          <span className="text-[10px] text-[#4285F4] font-extrabold uppercase tracking-widest font-display">Voice Ledger</span>
         </div>
         <div className="w-9" />
       </div>
@@ -379,7 +387,7 @@ export default function VoicePage() {
         {/* Mic action button */}
         <div className="relative mb-12">
           {state === "listening" && (
-            <div className="absolute -inset-4 rounded-full border border-indigo-500/10 animate-pulse pointer-events-none" />
+            <div className="absolute -inset-4 rounded-full border border-[#4285F4]/10 animate-pulse pointer-events-none" />
           )}
           
           <motion.button
@@ -389,10 +397,10 @@ export default function VoicePage() {
               state === "listening"
                 ? "bg-orange-500 border border-orange-600/30 shadow-lg shadow-orange-500/10"
                 : state === "processing"
-                ? "bg-slate-850 border border-slate-800"
+                ? "bg-slate-100 dark:bg-slate-850 border border-slate-200 dark:border-slate-800"
                 : state === "done"
                 ? "bg-emerald-500 border border-emerald-600/30 shadow-lg shadow-emerald-500/10"
-                : "bg-indigo-650 hover:bg-indigo-700 border border-indigo-550 shadow-lg shadow-indigo-600/10"
+                : "bg-indigo-650 hover:bg-[#3367D6] border border-indigo-550 shadow-lg shadow-[#4285F4]/10"
             }`}
           >
             {state === "processing" ? (
@@ -416,7 +424,7 @@ export default function VoicePage() {
           <motion.div key={state} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="text-center mb-8">
             {state === "idle" && (
               <>
-                <p className="text-white text-base font-black font-display tracking-tight mb-1">{t.tapToSpeak}</p>
+                <p className="text-slate-800 dark:text-white text-base font-black font-display tracking-tight mb-1">{t.tapToSpeak}</p>
                 <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">{t.subTap}</p>
               </>
             )}
@@ -431,10 +439,10 @@ export default function VoicePage() {
             )}
             {state === "processing" && (
               <>
-                <p className="text-white text-base font-black font-display tracking-tight mb-2">{t.analyzing}</p>
+                <p className="text-slate-800 dark:text-white text-base font-black font-display tracking-tight mb-2">{t.analyzing}</p>
                 <div className="w-40 h-1 bg-slate-800 rounded-full mx-auto overflow-hidden">
                   <motion.div 
-                    className="h-full bg-indigo-500 rounded-full"
+                    className="h-full bg-[#4285F4] rounded-full"
                     animate={{ width: `${progress}%` }} 
                     transition={{ ease: "linear" }} 
                   />
@@ -477,13 +485,13 @@ export default function VoicePage() {
           <motion.div 
             initial={{ opacity: 0, y: 12 }} 
             animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-sm bg-slate-900 border border-slate-800/80 rounded-xl p-4.5 mb-6"
+            className="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-sm rounded-xl p-4.5 mb-6"
           >
             <div className="flex items-center gap-1.5 mb-2">
-              <Zap size={11} className="text-indigo-400" />
-              <span className="text-[9px] text-indigo-400 font-extrabold uppercase tracking-widest font-display">{t.realtimeTranscript}</span>
+              <Zap size={11} className="text-[#4285F4]" />
+              <span className="text-[9px] text-[#4285F4] font-extrabold uppercase tracking-widest font-display">{t.realtimeTranscript}</span>
             </div>
-            <p className="text-slate-200 text-xs leading-relaxed font-semibold">"{transcript}"</p>
+            <p className="text-slate-700 dark:text-slate-200 text-xs leading-relaxed font-semibold">"{transcript}"</p>
           </motion.div>
         )}
 
@@ -492,13 +500,13 @@ export default function VoicePage() {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm space-y-3">
             <button 
               onClick={confirm} 
-              className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs rounded-xl shadow-sm cursor-pointer outline-none focus:outline-none transition-colors"
+              className="w-full py-3.5 bg-[#4285F4] hover:bg-[#3367D6] text-slate-800 dark:text-white font-bold text-xs rounded-xl shadow-sm cursor-pointer outline-none focus:outline-none transition-colors"
             >
               {t.saveDetails}
             </button>
             <button 
               onClick={startListening} 
-              className="w-full py-3 border border-slate-800 hover:bg-slate-900 text-slate-300 font-bold text-xs rounded-xl cursor-pointer outline-none focus:outline-none transition-colors"
+              className="w-full py-3 border border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-300 font-bold text-xs rounded-xl cursor-pointer outline-none focus:outline-none transition-colors"
             >
               {t.speakAgain}
             </button>
@@ -508,14 +516,14 @@ export default function VoicePage() {
           <div className="flex flex-col items-center gap-4 mt-2">
             
             {/* Simulation controls */}
-            <div className="flex items-center gap-3 bg-slate-950 border border-slate-900 rounded-xl px-3 py-1.5">
+            <div className="flex items-center gap-3 bg-white border border-slate-900 rounded-xl px-3 py-1.5">
               <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-widest">{t.demoSimulation}</span>
               <button
                 onClick={() => {
                   setUseSimulation(!useSimulation);
                   setErrorMsg("");
                 }}
-                className={`w-8 h-4 rounded-full p-0.5 transition-colors cursor-pointer flex items-center ${useSimulation ? "bg-indigo-650 justify-end" : "bg-slate-800 justify-start"}`}
+                className={`w-8 h-4 rounded-full p-0.5 transition-colors cursor-pointer flex items-center ${useSimulation ? "bg-indigo-650 justify-end" : "bg-slate-300 dark:bg-slate-800 justify-start"}`}
               >
                 <motion.div layout className="w-3 h-3 bg-white rounded-full shadow-sm" />
               </button>

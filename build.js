@@ -1,314 +1,9 @@
-"use client";
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { Shield, Sparkles, ChevronRight, ArrowLeft, Mail, Phone, Store, Check } from "lucide-react";
-import { signInWithPopup, GoogleAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-import { useAuth } from "@/context/AuthContext";
-import { apiClient } from "@/lib/apiClient";
-import HeroGraphic from "@/components/HeroGraphic";
+const fs = require('fs');
+const content = fs.readFileSync('client/app/page.js', 'utf8');
+const parts = content.split('// Loading gate showing premium loader');
+const prefix = parts[0];
 
-// Waveform Animation for Splash Hero
-function Waveform() {
-  return (
-    <div className="flex items-center gap-1.5 justify-center">
-      {[4, 8, 12, 16, 10, 6, 12, 8, 5, 9, 14, 8, 4].map((h, i) => (
-        <motion.div
-          key={i}
-          className="w-[3px] rounded-full bg-slate-700 dark:bg-slate-300"
-          style={{ height: h * 2.5 }}
-          animate={{ scaleY: [1, 1.4, 0.8, 1.2, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.08, ease: "easeInOut" }}
-        />
-      ))}
-    </div>
-  );
-}
-
-export default function OnboardingPage() {
-  const router = useRouter();
-  const { 
-    user, 
-    loading, 
-    loginWithFirebaseToken, 
-    completeMerchantOnboarding,
-    logout
-  } = useAuth();
-
-  const [step, setStep] = useState("splash"); // splash, auth-selector, mobile-input, otp-verify, merchant-setup
-  const [authMethod, setAuthMethod] = useState(""); // google, mobile
-  const [mobileNumber, setMobileNumber] = useState("");
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]); // 6-digit state
-  const [otpError, setOtpError] = useState("");
-  const [resendTimer, setResendTimer] = useState(30);
-  const [loadingVerify, setLoadingVerify] = useState(false);
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-
-  // Merchant Onboarding Profile State
-  const [shopName, setShopName] = useState("");
-  const [ownerName, setOwnerName] = useState("");
-  const [businessType, setBusinessType] = useState("");
-  const [language, setLanguage] = useState("English");
-
-  const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
-
-  // Wake up server on mount
-  useEffect(() => {
-    apiClient.ping();
-  }, []);
-
-  // Redirect and load state if already authenticated but onboarding incomplete
-  useEffect(() => {
-    if (user) {
-      if (user.onboardingIncomplete) {
-        setStep("merchant-setup");
-        setOwnerName(user.name || "");
-        setShopName(user.shopName || "");
-      } else {
-        window.location.href = "/dashboard";
-      }
-    }
-  }, [user]);
-
-  // Countdown timer for OTP resend
-  useEffect(() => {
-    if (step === "otp-verify" && resendTimer > 0) {
-      const t = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
-      return () => clearTimeout(t);
-    }
-  }, [step, resendTimer]);
-
-  // OTP auto-focus and auto-submit
-  const handleOtpChange = async (index, value) => {
-    if (value && !/^\d$/.test(value)) return;
-    
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    // Shift focus forward
-    if (value && index < 5) {
-      otpRefs[index + 1].current.focus();
-    }
-
-    // Auto submit once completely filled
-    if (newOtp.every(val => val !== "")) {
-      const submittedOtp = newOtp.join("");
-      handleVerifyOtp(submittedOtp);
-    }
-  };
-
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      otpRefs[index - 1].current.focus();
-    }
-  };
-
-  /**
-   * triggerGoogleAuth
-   * Initiates Google OAuth2 authentication. 
-   */
-  const triggerGoogleAuth = async () => {
-    try {
-      setOtpError("");
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
-      
-      console.log("[Auth] Invoking Firebase Google Sign-in popup...");
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-      console.log("[Auth] Firebase ID Token successfully retrieved.");
-
-      const profile = await loginWithFirebaseToken(idToken);
-      
-      if (profile.onboardingIncomplete) {
-        setAuthMethod("google");
-        setOwnerName(profile.name || "Yaksh Patel");
-        setStep("merchant-setup");
-      } else {
-        console.log("[Auth] Returning Google merchant logged in successfully.");
-        window.location.href = "/dashboard";
-      }
-    } catch (err) {
-      console.error("[Auth Error] Google Auth rejected:", err.message);
-      setOtpError("Authentication failed: " + err.message);
-    }
-  };
-
-  const handleDemoLogin = async () => {
-    try {
-      setOtpError("");
-      const idToken = "demo-demouser@voicekhata.com";
-      console.log("[Auth] Invoking Hackathon Demo Login Bypass...");
-      
-      const profile = await loginWithFirebaseToken(idToken);
-      
-      if (profile.onboardingIncomplete) {
-        setAuthMethod("google");
-        setOwnerName(profile.name || "Demo Merchant");
-        setStep("merchant-setup");
-      } else {
-        window.location.href = "/dashboard";
-      }
-    } catch (err) {
-      console.error("[Auth Error] Demo Login failed:", err.message);
-      setOtpError("Demo Login failed: " + err.message);
-    }
-  };
-
-  const handleMobileSubmit = async (e) => {
-    e.preventDefault();
-    if (mobileNumber.length !== 10) return;
-    setOtpError("");
-    setLoadingVerify(true);
-
-    const DEMO_NUMBERS = ["9999999999", "8888888888", "1234567890", "1111111111", "0000000000"];
-
-    try {
-      if (typeof window === "undefined") return;
-
-      // Hackathon Demo Mode Bypass
-      if (DEMO_NUMBERS.includes(mobileNumber)) {
-        console.log("[Auth] Demo number detected, skipping SMS verification.");
-        window.confirmationResult = {
-          confirm: async (code) => {
-            return {
-              user: {
-                getIdToken: async () => `demo-${mobileNumber}`
-              }
-            };
-          }
-        };
-        setAuthMethod("mobile");
-        setResendTimer(30);
-        setOtp(["1", "2", "3", "4", "5", "6"]); // Pre-fill OTP for convenience
-        setStep("otp-verify");
-        setLoadingVerify(false);
-        return;
-      }
-
-      console.log("[Auth] Setting up RecaptchaVerifier...");
-      if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.clear();
-      }
-
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-        size: "invisible",
-        callback: (response) => {
-          console.log("[Auth] reCAPTCHA verification passed.");
-        }
-      });
-
-      const fullPhone = `+91${mobileNumber}`;
-      console.log(`[Auth] Requesting SMS OTP for: ${fullPhone}`);
-      const confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
-      window.confirmationResult = confirmationResult;
-
-      console.log("[Auth] SMS verification code sent successfully.");
-      setAuthMethod("mobile");
-      setResendTimer(30);
-      setOtp(["", "", "", "", "", ""]);
-      setStep("otp-verify");
-    } catch (err) {
-      console.error("[Auth Error] Failed to send verification code:", err.message);
-      setOtpError("Failed to send OTP: " + err.message);
-    } finally {
-      setLoadingVerify(false);
-    }
-  };
-
-  const handleVerifyOtp = async (submittedOtp) => {
-    const finalOtp = submittedOtp || otp.join("");
-    if (finalOtp.length !== 6) return;
-
-    setOtpError("");
-    setIsVerifyingOtp(true);
-
-    try {
-      if (!window.confirmationResult) {
-        throw new Error("No active confirmation session found. Please re-send the code.");
-      }
-
-      console.log(`[Auth] Verifying 6-digit code: ${finalOtp}`);
-      const credential = await window.confirmationResult.confirm(finalOtp);
-      
-      console.log("[Auth] Firebase phone auth verification complete. Extracting token...");
-      const idToken = await credential.user.getIdToken();
-      
-      console.log("[Auth] Verifying ID token with secure backend...");
-      const profile = await loginWithFirebaseToken(idToken);
-
-      if (profile.onboardingIncomplete) {
-        setAuthMethod("mobile");
-        setOwnerName(profile.name || "");
-        setStep("merchant-setup");
-      } else {
-        console.log("[Auth] Phone merchant logged in successfully.");
-        window.location.href = "/dashboard";
-      }
-    } catch (err) {
-      console.error("[Auth Error] Code verification failed:", err.message);
-      setOtpError("Invalid verification code. Please check and try again.");
-    } finally {
-      setIsVerifyingOtp(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    setOtpError("");
-    setResendTimer(30);
-    setOtp(["", "", "", "", "", ""]);
-
-    try {
-      const fullPhone = `+91${mobileNumber}`;
-      console.log(`[Auth] Resending verification code to: ${fullPhone}`);
-      const confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
-      window.confirmationResult = confirmationResult;
-      console.log("[Auth] Code resent successfully.");
-    } catch (err) {
-      console.error("[Auth Error] Failed to resend code:", err.message);
-      setOtpError("Failed to resend code: " + err.message);
-    }
-  };
-
-  const completeOnboarding = async () => {
-    if (!shopName.trim()) return;
-    
-    const resolvedLanguage = 
-      language === "English" ? "en" :
-      language === "Hindi" ? "hi" :
-      language === "Tamil" ? "ta" :
-      language === "Marathi" ? "mr" :
-      language === "Gujarati" ? "gu" :
-      language === "Bhojpuri" ? "bho" : "hi";
-
-    const profileData = {
-      name: ownerName.trim() || "Yaksh Patel",
-      shopName: shopName.trim(),
-      language: resolvedLanguage,
-      businessType: businessType
-    };
-
-    try {
-      setOtpError("");
-      await completeMerchantOnboarding(profileData);
-      window.location.href = "/dashboard";
-    } catch (err) {
-      console.error("[Onboarding Complete Error]", err.message);
-      setOtpError("Failed to save merchant choices: " + err.message);
-    }
-  };
-
-  // Standard Framer Motion screen transition layouts
-  const transitionConfig = {
-    initial: { opacity: 0, x: 15 },
-    animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -15 },
-    transition: { type: "spring", stiffness: 350, damping: 30 }
-  };
-
-  // Loading gate showing premium loader
+const suffix = `// Loading gate showing premium loader
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 text-slate-800 flex items-center justify-center">
@@ -429,7 +124,7 @@ export default function OnboardingPage() {
                     <input 
                       type="tel"
                       value={mobileNumber}
-                      onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                      onChange={(e) => setMobileNumber(e.target.value.replace(/\\D/g, "").slice(0, 10))}
                       placeholder="98765 43210"
                       className="w-full bg-[#F8FAFC] border border-slate-200 rounded-full py-3.5 pl-16 pr-4 text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 transition-all"
                     />
@@ -579,11 +274,11 @@ export default function OnboardingPage() {
                         key={type}
                         type="button"
                         onClick={() => setBusinessType(type)}
-                        className={`px-3 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border cursor-pointer outline-none focus:outline-none ${
+                        className={\`px-3 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border cursor-pointer outline-none focus:outline-none \${
                           businessType === type
                             ? "bg-[#4285F4] border-[#4285F4] text-white shadow-md"
                             : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
-                        }`}
+                        }\`}
                       >
                         {type}
                       </button>
@@ -600,11 +295,11 @@ export default function OnboardingPage() {
                         key={langCode}
                         type="button"
                         onClick={() => setLanguage(langCode)}
-                        className={`px-3 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border cursor-pointer outline-none focus:outline-none ${
+                        className={\`px-3 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border cursor-pointer outline-none focus:outline-none \${
                           language === langCode
                             ? "bg-[#4285F4] border-[#4285F4] text-white shadow-md"
                             : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
-                        }`}
+                        }\`}
                       >
                         {langCode === "Bhojpuri" ? "Bhojpuri/Awadhi" : langCode}
                       </button>
@@ -658,3 +353,7 @@ function UserIcon(props) {
     </svg>
   );
 }
+`;
+
+fs.writeFileSync('client/app/page.js', prefix + suffix);
+console.log('Successfully updated page.js');

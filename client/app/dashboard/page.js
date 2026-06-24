@@ -593,7 +593,7 @@ export default function Dashboard() {
           <div className="h-6 w-48 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
         </div>
         <div className="px-5 mb-6 animate-pulse">
-          <div className="bg-slate-950 rounded-2xl p-5 space-y-4">
+          <div className="bg-white rounded-2xl p-5 space-y-4">
             <div className="h-3 w-40 bg-slate-800 rounded" />
             <div className="h-8 w-28 bg-slate-800 rounded" />
             <div className="h-3 w-32 bg-slate-800 rounded" />
@@ -626,16 +626,28 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Smart bookkeeping assistant</p>
-            <h1 className="text-xl font-black text-slate-800 dark:text-white tracking-tight mt-0.5">{merchantProfile.shopName}</h1>
+            <h1 className="text-xl font-black text-slate-800 dark:text-slate-800 dark:text-white tracking-tight mt-0.5">{merchantProfile.shopName}</h1>
           </div>
-          <motion.button 
-            whileTap={{ scale: 0.95 }} 
-            onClick={() => router.push("/reminders")}
-            className="relative w-9 h-9 bg-white dark:bg-slate-900 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-slate-100 dark:border-slate-800 flex items-center justify-center cursor-pointer transition-colors"
-          >
-            <Bell size={16} className="text-slate-400 dark:text-slate-500" />
-            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-orange-500 rounded-full" />
-          </motion.button>
+          <div className="flex items-center gap-2">
+            <motion.button 
+              whileTap={{ scale: 0.95 }} 
+              onClick={() => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+              }}
+              className="relative w-9 h-9 bg-white dark:bg-slate-900 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-slate-100 dark:border-slate-800 flex items-center justify-center cursor-pointer transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 dark:text-slate-500"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+            </motion.button>
+            <motion.button 
+              whileTap={{ scale: 0.95 }} 
+              onClick={() => router.push("/reminders")}
+              className="relative w-9 h-9 bg-white dark:bg-slate-900 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-slate-100 dark:border-slate-800 flex items-center justify-center cursor-pointer transition-colors"
+            >
+              <Bell size={16} className="text-slate-400 dark:text-slate-500" />
+              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-orange-500 rounded-full" />
+            </motion.button>
+          </div>
         </div>
       </div>
 
@@ -644,34 +656,34 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-950 dark:bg-slate-900 border border-slate-900 dark:border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden"
+          className="bg-white dark:bg-slate-900 border border-slate-900 dark:border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl -translate-y-6 translate-x-6" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#4285F4]/5 rounded-full blur-2xl -translate-y-6 translate-x-6" />
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Total outstanding balance</span>
-              <div className="flex items-center gap-1.5 bg-orange-950/40 border border-orange-900/30 rounded-lg px-2 py-0.5">
+              <div className="flex items-center gap-1.5 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/30 rounded-lg px-2 py-0.5">
                 <AlertCircle size={10} className="text-orange-400" />
-                <span className="text-[9px] text-orange-400 font-bold uppercase tracking-wide">{highRiskCount} High Risk</span>
+                <span className="text-[9px] text-orange-600 dark:text-orange-400 font-bold uppercase tracking-wide">{highRiskCount} High Risk</span>
               </div>
             </div>
             
-            <h2 className="text-3xl font-extrabold text-white font-display tracking-tight">₹{totalPending.toLocaleString()}</h2>
+            <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white font-display tracking-tight">₹{totalPending.toLocaleString()}</h2>
             <p className="text-[10px] text-slate-500 font-semibold tracking-wider uppercase mt-1">Live Ledger Database synced</p>
             
             <div className="grid grid-cols-3 gap-2 mt-5 border-t border-slate-800/80 pt-4.5">
               <div>
                 <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Collected</p>
-                <p className="text-sm font-bold text-white mt-0.5">₹{totalCollected.toLocaleString()}</p>
+                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-500 mt-0.5">₹{totalCollected.toLocaleString()}</p>
               </div>
               <div className="border-x border-slate-900 px-2">
                 <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Recovery Rate</p>
-                <p className="text-sm font-bold text-emerald-400 mt-0.5">{collectionRate}%</p>
+                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-500 mt-0.5">{collectionRate}%</p>
               </div>
               <div className="pl-2">
                 <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Avg Days</p>
-                <p className="text-sm font-bold text-white mt-0.5">{avgRepaymentDays}d</p>
+                <p className="text-sm font-bold text-slate-800 dark:text-white mt-0.5">{avgRepaymentDays}d</p>
               </div>
             </div>
           </div>
@@ -697,7 +709,7 @@ export default function Dashboard() {
           {[
             { label: t.giveCredit, icon: ArrowUpRight, color: "text-orange-500 bg-orange-500/5 border border-orange-500/10 dark:bg-orange-950/20 dark:border-orange-900/30", action: "/confirm?manual=true&type=credit" },
             { label: t.getPayment, icon: ArrowDownLeft, color: "text-emerald-500 bg-emerald-500/5 border border-emerald-500/10 dark:bg-emerald-950/20 dark:border-emerald-900/30", action: "/confirm?manual=true&type=payment" },
-            { label: t.customers, icon: Users, color: "text-indigo-500 bg-indigo-500/5 border border-indigo-500/10 dark:bg-indigo-950/20 dark:border-indigo-900/30", action: "/customers" },
+            { label: t.customers, icon: Users, color: "text-[#4285F4] bg-[#4285F4]/5 border border-[#4285F4]/10 dark:bg-indigo-950/20 dark:border-indigo-900/30", action: "/customers" },
             { label: t.insights, icon: TrendingUp, color: "text-slate-500 bg-slate-500/5 border border-slate-500/10 dark:bg-slate-850 dark:border-slate-800", action: "/insights" },
           ].map(({ label, icon: Icon, color, action }, i) => (
             <motion.button
@@ -725,7 +737,7 @@ export default function Dashboard() {
           {[
             { label: "Cashbook", icon: BookOpen, sub: "Cash Flow Tracker", type: "cashbook", colorClass: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400", borderClass: "hover:border-emerald-300 dark:hover:border-emerald-800/80" },
             { label: "Galla Counter", icon: IndianRupee, sub: "Cash Audit Tool", type: "galla_calc", colorClass: "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400", borderClass: "hover:border-amber-300 dark:hover:border-amber-800/80" },
-            { label: "Visiting Card", icon: CreditCard, sub: "Share Card Maker", type: "visiting_card", colorClass: "bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400", borderClass: "hover:border-indigo-300 dark:hover:border-indigo-800/80" },
+            { label: "Visiting Card", icon: CreditCard, sub: "Share Card Maker", type: "visiting_card", colorClass: "bg-indigo-50 dark:bg-indigo-950/30 text-[#4285F4] dark:text-[#4285F4]", borderClass: "hover:border-indigo-300 dark:hover:border-indigo-800/80" },
             { label: "GST Calculator", icon: Calculator, sub: "Quick GST Billing", type: "gst_calc", colorClass: "bg-teal-50 dark:bg-teal-950/30 text-teal-600 dark:text-teal-400", borderClass: "hover:border-teal-300 dark:hover:border-teal-800/80" }
           ].map(({ label, icon: Icon, sub, type, colorClass, borderClass }) => (
             <motion.button
@@ -833,10 +845,10 @@ export default function Dashboard() {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display">Business Cashbook</h3>
+                      <h3 className="text-sm font-black text-slate-800 dark:text-slate-800 dark:text-white uppercase tracking-wider font-display">Business Cashbook</h3>
                       <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Track daily general cash in-flow and expenditures</p>
                     </div>
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-[#4285F4] dark:text-[#4285F4]">
                       <BookOpen size={15} />
                     </div>
                   </div>
@@ -848,7 +860,7 @@ export default function Dashboard() {
                     const balance = totalIn - totalOut;
 
                     return (
-                      <div className="grid grid-cols-3 gap-2.5 p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl mb-5 text-center">
+                      <div className="grid grid-cols-3 gap-2.5 p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl mb-5 text-center">
                         <div>
                           <p className="text-sm font-black text-emerald-600 dark:text-emerald-400">₹{totalIn.toLocaleString()}</p>
                           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Cash In</p>
@@ -858,7 +870,7 @@ export default function Dashboard() {
                           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Cash Out</p>
                         </div>
                         <div>
-                          <p className={`text-sm font-black ${balance >= 0 ? "text-indigo-600 dark:text-indigo-400" : "text-red-500"}`}>₹{balance.toLocaleString()}</p>
+                          <p className={`text-sm font-black ${balance >= 0 ? "text-[#4285F4] dark:text-[#4285F4]" : "text-red-500"}`}>₹{balance.toLocaleString()}</p>
                           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Balance</p>
                         </div>
                       </div>
@@ -866,7 +878,7 @@ export default function Dashboard() {
                   })()}
 
                   {/* Add cashbook entry fields */}
-                  <div className="bg-slate-50/50 dark:bg-slate-950/40 rounded-xl p-4 border border-slate-100 dark:border-slate-850 mb-5 space-y-3.5">
+                  <div className="bg-slate-50/50 dark:bg-slate-900/40 rounded-xl p-4 border border-slate-100 dark:border-slate-850 mb-5 space-y-3.5">
                     <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Add Cash Entry</p>
                     <div className="flex gap-2">
                       {["in", "out"].map(t => (
@@ -893,7 +905,7 @@ export default function Dashboard() {
                         value={cashAmount}
                         onChange={(e) => setCashAmount(e.target.value)}
                         placeholder="Amount"
-                        className="w-full pl-8 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-indigo-500 transition-all"
+                        className="w-full pl-8 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-[#4285F4] transition-all"
                       />
                     </div>
                     <input
@@ -901,7 +913,7 @@ export default function Dashboard() {
                       value={cashNote}
                       onChange={(e) => setCashNote(e.target.value)}
                       placeholder="Note (e.g. Sales, Rent, tea)"
-                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-indigo-500 transition-all"
+                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-[#4285F4] transition-all"
                     />
 
                     <button
@@ -924,7 +936,7 @@ export default function Dashboard() {
                         setCashAmount("");
                         setCashNote("");
                       }}
-                      className="w-full py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-lg shadow-sm cursor-pointer flex items-center justify-center hover:bg-indigo-750 transition-colors"
+                      className="w-full py-2.5 bg-[#4285F4] text-slate-800 dark:text-white font-bold text-xs rounded-lg shadow-sm cursor-pointer flex items-center justify-center hover:bg-[#3367D6] transition-colors"
                     >
                       Save Cash Entry ✓
                     </button>
@@ -937,7 +949,7 @@ export default function Dashboard() {
                       <p className="text-center py-6 text-xs text-slate-400">No cash entries recorded today.</p>
                     ) : (
                       cashbookEntries.map(e => (
-                        <div key={e.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                        <div key={e.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800/80">
                           <div>
                             <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{e.note}</p>
                             <p className="text-[9px] text-slate-400 mt-0.5">{e.date}</p>
@@ -957,16 +969,16 @@ export default function Dashboard() {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display">Business Visiting Card</h3>
+                      <h3 className="text-sm font-black text-slate-800 dark:text-slate-800 dark:text-white uppercase tracking-wider font-display">Business Visiting Card</h3>
                       <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Design your premium business card to share instantly</p>
                     </div>
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-[#4285F4] dark:text-[#4285F4]">
                       <CreditCard size={15} />
                     </div>
                   </div>
 
                   {/* Theme Selector */}
-                  <div className="flex items-center gap-2 mb-3 bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                  <div className="flex items-center gap-2 mb-3 bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800/50">
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Theme:</span>
                     <div className="flex gap-2 flex-wrap flex-1 justify-end">
                       {[
@@ -975,7 +987,7 @@ export default function Dashboard() {
                         { id: "royal", label: "Royal Gold", bg: "bg-gradient-to-r from-amber-600 to-yellow-500" },
                         { id: "navy", label: "Navy", bg: "bg-blue-900" },
                         { id: "burgundy", label: "Burgundy", bg: "bg-rose-900" },
-                        { id: "black_gold", label: "Black Gold", bg: "bg-slate-950 border border-amber-500/50" },
+                        { id: "black_gold", label: "Black Gold", bg: "bg-white border border-amber-500/50" },
                         { id: "emerald_gold", label: "Emerald Gold", bg: "bg-emerald-950 border border-yellow-500/50" }
                       ].map(th => (
                         <button
@@ -983,7 +995,7 @@ export default function Dashboard() {
                           onClick={() => setCardTheme(th.id)}
                           className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-bold border-2 transition-all cursor-pointer ${
                             cardTheme === th.id || (th.id === "classic_dark" && cardTheme === "violet") || (th.id === "forest" && cardTheme === "emerald") || (th.id === "royal" && cardTheme === "gold")
-                              ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400"
+                              ? "border-[#4285F4] bg-indigo-50 dark:bg-indigo-950/40 text-[#4285F4] dark:text-[#4285F4]"
                               : "border-transparent bg-white dark:bg-slate-900 text-slate-400"
                           }`}
                         >
@@ -997,15 +1009,15 @@ export default function Dashboard() {
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     <div>
                       <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Business Type</label>
-                      <input type="text" value={cardCategory} onChange={(e) => setCardCategory(e.target.value)} placeholder="Kirana / Retail" className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-800 dark:text-white text-xs font-semibold outline-none" />
+                      <input type="text" value={cardCategory} onChange={(e) => setCardCategory(e.target.value)} placeholder="Kirana / Retail" className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-800 dark:text-white text-xs font-semibold outline-none" />
                     </div>
                     <div>
                       <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Tagline (optional)</label>
-                      <input type="text" value={cardTagline} onChange={(e) => setCardTagline(e.target.value)} placeholder="Your slogan..." className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-800 dark:text-white text-xs font-semibold outline-none" />
+                      <input type="text" value={cardTagline} onChange={(e) => setCardTagline(e.target.value)} placeholder="Your slogan..." className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-800 dark:text-white text-xs font-semibold outline-none" />
                     </div>
                     <div className="col-span-2">
                       <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Address (optional)</label>
-                      <input type="text" value={cardAddress} onChange={(e) => setCardAddress(e.target.value)} placeholder="Shop No. 5, Market Road, City" className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-800 dark:text-white text-xs font-semibold outline-none" />
+                      <input type="text" value={cardAddress} onChange={(e) => setCardAddress(e.target.value)} placeholder="Shop No. 5, Market Road, City" className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-800 dark:text-white text-xs font-semibold outline-none" />
                     </div>
                   </div>
 
@@ -1017,7 +1029,7 @@ export default function Dashboard() {
                       (cardTheme === "violet" || cardTheme === "classic_dark") ? "bg-gradient-to-br from-slate-900 via-slate-850 to-slate-905 border border-slate-700/50 text-white" :
                       (cardTheme === "emerald" || cardTheme === "forest") ? "bg-gradient-to-br from-emerald-900 via-emerald-850 to-teal-905 border border-emerald-700/50 text-white" :
                       (cardTheme === "gold" || cardTheme === "royal") ? "bg-gradient-to-br from-amber-700 via-yellow-600 to-amber-805 border border-amber-500/50 text-white" :
-                      cardTheme === "navy" ? "bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-955 border border-indigo-500/30 text-white" :
+                      cardTheme === "navy" ? "bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-955 border border-[#4285F4]/30 text-white" :
                       cardTheme === "burgundy" ? "bg-gradient-to-br from-rose-955 via-red-950 to-rose-905 border border-rose-500/30 text-white" :
                       cardTheme === "black_gold" ? "bg-gradient-to-br from-slate-955 via-slate-900 to-slate-950 border border-amber-550/40 text-amber-100 shadow-[0_4px_20px_rgba(245,158,11,0.15)]" :
                       "bg-gradient-to-br from-emerald-950 via-teal-950 to-emerald-905 border border-yellow-550/30 text-emerald-100 shadow-[0_4px_20px_rgba(16,185,129,0.15)]"
@@ -1102,13 +1114,13 @@ export default function Dashboard() {
                         ].filter(Boolean).join('\n');
                         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(lines)}`, '_blank');
                       }}
-                      className="py-2.5 bg-[#25D366] hover:bg-[#22c35e] text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 shadow-sm transition-all duration-200 border-0 outline-none focus:outline-none"
+                      className="py-2.5 bg-[#25D366] hover:bg-[#22c35e] text-slate-800 dark:text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 shadow-sm transition-all duration-200 border-0 outline-none focus:outline-none"
                     >
                       <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-4 h-4 object-contain" /> Share on WhatsApp
                     </button>
                     <button
                       onClick={handleDownloadCard}
-                      className="py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 border-0 outline-none focus:outline-none"
+                      className="py-2.5 bg-[#4285F4] hover:bg-[#3367D6] text-slate-800 dark:text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 border-0 outline-none focus:outline-none"
                     >
                       <Download size={14} /> Download & Save
                     </button>
@@ -1122,10 +1134,10 @@ export default function Dashboard() {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display">GST Bill Calculator</h3>
+                      <h3 className="text-sm font-black text-slate-800 dark:text-slate-800 dark:text-white uppercase tracking-wider font-display">GST Bill Calculator</h3>
                       <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Calculate CGST, SGST & Net values instantly</p>
                     </div>
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-[#4285F4] dark:text-[#4285F4]">
                       <Calculator size={15} />
                     </div>
                   </div>
@@ -1140,8 +1152,8 @@ export default function Dashboard() {
                             onClick={() => setGstType(t)}
                             className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                               gstType === t
-                                ? "bg-slate-900 dark:bg-indigo-600 text-white border-slate-900 dark:border-indigo-600 shadow-sm"
-                                : "bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-slate-200/50 dark:border-slate-800"
+                                ? "bg-slate-50 dark:bg-[#4285F4] text-white border-slate-900 dark:border-[#4285F4] shadow-sm"
+                                : "bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200/50 dark:border-slate-800"
                             }`}
                           >
                             {t === "exclusive" ? "Tax Extra (+ GST)" : "Tax Included (GST Incl.)"}
@@ -1159,7 +1171,7 @@ export default function Dashboard() {
                           value={gstBasePrice}
                           onChange={(e) => setGstBasePrice(e.target.value)}
                           placeholder="1000"
-                          className="w-full pl-8 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-indigo-500 transition-colors"
+                          className="w-full pl-8 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-semibold outline-none focus:border-[#4285F4] transition-colors"
                         />
                       </div>
                     </div>
@@ -1173,8 +1185,8 @@ export default function Dashboard() {
                             onClick={() => setGstRate(r)}
                             className={`py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                               gstRate === r
-                                ? "bg-indigo-600 text-white shadow-sm border border-indigo-600"
-                                : "bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-800"
+                                ? "bg-[#4285F4] text-white shadow-sm border border-[#4285F4]"
+                                : "bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-800"
                             }`}
                           >
                             {r}%
@@ -1202,7 +1214,7 @@ export default function Dashboard() {
                     const splitTax = taxVal / 2;
 
                     return (
-                      <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80 p-4 rounded-xl mb-5 space-y-2">
+                      <div className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 p-4 rounded-xl mb-5 space-y-2">
                         <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-900">
                           <span className="text-[10px] text-slate-400">Base Price (Net of Tax)</span>
                           <span className="text-xs font-bold text-slate-700 dark:text-slate-350">₹{baseVal.toFixed(2)}</span>
@@ -1217,7 +1229,7 @@ export default function Dashboard() {
                         </div>
                         <div className="flex justify-between py-1 pt-2">
                           <span className="text-xs font-bold text-slate-800 dark:text-white">Total Bill Value</span>
-                          <span className="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">₹{finalVal.toFixed(2)}</span>
+                          <span className="text-xs font-extrabold text-[#4285F4] dark:text-[#4285F4]">₹{finalVal.toFixed(2)}</span>
                         </div>
                       </div>
                     );
@@ -1251,7 +1263,7 @@ export default function Dashboard() {
                         ].join('\n');
                         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(lines)}`, '_blank');
                       }}
-                      className="py-2.5 bg-[#25D366] hover:bg-[#22c35e] text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 shadow-sm transition-all duration-200 border-0 outline-none focus:outline-none"
+                      className="py-2.5 bg-[#25D366] hover:bg-[#22c35e] text-slate-800 dark:text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 shadow-sm transition-all duration-200 border-0 outline-none focus:outline-none"
                     >
                       <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-4 h-4 object-contain" /> Share on WhatsApp
                     </button>
@@ -1269,7 +1281,7 @@ export default function Dashboard() {
                         const splitTax = taxVal / 2;
                         handleDownloadBill(baseVal, splitTax, finalVal, gstRate);
                       }}
-                      className="py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 border-0 outline-none focus:outline-none"
+                      className="py-2.5 bg-[#4285F4] hover:bg-[#3367D6] text-slate-800 dark:text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 border-0 outline-none focus:outline-none"
                     >
                       <Download size={14} /> Download Bill
                     </button>
@@ -1282,7 +1294,7 @@ export default function Dashboard() {
                 <div>
                    <div className="flex items-center justify-between mb-4">
                      <div>
-                       <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider font-display">Galla Cash Counter</h3>
+                       <h3 className="text-sm font-black text-slate-800 dark:text-slate-800 dark:text-white uppercase tracking-wider font-display">Galla Cash Counter</h3>
                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Physical cash denomination auditor & discrepancies checker</p>
                      </div>
                      <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
@@ -1304,16 +1316,16 @@ export default function Dashboard() {
                        (parseInt(qty1Coin) || 0) * 1;
 
                      return (
-                       <div className="bg-slate-950 dark:bg-slate-900 border border-slate-900 dark:border-slate-800 p-4.5 rounded-2xl mb-5 text-center relative overflow-hidden shadow-md">
+                       <div className="bg-white dark:bg-slate-900 border border-slate-900 dark:border-slate-800 p-4.5 rounded-2xl mb-5 text-center relative overflow-hidden shadow-md">
                          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-xl pointer-events-none" />
                          <span className="text-slate-400 text-[8px] font-bold uppercase tracking-widest block mb-1">TOTAL COUNTED CASH</span>
-                         <h4 className="text-2xl font-extrabold text-white tracking-tight">₹{total.toLocaleString()}</h4>
+                         <h4 className="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">₹{total.toLocaleString()}</h4>
                        </div>
                      );
                    })()}
 
                    {/* Denomination Inputs Table Grid */}
-                   <div className="bg-slate-50/50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 rounded-xl p-4.5 mb-5 space-y-3">
+                   <div className="bg-slate-50/50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-850 rounded-xl p-4.5 mb-5 space-y-3">
                      {[
                        { label: "₹500", state: qty500, setter: setQty500, value: 500 },
                        { label: "₹200", state: qty200, setter: setQty200, value: 200 },
@@ -1341,7 +1353,7 @@ export default function Dashboard() {
                                }
                              }}
                              placeholder="0"
-                             className="w-16 px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-bold text-center outline-none focus:border-indigo-500 transition-colors"
+                             className="w-16 px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-lg text-slate-850 dark:text-white text-xs font-bold text-center outline-none focus:border-[#4285F4] transition-colors"
                            />
                          </div>
                          <div className="w-24 text-right">
@@ -1383,7 +1395,7 @@ export default function Dashboard() {
                          const discrepancy = total - todayCashIn;
 
                          return (
-                           <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80 p-4 rounded-xl space-y-3.5">
+                           <div className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 p-4 rounded-xl space-y-3.5">
                              <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-900">
                                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Physical Counted Cash</span>
                                <span className="text-xs font-extrabold text-slate-800 dark:text-white">₹{total.toLocaleString()}</span>
@@ -1437,7 +1449,7 @@ export default function Dashboard() {
                                    setFeedbackMessage(`Cashbook adjusted successfully with ₹${absAmt.toLocaleString()} ${isShortage ? "out-flow" : "in-flow"}.`);
                                    setShowAudit(false);
                                  }}
-                                 className="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 dark:hover:bg-slate-750 text-indigo-650 dark:text-indigo-400 font-bold text-[10px] rounded-lg tracking-wider uppercase border border-indigo-150/30 dark:border-slate-700 cursor-pointer transition-colors outline-none focus:outline-none"
+                                 className="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 dark:hover:bg-slate-750 text-indigo-650 dark:text-[#4285F4] font-bold text-[10px] rounded-lg tracking-wider uppercase border border-indigo-150/30 dark:border-slate-700 cursor-pointer transition-colors outline-none focus:outline-none"
                                >
                                  Adjust Cashbook Balance ✓
                                </button>
@@ -1458,7 +1470,7 @@ export default function Dashboard() {
                      </button>
                      <button
                        onClick={() => setShowAudit(true)}
-                       className="py-2.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center outline-none focus:outline-none shadow-sm transition-colors"
+                       className="py-2.5 bg-[#4285F4] hover:bg-[#3367D6] text-slate-800 dark:text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center outline-none focus:outline-none shadow-sm transition-colors"
                      >
                        Match with Cashbook
                      </button>

@@ -47,7 +47,7 @@ export default function SettingsPage() {
   const [lang, setLang] = useState("English");
   const [notifications, setNotifications] = useState(true);
   const [autoReminder, setAutoReminder] = useState(true);
-  const [voiceConfirm, setVoiceConfirm] = useState(false);
+  const [voiceConfirm, setVoiceConfirm] = useState(true);
 
   // Dynamic Merchant Profile State
   const [profile, setProfile] = useState({
@@ -97,6 +97,11 @@ export default function SettingsPage() {
     if (typeof window !== 'undefined') {
       const activeTheme = localStorage.getItem('theme') === 'dark' || document.documentElement.classList.contains('dark');
       setDarkMode(activeTheme);
+      
+      const savedConfirm = localStorage.getItem('voicekhata_voice_confirm');
+      if (savedConfirm !== null) {
+        setVoiceConfirm(savedConfirm === 'true');
+      }
     }
   }, []);
 
@@ -188,7 +193,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-28 relative transition-colors duration-200">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] pb-28 relative transition-colors duration-200">
       <FloatingBlobs />
       <div className="relative z-10 px-4 pt-12 pb-4">
         <h1 className="text-2xl font-black text-slate-800 dark:text-white mb-1">Settings</h1>
@@ -211,7 +216,7 @@ export default function SettingsPage() {
                 )}
               </div>
               <div>
-                <p className="text-white font-black text-base leading-tight">{profile.shopName || "My Store"}</p>
+                <p className="text-slate-800 dark:text-white font-black text-base leading-tight">{profile.shopName || "My Store"}</p>
                 <p className="text-violet-200 text-xs mt-1 truncate max-w-[170px]">{profile.phone || profile.email || "No contact info"}</p>
               </div>
             </div>
@@ -250,7 +255,7 @@ export default function SettingsPage() {
                 <button key={l} onClick={() => handleLanguageChange(l)}
                   className={`py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     lang === l
-                      ? "bg-gradient-to-r from-violet-600 to-indigo-700 text-white shadow-md shadow-violet-100 dark:shadow-none"
+                      ? "bg-gradient-to-r from-violet-600 to-[#3367D6] text-white shadow-md shadow-violet-100 dark:shadow-none"
                       : "bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-300 border border-slate-100 dark:border-slate-700/50"
                   }`}>
                   {l}
@@ -280,7 +285,12 @@ export default function SettingsPage() {
 
         {/* Voice settings */}
         <SettingSection title="Voice Settings">
-          <SettingRow icon={Mic} label="Voice Confirmation" value="Confirm before saving" toggle={voiceConfirm} onToggle={setVoiceConfirm} color="bg-violet-50 text-violet-500 dark:bg-violet-950/40 dark:text-violet-400" />
+          <SettingRow icon={Mic} label="Voice Confirmation" value="Confirm before saving" toggle={voiceConfirm} onToggle={(val) => {
+            setVoiceConfirm(val);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('voicekhata_voice_confirm', val.toString());
+            }
+          }} color="bg-violet-50 text-violet-500 dark:bg-violet-950/40 dark:text-violet-400" />
           <SettingRow icon={Globe} label="Voice Language" value={lang} action={() => {}} last />
         </SettingSection>
 
@@ -424,7 +434,7 @@ export default function SettingsPage() {
                 </button>
                 <button
                   onClick={handleSaveProfile}
-                  className="flex-1 py-3.5 bg-gradient-to-r from-violet-600 to-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-violet-100 hover:from-violet-700 hover:to-indigo-800 transition-all cursor-pointer flex items-center justify-center border-0 outline-none"
+                  className="flex-1 py-3.5 bg-gradient-to-r from-violet-600 to-[#3367D6] text-slate-800 dark:text-white font-bold text-xs rounded-xl shadow-md shadow-violet-100 hover:from-violet-700 hover:to-indigo-800 transition-all cursor-pointer flex items-center justify-center border-0 outline-none"
                 >
                   Save Profile ✓
                 </button>

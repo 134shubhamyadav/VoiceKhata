@@ -84,7 +84,7 @@ function ReminderCard({ r, i, onEdit, onRefresh, onDelete }) {
               </button>
               <button 
                 onClick={() => onEdit(r)} 
-                className="flex-[2] py-2 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-xl flex items-center justify-center gap-1 cursor-pointer transition-colors outline-none focus:outline-none"
+                className="flex-[2] py-2 text-[11px] font-bold text-[#4285F4] dark:text-[#4285F4] bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-xl flex items-center justify-center gap-1 cursor-pointer transition-colors outline-none focus:outline-none"
               >
                 <Edit3 size={11} /> Edit & Send
               </button>
@@ -283,7 +283,7 @@ export default function RemindersPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFF] dark:bg-slate-950 pb-28 relative transition-colors duration-200">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] pb-28 relative transition-colors duration-200">
       <FloatingBlobs />
       <div className="relative z-10 px-4 pt-12 pb-4">
         <div className="flex items-center justify-between mb-4">
@@ -294,7 +294,7 @@ export default function RemindersPage() {
           <motion.button 
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsCreateOpen(true)}
-            className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-md shadow-blue-200 dark:shadow-none cursor-pointer border-0 outline-none focus:outline-none"
+            className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-[#3367D6] hover:from-blue-700 hover:to-indigo-800 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-md shadow-blue-200 dark:shadow-none cursor-pointer border-0 outline-none focus:outline-none"
           >
             <Plus size={14} /> New Reminder
           </motion.button>
@@ -314,7 +314,7 @@ export default function RemindersPage() {
         </div>
 
         {/* AI suggestion */}
-        <div className="bg-gradient-to-r from-indigo-600 to-blue-700 rounded-2xl p-4 mb-5 relative overflow-hidden shadow-md shadow-indigo-100 dark:shadow-none">
+        <div className="bg-gradient-to-r from-[#4285F4] to-blue-700 rounded-2xl p-4 mb-5 relative overflow-hidden shadow-md shadow-indigo-100 dark:shadow-none">
           <div className="absolute right-0 top-0 w-20 h-20 bg-white/10 rounded-full -translate-y-4 translate-x-4" />
           <div className="relative z-10 flex items-center gap-3">
             <div className="w-9 h-9 bg-white/25 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -425,7 +425,7 @@ export default function RemindersPage() {
                             onClick={() => handleToneChange(t)}
                             className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all border cursor-pointer capitalize outline-none focus:outline-none ${
                               createTone === t
-                                ? "bg-gradient-to-r from-blue-600 to-indigo-700 text-white border-transparent shadow-sm"
+                                ? "bg-gradient-to-r from-blue-600 to-[#3367D6] text-white border-transparent shadow-sm"
                                 : "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-250 dark:border-slate-800/80"
                             }`}
                           >
@@ -459,7 +459,7 @@ export default function RemindersPage() {
                 <button
                   onClick={handleCreateSubmit}
                   disabled={!selectedCust}
-                  className={`flex-1 py-3.5 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all border-0 outline-none focus:outline-none ${
+                  className={`flex-1 py-3.5 text-slate-800 dark:text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all border-0 outline-none focus:outline-none ${
                     selectedCust
                       ? "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-green-100 dark:shadow-none"
                       : "bg-slate-200 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-300 dark:border-slate-800/60 shadow-none cursor-not-allowed"
@@ -531,7 +531,7 @@ export default function RemindersPage() {
                 </button>
                 <button
                   onClick={handleEditSubmit}
-                  className="flex-1 py-3.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-100 dark:shadow-none flex items-center justify-center gap-1.5 cursor-pointer border-0 outline-none focus:outline-none"
+                  className="flex-1 py-3.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-slate-800 dark:text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-100 dark:shadow-none flex items-center justify-center gap-1.5 cursor-pointer border-0 outline-none focus:outline-none"
                 >
                   <img src="/whatsapp-logo.png" alt="WhatsApp" className="w-3.5 h-3.5 object-contain" /> Send & Save
                 </button>

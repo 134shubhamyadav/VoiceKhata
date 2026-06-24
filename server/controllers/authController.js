@@ -53,12 +53,21 @@ const verifyToken = async (req, res) => {
   try {
     let decodedToken;
     if (idToken.startsWith("demo-")) {
-      const phone = idToken.replace("demo-", "+91");
-      decodedToken = {
-        uid: `demo-uid-${phone}`,
-        phone_number: phone,
-        name: "Demo Merchant"
-      };
+      if (idToken.includes("@")) {
+        const email = idToken.replace("demo-", "");
+        decodedToken = {
+          uid: `demo-uid-${email}`,
+          email: email,
+          name: "Demo Merchant"
+        };
+      } else {
+        const phone = idToken.replace("demo-", "+91");
+        decodedToken = {
+          uid: `demo-uid-${phone}`,
+          phone_number: phone,
+          name: "Demo Merchant"
+        };
+      }
     } else {
       if (!firebaseInitialized) {
         return res.status(503).json({

@@ -322,7 +322,7 @@ export default function SuccessPage() {
   const isCashbookIn = txData.type === 'cashbook_in';
   const isCashbook = isCashbookOut || isCashbookIn;
 
-  let themeColorClass = "text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-950/20 border-indigo-500/10 dark:border-indigo-900/30";
+  let themeColorClass = "text-[#4285F4] dark:text-[#4285F4] bg-[#4285F4]/5 dark:bg-indigo-950/20 border-[#4285F4]/10 dark:border-indigo-900/30";
   if (isCashbookOut) {
     themeColorClass = "text-rose-600 dark:text-rose-400 bg-rose-500/5 dark:bg-rose-950/20 border-rose-500/10 dark:border-rose-900/30";
   } else if (isCashbookIn || txData.type === 'payment') {
@@ -337,7 +337,7 @@ export default function SuccessPage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] flex flex-col items-center justify-between px-5 pt-16 pb-12 relative overflow-hidden transition-colors duration-200">
       {/* Precision ambient background orbs */}
-      <div className={`absolute w-64 h-64 ${isCredit ? "bg-indigo-500/5" : isCashbookOut ? "bg-rose-500/5" : "bg-emerald-500/5"} rounded-full blur-[80px] -top-20 left-1/2 -translate-x-1/2 pointer-events-none`} />
+      <div className={`absolute w-64 h-64 ${isCredit ? "bg-[#4285F4]/5" : isCashbookOut ? "bg-rose-500/5" : "bg-emerald-500/5"} rounded-full blur-[80px] -top-20 left-1/2 -translate-x-1/2 pointer-events-none`} />
 
       <div className="flex-1 flex flex-col items-center justify-center text-center w-full max-w-sm">
         
@@ -354,7 +354,7 @@ export default function SuccessPage() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <h1 className="text-xl font-black text-slate-800 dark:text-white tracking-tight font-display mb-1.5">
+          <h1 className="text-xl font-black text-slate-800 dark:text-slate-800 dark:text-slate-800 dark:text-white tracking-tight font-display mb-1.5">
             {isCredit ? t.creditAdded : isCashbookOut ? t.expenseRecorded : isCashbookIn ? t.salesRecorded : t.paymentRecorded}
           </h1>
           <p className="text-xs text-slate-400 dark:text-slate-500 leading-relaxed px-4">
@@ -376,7 +376,7 @@ export default function SuccessPage() {
               <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t.transactionCode}</p>
               <p className="text-xs font-extrabold text-slate-700 dark:text-slate-350 mt-0.5">TXN-00{Math.floor(100 + Math.random() * 900)}</p>
             </div>
-            <div className={`w-7 h-7 ${isCredit ? "bg-indigo-500/5 text-indigo-500" : isCashbookOut ? "bg-rose-500/5 text-rose-500" : "bg-emerald-500/5 text-emerald-500"} rounded-lg flex items-center justify-center border border-slate-100 dark:border-slate-800`}>
+            <div className={`w-7 h-7 ${isCredit ? "bg-[#4285F4]/5 text-[#4285F4]" : isCashbookOut ? "bg-rose-500/5 text-rose-500" : "bg-emerald-500/5 text-emerald-500"} rounded-lg flex items-center justify-center border border-slate-100 dark:border-slate-800`}>
               <CheckCircle size={14} />
             </div>
           </div>
@@ -403,10 +403,10 @@ export default function SuccessPage() {
             transition={{ delay: 0.2 }}
             className="w-full mt-4.5"
           >
-            <div className={`border rounded-xl p-4 text-left ${isCredit ? "bg-indigo-500/5 border-indigo-500/10" : "bg-emerald-500/5 border-emerald-500/10"}`}>
+            <div className={`border rounded-xl p-4 text-left ${isCredit ? "bg-[#4285F4]/5 border-[#4285F4]/10" : "bg-emerald-500/5 border-emerald-500/10"}`}>
               <div className="flex items-center gap-2 mb-2">
-                <MessageCircle size={13} className={isCredit ? "text-indigo-600 dark:text-indigo-400" : "text-emerald-600 dark:text-emerald-400"} />
-                <span className={`text-[10px] font-bold uppercase tracking-wider ${isCredit ? "text-indigo-700 dark:text-indigo-300" : "text-emerald-700 dark:text-emerald-300"}`}>
+                <MessageCircle size={13} className={isCredit ? "text-[#4285F4] dark:text-[#4285F4]" : "text-emerald-600 dark:text-emerald-400"} />
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${isCredit ? "text-[#3367D6] dark:text-indigo-300" : "text-emerald-700 dark:text-emerald-300"}`}>
                   {isCredit ? t.whatsappReminder : t.whatsappReceipt}
                 </span>
               </div>
@@ -433,11 +433,11 @@ export default function SuccessPage() {
                 <Link size={14} className="text-slate-400 dark:text-slate-500 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t.paymentLink}</p>
-                  <p className="text-xs font-extrabold text-indigo-600 dark:text-indigo-400 truncate mt-0.5">pay.voicekhata.in/txn-{Math.floor(1000 + Math.random() * 9000)}</p>
+                  <p className="text-xs font-extrabold text-[#4285F4] dark:text-[#4285F4] truncate mt-0.5">pay.voicekhata.in/txn-{Math.floor(1000 + Math.random() * 9000)}</p>
                 </div>
                 <button 
                   onClick={handleCopy} 
-                  className="text-[9px] bg-slate-900 hover:bg-slate-850 dark:bg-slate-800 text-white px-2.5 py-1.5 rounded-lg font-bold transition-colors cursor-pointer outline-none focus:outline-none"
+                  className="text-[9px] bg-slate-900 hover:bg-slate-850 dark:bg-slate-800 text-slate-800 dark:text-white px-2.5 py-1.5 rounded-lg font-bold transition-colors cursor-pointer outline-none focus:outline-none"
                 >
                   {copied ? t.copied : t.copy}
                 </button>
@@ -446,7 +446,7 @@ export default function SuccessPage() {
 
             <button 
               onClick={handleShareWhatsApp} 
-              className="w-full py-3 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer outline-none focus:outline-none"
+              className="w-full py-3 bg-[#25D366] hover:bg-[#20ba5a] text-slate-800 dark:text-slate-800 dark:text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer outline-none focus:outline-none"
             >
               <Share2 size={13} /> {t.shareReceipt}
             </button>
@@ -463,7 +463,7 @@ export default function SuccessPage() {
       >
         <button 
           onClick={() => router.push("/voice")}
-          className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none transition-colors"
+          className="w-full py-3.5 bg-[#4285F4] hover:bg-[#3367D6] text-slate-800 dark:text-slate-800 dark:text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none transition-colors"
         >
           {t.recordMore} <ArrowRight size={14} />
         </button>
