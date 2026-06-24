@@ -67,22 +67,30 @@ const getDashboardSummaryData = async (userId) => {
   const totalCustomers = customerAgg[0]?.totalCustomers ?? 0;
   const highRiskCount  = customerAgg[0]?.highRiskCount  ?? 0;
 
-  // 2. Total collected (all paid payment entries)
-  const collectedAgg = await Entry.aggregate([
-    { $match: { ...userFilter, type: "payment", status: "paid" } },
-    { $group: { _id: null, total: { $sum: "$amount" } } },
+  // 2. Total collected (Amount of credit that has been paid off)
+  const creditsAgg = await Entry.aggregate([
+    { $match: { ...userFilter, type: "credit" } },
+    {
+      $group: {
+        _id: null,
+        totalIssued: { $sum: "$amount" },
+        totalRemaining: { $sum: { $ifNull: ["$remainingAmount", "$amount"] } }
+      }
+    }
   ]);
-  const totalCollected = parseFloat((collectedAgg[0]?.total ?? 0).toFixed(2));
+  
+  const totalIssued = creditsAgg[0]?.totalIssued ?? 0;
+  const totalRemaining = creditsAgg[0]?.totalRemaining ?? 0;
+  const totalCollected = parseFloat((totalIssued - totalRemaining).toFixed(2));
 
   // 3. Overdue customer count
   const overdueCount = await Entry.distinct("customerId", {
     ...userFilter, status: "overdue",
   });
 
-  // 4. Collection rate
-  const totalVolume    = totalCollected + totalPending;
-  const collectionRate = totalVolume > 0
-    ? Math.round((totalCollected / totalVolume) * 100)
+  // 4. Collection rate (Recovery Rate)
+  const collectionRate = totalIssued > 0
+    ? Math.round((totalCollected / totalIssued) * 100)
     : 0;
 
   // 5. Recent activity (last 5 entries, any type)
@@ -122,23 +130,32 @@ const getDashboardSummaryData = async (userId) => {
 const getDashboardInsightsData = async (userId) => {
   const userFilter = userId ? { userId: toObjectId(userId) } : {};
 
-  const [customerAgg, collectedAgg, overdueCount] = await Promise.all([
+  const [customerAgg, creditsAgg, overdueCount] = await Promise.all([
     Customer.aggregate([
       { $match: { ...userFilter, isActive: true } },
       { $group: { _id: null, totalOwed: { $sum: "$totalOwed" }, count: { $sum: 1 } } },
     ]),
     Entry.aggregate([
-      { $match: { ...userFilter, type: "payment", status: "paid" } },
-      { $group: { _id: null, total: { $sum: "$amount" } } },
+      { $match: { ...userFilter, type: "credit" } },
+      {
+        $group: {
+          _id: null,
+          totalIssued: { $sum: "$amount" },
+          totalRemaining: { $sum: { $ifNull: ["$remainingAmount", "$amount"] } }
+        }
+      }
     ]),
     Entry.distinct("customerId", { ...userFilter, status: "overdue" }),
   ]);
 
   const totalPending   = parseFloat((customerAgg[0]?.totalOwed ?? 0).toFixed(2));
-  const totalCollected = parseFloat((collectedAgg[0]?.total    ?? 0).toFixed(2));
-  const totalVolume    = totalCollected + totalPending;
-  const collectionRate = totalVolume > 0
-    ? Math.round((totalCollected / totalVolume) * 100)
+  
+  const totalIssued = creditsAgg[0]?.totalIssued ?? 0;
+  const totalRemaining = creditsAgg[0]?.totalRemaining ?? 0;
+  const totalCollected = parseFloat((totalIssued - totalRemaining).toFixed(2));
+
+  const collectionRate = totalIssued > 0
+    ? Math.round((totalCollected / totalIssued) * 100)
     : 0;
 
   // Dynamic AI insights

@@ -362,18 +362,19 @@ export default function VoicePage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] flex flex-col overflow-hidden relative">
       {/* Precision ambient glow orbs */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#4285F4]/5 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute w-96 h-96 bg-[#4285F4]/15 rounded-full blur-[100px] top-1/4 left-1/2 -translate-x-1/2 pointer-events-none animate-pulse" style={{ animationDuration: '5s' }} />
+      <div className="absolute w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] bottom-1/4 right-0 pointer-events-none animate-pulse" style={{ animationDuration: '4s', animationDelay: '1s' }} />
 
       {/* Modern thin header */}
       <div className="relative z-10 flex items-center justify-between px-5 pt-12 pb-6">
-        <button onClick={() => router.back()} className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-transparent flex shadow-sm items-center justify-center cursor-pointer hover:bg-slate-900/60">
-          <X size={16} className="text-slate-400" />
+        <button onClick={() => router.back()} className="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-800 bg-white/50 backdrop-blur-md dark:bg-slate-900/50 flex shadow-sm items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <X size={18} className="text-slate-500 dark:text-slate-400" />
         </button>
-        <div className="flex items-center gap-1.5 bg-indigo-950/30 border border-indigo-900/30 rounded-lg px-2.5 py-1">
-          <Zap size={10} className="text-[#4285F4]" />
-          <span className="text-[10px] text-[#4285F4] font-extrabold uppercase tracking-widest font-display">Voice Ledger</span>
+        <div className="flex items-center gap-1.5 bg-gradient-to-r from-[#4285F4]/10 to-[#3367D6]/10 border border-[#4285F4]/20 backdrop-blur-sm rounded-full px-3.5 py-1.5 shadow-[0_4px_12px_rgba(66,133,244,0.05)]">
+          <Zap size={11} className="text-[#4285F4]" />
+          <span className="text-[11px] text-[#4285F4] font-black uppercase tracking-widest font-display">Voice Ledger</span>
         </div>
-        <div className="w-9" />
+        <div className="w-10" />
       </div>
 
       {/* Main Recording layout */}
@@ -387,20 +388,27 @@ export default function VoicePage() {
         {/* Mic action button */}
         <div className="relative mb-12">
           {state === "listening" && (
-            <div className="absolute -inset-4 rounded-full border border-[#4285F4]/10 animate-pulse pointer-events-none" />
+            <div className="absolute -inset-6 rounded-full border-2 border-orange-500/20 animate-ping pointer-events-none" style={{ animationDuration: '1.5s' }} />
+          )}
+          {state === "idle" && (
+            <>
+              <div className="absolute inset-0 bg-[#4285F4]/20 rounded-full animate-ping pointer-events-none" style={{ animationDuration: '3s' }} />
+              <div className="absolute -inset-4 border border-[#4285F4]/10 rounded-full animate-pulse pointer-events-none" style={{ animationDuration: '2s' }} />
+            </>
           )}
           
           <motion.button
+            whileHover={state === "idle" ? { scale: 1.05 } : undefined}
             whileTap={state === "idle" || state === "done" ? { scale: 0.94 } : undefined}
             onClick={state === "idle" || state === "done" ? startListening : undefined}
-            className={`w-24 h-24 rounded-full flex items-center justify-center transition-all cursor-pointer outline-none focus:outline-none ${
+            className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer outline-none focus:outline-none z-10 relative ${
               state === "listening"
-                ? "bg-orange-500 border border-orange-600/30 shadow-lg shadow-orange-500/10"
+                ? "bg-gradient-to-br from-orange-400 to-orange-600 border border-orange-300/50 shadow-[0_0_40px_rgba(249,115,22,0.4)]"
                 : state === "processing"
-                ? "bg-slate-100 dark:bg-slate-850 border border-slate-200 dark:border-slate-800"
+                ? "bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-inner"
                 : state === "done"
-                ? "bg-emerald-500 border border-emerald-600/30 shadow-lg shadow-emerald-500/10"
-                : "bg-indigo-650 hover:bg-[#3367D6] border border-indigo-550 shadow-lg shadow-[#4285F4]/10"
+                ? "bg-gradient-to-br from-emerald-400 to-emerald-600 border border-emerald-300/50 shadow-[0_0_40px_rgba(16,185,129,0.4)]"
+                : "bg-gradient-to-br from-[#4285F4] to-[#3367D6] border border-white/20 shadow-[0_12px_32px_rgba(66,133,244,0.35)] hover:shadow-[0_16px_48px_rgba(66,133,244,0.45)]"
             }`}
           >
             {state === "processing" ? (
@@ -421,11 +429,11 @@ export default function VoicePage() {
 
         {/* Dynamic Speech Status */}
         <AnimatePresence mode="wait">
-          <motion.div key={state} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="text-center mb-8">
+          <motion.div key={state} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="text-center mb-8">
             {state === "idle" && (
               <>
-                <p className="text-slate-800 dark:text-white text-base font-black font-display tracking-tight mb-1">{t.tapToSpeak}</p>
-                <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">{t.subTap}</p>
+                <h2 className="text-2xl font-black font-display tracking-tight bg-gradient-to-r from-slate-900 via-[#1e293b] to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent mb-1.5">{t.tapToSpeak}</h2>
+                <p className="text-slate-500 text-[11px] font-bold uppercase tracking-[0.15em]">{t.subTap}</p>
               </>
             )}
             {state === "listening" && (
