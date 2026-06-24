@@ -180,22 +180,29 @@ const ENGLISH_MULTIPLIERS = {
   hundred: 100, thousand: 1000, lakh: 100000, lakhs: 100000, crore: 10000000, crores: 10000000
 };
 
+const MARATHI_NUMBERS = {
+  ek: 1, don: 2, teen: 3, char: 4, pach: 5, saha: 6, saat: 7, aath: 8, nau: 9,
+  daha: 10, vis: 20, tis: 30, chalis: 40, pannas: 50, sath: 60, sattar: 70,
+  aishi: 80, navvad: 90, shambhar: 100, she: 100, hajar: 1000, lakh: 100000,
+};
+const MARATHI_MULTIPLIERS = { shambhar: 100, she: 100, hajar: 1000, lakh: 100000 };
+
 const CASHBOOK_OUT_WORDS = [
   "expense", "kharch", "kharch kiya", "chai", "tea", "rent", "salary",
   "petrol", "fuel", "bill", "electricity", "samosa", "snack", "food",
-  "wages", "transport", "maintenance",
+  "wages", "transport", "maintenance", "dile", "kharchale",
 ];
 const CASHBOOK_IN_WORDS = [
   "sales", "bikri", "income", "revenue", "galla", "aaj ki kamai",
-  "settlement", "daily sales", "collection",
+  "settlement", "daily sales", "collection", "jama", "aale", "milale",
 ];
 const CREDIT_WORDS = [
   "udhaar", "credit", "diya", "diye", "de diya", "baki", "baaki",
-  "liya", "le gaya", "ka udhaar", "ko udhaar",
+  "liya", "le gaya", "ka udhaar", "ko udhaar", "udhar", "dile", "ghetle",
 ];
 const PAYMENT_WORDS = [
   "payment", "paid", "mila", "aaya", "vasuli", "wapas", "return",
-  "ne diya", "ne diye", "collect", "recovered",
+  "ne diya", "ne diye", "collect", "recovered", "aale", "kadun aale", "jama",
 ];
 
 const extractAmount = (text) => {
@@ -252,18 +259,42 @@ const extractAmount = (text) => {
     if (finalVal > 0) return finalVal;
   }
 
+  // Marathi words: "don hajar", "pach she"
+  total = 0;
+  current = 0;
+  let hasMarathiWord = false;
+  for (const word of words) {
+    if (MARATHI_NUMBERS[word] !== undefined) {
+      hasMarathiWord = true;
+      const value = MARATHI_NUMBERS[word];
+      if (MARATHI_MULTIPLIERS[word] !== undefined) {
+        current = current === 0 ? value : current * value;
+        total += current;
+        current = 0;
+      } else {
+        current += value;
+      }
+    }
+  }
+  if (hasMarathiWord) {
+    const finalVal = total + current;
+    if (finalVal > 0) return finalVal;
+  }
+
   return null;
 };
 
 const extractCustomerName = (text) => {
-  // Look for name before/after common prepositions in both English and Hindi/Devnagari script
+  // Look for name before/after common prepositions in both English and Hindi/Marathi Devnagari script
   const patterns = [
-    // Devnagari patterns
-    /^([\u0900-\u097F]+)\s+(?:ने|को|का|के|की|में|से)(?:\s|$)/,
-    /(?:\s|^)(?:ने|को|का|के|से)\s+([\u0900-\u097F]+)(?:\s|$)/,
-    // English patterns
-    /^([a-zA-Z]+(?:\s[a-zA-Z]+)?)\s+(?:ko|ne|ka|ke|ki)\b/i,
-    /\b(?:ko|ne|ka|ke)\s+([a-zA-Z]+(?:\s[a-zA-Z]+)?)\b/i,
+    // Devnagari patterns (Hindi & Marathi suffixes)
+    /^([\u0900-\u097F]+)\s+(?:ने|को|का|के|की|में|से|ला|कडून)(?:\s|$)/,
+    /(?:\s|^)(?:ने|को|का|के|से|कडून)\s+([\u0900-\u097F]+)(?:\s|$)/,
+    /^([\u0900-\u097F]+)(?:ने|ला|कडून)\b/, // Suffix attached directly
+    // English patterns (Hindi & Marathi suffixes)
+    /^([a-zA-Z]+(?:\s[a-zA-Z]+)?)\s+(?:ko|ne|ka|ke|ki|la|kadun)\b/i,
+    /\b(?:ko|ne|ka|ke|kadun)\s+([a-zA-Z]+(?:\s[a-zA-Z]+)?)\b/i,
+    /^([a-zA-Z]+)(?:ne|la)\b/i, // Suffix attached directly
     /^([a-zA-Z]{2,})\b/i,
   ];
 
@@ -271,8 +302,8 @@ const extractCustomerName = (text) => {
     const m = text.match(re);
     if (m && m[1] && m[1].length > 1) {
       let name = m[1].trim();
-      // Strip starting Hinglish pronouns
-      const pronouns = ["me", "main", "maine", "mene", "i", "he", "she", "we", "they", "you", "mujhse", "mujhe", "mera", "meri", "vah", "wo", "usne"];
+      // Strip starting Hinglish/Marathi pronouns
+      const pronouns = ["me", "main", "maine", "mene", "i", "he", "she", "we", "they", "you", "mujhse", "mujhe", "mera", "meri", "vah", "wo", "usne", "mi", "tumi", "tyane", "tila", "aami", "amhi"];
       const words = name.split(/\s+/);
       if (words.length > 1 && pronouns.includes(words[0].toLowerCase())) {
         words.shift();
@@ -338,14 +369,14 @@ const detectType = (text) => {
   if (CASHBOOK_OUT_WORDS.some((w) => t.includes(w)) || /खर्च|सैलरी|किराया|पेट्रोल/i.test(t)) return "cashbook_out";
   if (CASHBOOK_IN_WORDS.some((w) => t.includes(w)) || /बिक्री|कमाई|गल्ला/i.test(t)) return "cashbook_in";
 
-  // Check if "ne/mein" or "ने/में" is present before the amount, and "diya/diye" or "दिया/दिए" is present
-  const isPaymentRegex = /(?:ne|mein|ने|में)\s+.*\s+(?:diya|diye|दिया|दिए)(?:\s|$)/i;
-  const isPaymentSimple = /mila|aaya|vasuli|wapas|payment|paid|collect|मिला|आया|वसूली|वापस/i;
+  // Check if "ne/mein/kadun" or "ने/में/कडून" is present before the amount, and "diya/diye/aale" or "दिया/दिए/आले" is present
+  const isPaymentRegex = /(?:ne|mein|kadun|ने|में|कडून)\s+.*\s+(?:diya|diye|aale|jama|दिया|दिए|आले|जमा)(?:\s|$)/i;
+  const isPaymentSimple = /mila|aaya|vasuli|wapas|payment|paid|collect|aale|kadun|मिला|आया|वसूली|वापस|आले|कडून/i;
   if (isPaymentRegex.test(t) || isPaymentSimple.test(t)) {
     return "payment";
   }
 
-  const isCreditRegex = /udhaar|credit|diya|diye|baki|baaki|liya|उधार|दिया|दिए|बाकी|लिया/i;
+  const isCreditRegex = /udhaar|credit|diya|diye|baki|baaki|liya|dile|ghetle|उधार|दिया|दिए|बाकी|लिया|दिले|घेतले/i;
   if (isCreditRegex.test(t)) {
     return "credit";
   }
