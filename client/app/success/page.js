@@ -271,7 +271,10 @@ export default function SuccessPage() {
   };
 
   const handleCopy = () => {
-    const linkText = `pay.voicekhata.in/txn-${Math.floor(1000 + Math.random() * 9000)}`;
+    const upiId = user?.upiId || "voicekhata@ybl";
+    const shopName = user?.shopName || "VoiceKhata Merchant";
+    const amountStr = txData.amount ? `&am=${txData.amount}` : "";
+    const linkText = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(shopName)}${amountStr}&cu=INR`;
     navigator.clipboard.writeText(linkText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -432,8 +435,8 @@ export default function SuccessPage() {
               <div className="flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-850 rounded-xl p-3 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
                 <Link size={14} className="text-slate-400 dark:text-slate-500 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t.paymentLink}</p>
-                  <p className="text-xs font-extrabold text-[#4285F4] dark:text-[#4285F4] truncate mt-0.5">pay.voicekhata.in/txn-{Math.floor(1000 + Math.random() * 9000)}</p>
+                  <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">UPI Payment Link</p>
+                  <p className="text-xs font-extrabold text-[#4285F4] dark:text-[#4285F4] truncate mt-0.5">{user?.upiId || "voicekhata@ybl"}</p>
                 </div>
                 <button 
                   onClick={handleCopy} 
