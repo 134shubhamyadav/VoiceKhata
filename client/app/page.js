@@ -434,11 +434,10 @@ export default function OnboardingPage() {
               <div className="space-y-4">
                 {/* Google Button */}
                 <button 
-                  onClick={handleGoogleSignIn}
-                  disabled={loading}
+                  onClick={triggerGoogleAuth}
                   className="w-full py-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-[15px] rounded-2xl flex items-center justify-center gap-3 cursor-pointer transition-all shadow-sm outline-none"
                 >
-                  <FcGoogle size={22} />
+                  <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G" className="w-5 h-5" />
                   Continue with Google
                 </button>
 
@@ -448,7 +447,6 @@ export default function OnboardingPage() {
                     setOtpError("");
                     setStep("mobile-input");
                   }}
-                  disabled={loading}
                   className="w-full py-4 bg-[#1877F2] hover:bg-[#166fe5] text-white font-bold text-[15px] rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-md outline-none"
                 >
                   <Phone size={18} />
@@ -468,7 +466,6 @@ export default function OnboardingPage() {
 
               <button 
                 onClick={handleDemoLogin}
-                disabled={loading}
                 className="w-full py-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-100 font-bold text-[15px] rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-colors outline-none"
               >
                 <Sparkles size={18} />
