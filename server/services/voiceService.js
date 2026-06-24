@@ -57,6 +57,8 @@ Common patterns:
 - "मैंने अनिल को 50 दिया, परसों लौटाएगा" → credit, amount=50, customer=Anil, dueDate=2 days from today
 - "Ramesh la 500 udhar dile" → credit, amount=500, customer=Ramesh
 - "Suresh kadun 200 aale" → payment, amount=200, customer=Suresh
+- "रमेशने दोन हजार रुपये उधार घेतले" → credit, amount=2000, customer=रमेश (Remove suffix 'ने')
+- "पाचशे रुपये दिले" → credit, amount=500
 
 ENGLISH SENTENCE PATTERNS (very important):
 - "I give Ramesh 5000" → credit, customer=Ramesh, amount=5000
@@ -75,7 +77,15 @@ CUSTOMER NAME EXTRACTION (critical):
 - "mene Yash ko" → Yash is the customer
 - "Suresh paid" → Suresh is the customer
 - PRONOUNS ARE NOT NAMES. Ignore words like "maine", "mene", "I", "me", "wo", "usne", "vah", "tumne", "mi", "tumi", "tyane". Never return these as the customer name.
+- CRITICAL: Strip suffixes from the name! In Marathi/Hindi, names often have suffixes attached (e.g. "रमेशने" -> "रमेश", "Rameshne" -> "Ramesh", "Sureshla" -> "Suresh", "Priyako" -> "Priya"). ALWAYS return the clean base name without "ne", "la", "ko", "kadun".
 - If no clear person name found, set customerName to null (do NOT set "Unknown Customer")
+
+AMOUNT EXTRACTION (critical):
+- Convert regional number words to digits!
+- "दोन हजार" or "don hajar" = 2000
+- "पाचशे" or "pachshe" = 500
+- "शंभर" or "shambhar" = 100
+- Must return a valid integer.
 
 DUE DATE EXTRACTION (FOR ALL LANGUAGES):
 - Always translate relative dates spoken in ANY language to YYYY-MM-DD.
