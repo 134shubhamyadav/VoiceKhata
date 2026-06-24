@@ -209,7 +209,7 @@ const CREDIT_WORDS = [
 ];
 const PAYMENT_WORDS = [
   "payment", "paid", "mila", "aaya", "vasuli", "wapas", "return",
-  "ne diya", "ne diye", "collect", "recovered", "aale", "kadun aale", "jama",
+  "ne diya", "ne diye", "collect", "recovered", "aale", "kadun aale", "jama", "parat",
 ];
 
 const extractAmount = (text) => {
@@ -319,7 +319,7 @@ const extractCustomerName = (text) => {
     // Devnagari patterns (Hindi & Marathi suffixes)
     /^([\u0900-\u097F]+)\s+(?:ने|को|का|के|की|में|से|ला|कडून)(?:\s|$)/,
     /(?:\s|^)(?:ने|को|का|के|से|कडून)\s+([\u0900-\u097F]+)(?:\s|$)/,
-    /^([\u0900-\u097F]+)(?:ने|ला|कडून)\b/, // Suffix attached directly
+    /^([\u0900-\u097F]+)(?:ने|ला|कडून)(?:\s|$)/, // Suffix attached directly
     // English patterns (Hindi & Marathi suffixes)
     /^([a-zA-Z]+(?:\s[a-zA-Z]+)?)\s+(?:ko|ne|ka|ke|ki|la|kadun)\b/i,
     /\b(?:ko|ne|ka|ke|kadun)\s+([a-zA-Z]+(?:\s[a-zA-Z]+)?)\b/i,
@@ -398,9 +398,9 @@ const detectType = (text) => {
   if (CASHBOOK_OUT_WORDS.some((w) => t.includes(w)) || /खर्च|सैलरी|किराया|पेट्रोल/i.test(t)) return "cashbook_out";
   if (CASHBOOK_IN_WORDS.some((w) => t.includes(w)) || /बिक्री|कमाई|गल्ला/i.test(t)) return "cashbook_in";
 
-  // Check if "ne/mein/kadun" or "ने/में/कडून" is present before the amount, and "diya/diye/aale" or "दिया/दिए/आले" is present
-  const isPaymentRegex = /(?:ne|mein|kadun|ने|में|कडून)\s+.*\s+(?:diya|diye|aale|jama|दिया|दिए|आले|जमा)(?:\s|$)/i;
-  const isPaymentSimple = /mila|aaya|vasuli|wapas|payment|paid|collect|aale|kadun|मिला|आया|वसूली|वापस|आले|कडून/i;
+  // Check if "ne/mein/kadun" or "ने/में/कडून" is present before the amount, and "diya/diye/aale" or "दिया/दिए/आले/दिले" is present
+  const isPaymentRegex = /(?:ne|mein|kadun|ने|में|कडून)\s+.*\s+(?:diya|diye|aale|jama|dile|दिया|दिए|आले|जमा|दिले)(?:\s|$)/i;
+  const isPaymentSimple = /mila|aaya|vasuli|wapas|payment|paid|collect|aale|kadun|parat|मिला|आया|वसूली|वापस|आले|कडून|परत/i;
   if (isPaymentRegex.test(t) || isPaymentSimple.test(t)) {
     return "payment";
   }
