@@ -671,11 +671,13 @@ export default function OnboardingPage() {
       </div>
 
       {/* Footer secure policy tag */}
-      <div className="relative z-10 text-center pb-8 px-6 mt-auto">
-        <p className="text-slate-400 text-[10px] max-w-xs mx-auto leading-relaxed font-medium">
-          By logging in, you agree to our <span onClick={() => router.push('/terms')} className="text-[#4285F4] underline cursor-pointer">Terms of Service</span> and <span onClick={() => router.push('/privacy')} className="text-[#4285F4] underline cursor-pointer">Privacy Policies</span>
-        </p>
-      </div>
+      {step !== "splash" && (
+        <div className="relative z-10 text-center pb-8 px-6 mt-auto shrink-0">
+          <p className="text-slate-400 text-[10px] max-w-xs mx-auto leading-relaxed font-medium">
+            By logging in, you agree to our <span onClick={() => router.push('/terms')} className="text-[#4285F4] underline cursor-pointer">Terms of Service</span> and <span onClick={() => router.push('/privacy')} className="text-[#4285F4] underline cursor-pointer">Privacy Policies</span>
+          </p>
+        </div>
+      )}
       {/* Invisible ReCAPTCHA Anchor */}
       <div id="recaptcha-container" className="absolute bottom-0 right-0 pointer-events-none opacity-0 select-none z-0"></div>
     </div>
