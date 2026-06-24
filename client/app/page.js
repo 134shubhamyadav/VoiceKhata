@@ -327,7 +327,18 @@ export default function OnboardingPage() {
       
       {/* Top Graphic Area (Visible on Auth Steps) */}
       {(step === "auth-selector" || step === "mobile-input" || step === "otp-verify") && (
-        <div className="w-full bg-[#F5F8FF] pt-8 pb-2 rounded-b-[32px] shadow-[0_4px_20px_rgba(0,0,0,0.02)] mb-4 shrink-0">
+        <div className="w-full bg-[#F5F8FF] pt-4 pb-2 rounded-b-[32px] shadow-[0_4px_20px_rgba(0,0,0,0.02)] mb-4 shrink-0 relative">
+          <button 
+            onClick={() => {
+              if (step === "otp-verify") setStep("mobile-input");
+              else if (step === "mobile-input") setStep("auth-selector");
+              else if (step === "auth-selector") setStep("splash");
+            }}
+            className="absolute top-4 left-4 z-10 p-2 bg-white rounded-full shadow-sm text-slate-600 hover:text-slate-900 transition-colors"
+            aria-label="Go Back"
+          >
+            <ChevronRight className="rotate-180" size={20} />
+          </button>
           <HeroGraphic />
         </div>
       )}
@@ -672,7 +683,7 @@ export default function OnboardingPage() {
 
       {/* Footer secure policy tag */}
       {step !== "splash" && (
-        <div className="relative z-10 text-center pb-8 px-6 mt-auto shrink-0">
+        <div className="relative z-10 text-center pb-4 px-6 mt-auto shrink-0">
           <p className="text-slate-400 text-[10px] max-w-xs mx-auto leading-relaxed font-medium">
             By logging in, you agree to our <span onClick={() => router.push('/terms')} className="text-[#4285F4] underline cursor-pointer">Terms of Service</span> and <span onClick={() => router.push('/privacy')} className="text-[#4285F4] underline cursor-pointer">Privacy Policies</span>
           </p>
