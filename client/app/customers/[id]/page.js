@@ -527,39 +527,14 @@ export default function CustomerDetail() {
           </button>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12 }} className="grid grid-cols-2 gap-3 mb-5">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12 }} className="mb-5">
           <button 
             onClick={() => window.open(`tel:${customer.phone}`, '_self')} 
-            className="py-2.5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-850 text-slate-650 dark:text-slate-400 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.01)] cursor-pointer outline-none focus:outline-none hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors"
+            className="w-full py-2.5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-850 text-slate-650 dark:text-slate-400 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.01)] cursor-pointer outline-none focus:outline-none hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors"
           >
             <Phone size={12} /> Call Customer
           </button>
-          <button 
-            onClick={handleSimulateUPI} 
-            disabled={simulatingUPI}
-            className={`py-2.5 bg-slate-900 border border-slate-800 text-slate-800 dark:text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none ${simulatingUPI ? "opacity-60" : ""}`}
-          >
-            {simulatingUPI ? (
-              <span className="flex items-center gap-1">
-                <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                Paying...
-              </span>
-            ) : (
-              <>⚡ Simulate UPI Pay</>
-            )}
-          </button>
         </motion.div>
-
-        {simulatingUPI && (
-          <motion.div 
-            initial={{ opacity: 0, y: -6 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            className="mb-5 bg-[#4285F4]/5 border border-[#4285F4]/10 rounded-xl p-3 flex items-center gap-2.5"
-          >
-            <span className="w-3.5 h-3.5 border-2 border-[#4285F4] border-t-transparent rounded-full animate-spin flex-shrink-0" />
-            <p className="text-[10px] text-[#3367D6] dark:text-[#4285F4] font-bold uppercase tracking-wider">Simulating Paytm webhook auto-update for ₹500...</p>
-          </motion.div>
-        )}
 
         {/* Transactions timeline list */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
