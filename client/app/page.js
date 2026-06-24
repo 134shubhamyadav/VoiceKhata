@@ -323,17 +323,17 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="relative min-h-screen not-sm:min-w-full bg-white text-slate-800 flex flex-col justify-start overflow-hidden">
+    <div className="relative h-[100dvh] w-full max-w-md mx-auto sm:max-w-none bg-white text-slate-800 flex flex-col justify-start overflow-hidden">
       
       {/* Top Graphic Area (Visible on Auth Steps) */}
       {(step === "auth-selector" || step === "mobile-input" || step === "otp-verify") && (
-        <div className="w-full bg-[#F5F8FF] pt-12 pb-4 rounded-b-[40px] shadow-[0_4px_20px_rgba(0,0,0,0.02)] mb-6">
+        <div className="w-full bg-[#F5F8FF] pt-8 pb-2 rounded-b-[32px] shadow-[0_4px_20px_rgba(0,0,0,0.02)] mb-4 shrink-0">
           <HeroGraphic />
         </div>
       )}
 
       {/* Main Container */}
-      <div className="relative z-10 flex-1 flex flex-col px-6 py-4 pb-12">
+      <div className="relative z-10 flex-1 flex flex-col px-6 py-4 pb-6 overflow-y-auto no-scrollbar">
         <AnimatePresence mode="wait">
           
           {/* STEP 1: SPLASH INTRO BRAND VIEW */}
@@ -352,22 +352,22 @@ export default function OnboardingPage() {
                  <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent" />
               </div>
 
-              <motion.div {...transitionConfig} key="splash" className="flex-1 flex flex-col justify-between w-full h-full relative z-10 px-6 py-12">
+              <motion.div {...transitionConfig} key="splash" className="flex-1 flex flex-col justify-between w-full h-full relative z-10 px-6 py-8">
                 
                 {/* Top Section: Logo in top-center */}
-                <div className="flex flex-col items-center mt-6 text-center">
+                <div className="flex flex-col items-center mt-2 text-center">
                   <motion.div 
                     initial={{ scale: 0.8, opacity: 0 }} 
                     animate={{ scale: 1, opacity: 1 }} 
                     transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
-                    className="relative mb-6"
+                    className="relative mb-4"
                   >
                     {/* Pulsing ring behind logo */}
-                    <div className="absolute inset-0 bg-[#4285F4]/30 rounded-[24px] blur-xl animate-ping" style={{ animationDuration: '3s' }} />
+                    <div className="absolute inset-0 bg-[#4285F4]/30 rounded-[20px] blur-xl animate-ping" style={{ animationDuration: '3s' }} />
                     
                     {/* Premium Glassmorphic Logo Presentation */}
-                    <div className="relative w-24 h-24 rounded-[24px] bg-white/70 backdrop-blur-md border border-white/80 flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] overflow-hidden p-2 z-10">
-                      <img src="/logo.png" alt="VoiceKhata Logo" className="w-full h-full object-contain rounded-[18px] select-none" />
+                    <div className="relative w-20 h-20 rounded-[20px] bg-white/70 backdrop-blur-md border border-white/80 flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] overflow-hidden p-1.5 z-10">
+                      <img src="/logo.png" alt="VoiceKhata Logo" className="w-full h-full object-contain rounded-[16px] select-none" />
                     </div>
                   </motion.div>
 
@@ -387,14 +387,14 @@ export default function OnboardingPage() {
                 </div>
 
                 {/* Bottom Section: Button near the table */}
-                <div className="w-full mt-auto pb-6 relative flex justify-center">
+                <div className="w-full mt-auto pb-4 relative flex justify-center shrink-0">
                   <motion.button 
                     initial={{ y: 20, opacity: 0 }} 
                     animate={{ y: 0, opacity: 1 }} 
                     transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.3 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setStep("auth-selector")}
-                    className="group relative w-full max-w-[320px] py-4 bg-gradient-to-r from-[#4285F4] to-[#3367D6] hover:from-[#3367D6] hover:to-[#2857b8] text-white font-bold text-[16px] rounded-full flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 shadow-[0_8px_25px_0_rgba(66,133,244,0.5)] hover:shadow-[0_12px_30px_rgba(66,133,244,0.4)] hover:-translate-y-1 outline-none mx-auto z-10 border-[3px] border-[#1e3a8a]"
+                    className="group relative w-full max-w-[320px] py-3.5 bg-gradient-to-r from-[#4285F4] to-[#3367D6] hover:from-[#3367D6] hover:to-[#2857b8] text-white font-bold text-[16px] rounded-full flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 shadow-[0_8px_25px_0_rgba(66,133,244,0.5)] hover:shadow-[0_12px_30px_rgba(66,133,244,0.4)] hover:-translate-y-1 outline-none mx-auto z-10 border-[3px] border-[#1e3a8a]"
                   >
                     Get Started 
                     <ChevronRight size={20} className="transition-transform duration-300 group-hover:translate-x-1 text-white" />
@@ -407,10 +407,10 @@ export default function OnboardingPage() {
 
           {/* STEP 2: AUTHENTICATION OPTIONS SELECTOR */}
           {step === "auth-selector" && (
-            <motion.div {...transitionConfig} key="auth-selector" className="flex-1 flex flex-col">
-              <div className="mb-8">
-                <h2 className="text-2xl font-black font-display tracking-tight text-slate-900 mb-2">Welcome Back :)</h2>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">Choose your preferred login channel to continue.</p>
+            <motion.div {...transitionConfig} key="auth-selector" className="flex-1 flex flex-col justify-center">
+              <div className="mb-6">
+                <h2 className="text-[22px] font-black font-display tracking-tight text-slate-900 mb-1.5">Welcome Back :)</h2>
+                <p className="text-[11px] text-slate-500 font-medium leading-relaxed">Choose your preferred login channel to continue.</p>
               </div>
 
               {otpError && (
