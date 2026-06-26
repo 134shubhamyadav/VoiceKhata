@@ -388,7 +388,7 @@ const extractDueDate = (text) => {
   // Next month: pudhchya mahinyat, aavta mahine, adutha maatham
   if (/mahine\s*mein|next\s*month|महीने|महीना|pudhchya mahinyat|पुढच्या महिन्यात|aavta mahine|આવતા મહિને|adutha maatham|அடுத்த மாதம்|agle mahine/.test(t)) return addDays(30);
 
-  const daysMatch = t.match(/(\d+)\s*(?:din|days?|divas)\s*(?:mein|baad|later|nantar|sat)/);
+  const daysMatch = t.match(/(\d+)\s*(?:din|days?|divas|दिन|दिवस)\s*(?:mein|baad|later|nantar|sat|में|बाद|नंतर)/);
   if (daysMatch) return addDays(parseInt(daysMatch[1]));
 
   // ISO date
