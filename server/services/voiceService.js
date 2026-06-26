@@ -89,20 +89,21 @@ AMOUNT EXTRACTION (critical):
 
 DUE DATE EXTRACTION (FOR ALL LANGUAGES):
 - Always translate relative dates spoken in ANY language to YYYY-MM-DD.
-- Examples of "Tomorrow" (+1 day): 'kal' (Hindi), 'udya' / 'उद्या' (Marathi), 'kale' / 'કાલે' (Gujarati), 'naalai' / 'நாளை' (Tamil), 'bihaan' (Bhojpuri).
-- Examples of "Day after tomorrow" (+2 days): 'parso' / 'परसों' (Hindi), 'parva' / 'परवा' (Marathi), 'param divase' / 'પરમ દિવસે' (Gujarati), 'naalai marunaal' / 'நாளை மறுநாள்' (Tamil).
+- Examples of "Tomorrow" (+1 day): 'kal' (Hindi), 'udya' / 'उद्या' (Marathi), 'kale' / 'કાલે' (Gujarati), 'naalai' / 'நாளை' (Tamil), 'bihaan' (Bhojpuri), 'tomorrow'.
+- Examples of "Day after tomorrow" (+2 days): 'parso' / 'परसों' (Hindi), 'parva' / 'परवा' (Marathi), 'param divase' / 'પરમ દિવસે' (Gujarati), 'naalai marunaal' / 'நாளை மறுநாள்' (Tamil), 'day after tomorrow', 'terwa'.
 - "30 days back" = 30 days from today
-- "give back in X days" = X days from today
+- "give back in X days" or "after X days" or "in X days" = X days from today
 - "he will give me X days back" = X days from today
-- "next month" = 30 days from today
-- "next week" = 7 days from today
+- "X din baad vapas karega", "X din mein dega", "X divsanantr deil", "X divsat parat karel" = X days from today
+- "agle hafte", "next week", "pudhchya aathavdyat" = 7 days from today
+- "agle mahine", "next month", "pudhchya mahinyat" = 30 days from today
 - Payment type: if no date mentioned, use today as dueDate
 
 Transaction type rules:
-- "diya", "denge", "dile", "udhaar diya", "credit", "liya", "ghetle", "baki", "give", "gave", "I give" → type = "credit"
-- "aaya", "mila", "aale", "jama", "payment mili", "vasuli", "collected", "ne diya", "ne diye", "paid", "received from" → type = "payment"
-- "kharch", "expense", "chai", "petrol", "rent", "salary" → type = "cashbook_out"
-- "sales", "bikri", "aaj ki", "galla", "income" → type = "cashbook_in"
+- CREDIT (given/taken udhaar): "diya", "denge", "dile", "udhaar diya", "udhar le", "udhaar liya", "credit", "liya", "ghetle", "baki", "baaki", "give", "gave", "I give", "borrow", "lent", "owes me", "unpaid", "due", "usne", "usane", "karja", "thakbaki", "dena baki hai", "udhar khatyame" → type = "credit"
+- PAYMENT (received from customer): "aaya", "mila", "aale", "jama", "payment mili", "vasuli", "bhugtaan", "bhugtan le", "chuka diya", "collected", "ne diya", "ne diye", "paid", "received from", "settled", "cleared", "returned", "got back", "vasul", "mile", "jama kiya", "wapas kiya", "vapas aaya", "return kiya", "chukta kiya", "mil gaya", "prapt hua", "milale", "jama zale", "parat dile", "fitale", "chukte kele", "phitle", "bharpai" → type = "payment"
+- EXPENSE (money out): "kharch", "expense", "chai", "petrol", "rent", "salary", "spent", "bought", "paid for", "cost", "bill", "kharcha", "lag gaya", "de diye", "bhada", "pagar", "kiraaya", "gela", "bhade" → type = "cashbook_out"
+- INCOME (money in): "sales", "bikri", "aaj ki", "galla", "income", "revenue", "sold", "profit", "kamai", "aamdani", "becha", "vikri", "utpanna", "dhanda" → type = "cashbook_in"
 
 Today's date is: ${new Date().toISOString().split("T")[0]}
 
@@ -197,19 +198,23 @@ const DEVNAGARI_MULTIPLIERS = { "शंभर": 100, "सौ": 100, "हजा�
 const CASHBOOK_OUT_WORDS = [
   "expense", "kharch", "kharch kiya", "chai", "tea", "rent", "salary",
   "petrol", "fuel", "bill", "electricity", "samosa", "snack", "food",
-  "wages", "transport", "maintenance", "dile", "kharchale",
+  "wages", "transport", "maintenance", "dile", "kharchale", "spent",
+  "bought", "paid for", "cost", "kharcha", "lag gaya", "bhada", "pagar", "kiraaya", "gela", "bhade"
 ];
 const CASHBOOK_IN_WORDS = [
   "sales", "bikri", "income", "revenue", "galla", "aaj ki kamai",
   "settlement", "daily sales", "collection", "jama", "aale", "milale",
+  "sold", "profit", "kamai", "aamdani", "becha", "vikri", "utpanna", "dhanda"
 ];
 const CREDIT_WORDS = [
   "udhaar", "credit", "diya", "diye", "de diya", "baki", "baaki",
   "liya", "le gaya", "ka udhaar", "ko udhaar", "udhar", "dile", "ghetle",
+  "borrow", "lent", "gave", "give", "owes", "unpaid", "due", "usne", "usane", "karja", "thakbaki", "dena baki", "khatyame"
 ];
 const PAYMENT_WORDS = [
   "payment", "paid", "mila", "aaya", "vasuli", "wapas", "return",
   "ne diya", "ne diye", "collect", "recovered", "aale", "kadun aale", "jama", "parat",
+  "settled", "received", "cleared", "returned", "got back", "vasul", "mile", "jama kiya", "wapas kiya", "vapas aaya", "return kiya", "bhugtaan", "chuka diya", "chukta kiya", "pay kiya", "mil gaya", "prapt hua", "jama zale", "parat dile", "fitale", "chukte kele", "phitle", "bharpai"
 ];
 
 const extractAmount = (text) => {
@@ -375,15 +380,15 @@ const extractDueDate = (text) => {
   if (/kal|tomorrow|कल|udya|उद्या|kale|કાલે|naalai|நாளை|bihaan|बिहान/.test(t)) return addDays(1);
   
   // Day After Tomorrow: parso, parva, param divase, naalai marunaal
-  if (/parso|parson|day after|परसों|परसो|parva|परवा|param divase|પરમ દિવસે|naalai marunaal|நாளை மறுநாள்/.test(t)) return addDays(2);
+  if (/parso|parson|day after|परसों|परसो|parva|परवा|param divase|પરમ દિવસે|naalai marunaal|நாளை மறுநாள்|terwa/.test(t)) return addDays(2);
   
   // Next week: pudhchya, aavta avadiye, adutha vaaram
-  if (/hafte\s*mein|next\s*week|हफ्ते|सप्ताह|pudhchya aathavdyat|पुढच्या आठवड्यात|aavta avadiye|આવતા અઠવાડિયે|adutha vaaram|அடுத்த வாரம்/.test(t)) return addDays(7);
+  if (/hafte\s*mein|next\s*week|हफ्ते|सप्ताह|pudhchya aathavdyat|पुढच्या आठवड्यात|aavta avadiye|આવતા અઠવાડિયે|adutha vaaram|அடுத்த வாரம்|agle hafte/.test(t)) return addDays(7);
   
   // Next month: pudhchya mahinyat, aavta mahine, adutha maatham
-  if (/mahine\s*mein|next\s*month|महीने|महीना|pudhchya mahinyat|पुढच्या महिन्यात|aavta mahine|આવતા મહિને|adutha maatham|அடுத்த மாதம்/.test(t)) return addDays(30);
+  if (/mahine\s*mein|next\s*month|महीने|महीना|pudhchya mahinyat|पुढच्या महिन्यात|aavta mahine|આવતા મહિને|adutha maatham|அடுத்த மாதம்|agle mahine/.test(t)) return addDays(30);
 
-  const daysMatch = t.match(/(\d+)\s*(?:din|days?)\s*(?:mein|baad|later)/);
+  const daysMatch = t.match(/(\d+)\s*(?:din|days?|divas)\s*(?:mein|baad|later|nantar|sat)/);
   if (daysMatch) return addDays(parseInt(daysMatch[1]));
 
   // ISO date
@@ -400,12 +405,12 @@ const detectType = (text) => {
 
   // Check if "ne/mein/kadun" or "ने/में/कडून" is present before the amount, and "diya/diye/aale" or "दिया/दिए/आले/दिले" is present
   const isPaymentRegex = /(?:ne|mein|kadun|ने|में|कडून)\s+.*\s+(?:diya|diye|aale|jama|dile|दिया|दिए|आले|जमा|दिले)(?:\s|$)/i;
-  const isPaymentSimple = /mila|aaya|vasuli|wapas|payment|paid|collect|aale|kadun|parat|मिला|आया|वसूली|वापस|आले|कडून|परत/i;
+  const isPaymentSimple = /mila|aaya|vasuli|wapas|payment|paid|collect|aale|kadun|parat|bhugtaan|bhugtan|settled|received|cleared|returned|vasul|mile|chukta|prapt|fitale|phitle|bharpai|मिला|आया|वसूली|वापस|आले|कडून|परत|भुगतान/i;
   if (isPaymentRegex.test(t) || isPaymentSimple.test(t)) {
     return "payment";
   }
 
-  const isCreditRegex = /udhaar|credit|diya|diye|baki|baaki|liya|dile|ghetle|उधार|दिया|दिए|बाकी|लिया|दिले|घेतले/i;
+  const isCreditRegex = /udhaar|udhar|credit|diya|diye|baki|baaki|liya|le|dile|ghetle|borrow|lent|gave|give|owes|unpaid|due|usne|usane|karja|thakbaki|उधार|दिया|दिए|बाकी|लिया|दिले|घेतले/i;
   if (isCreditRegex.test(t)) {
     return "credit";
   }
