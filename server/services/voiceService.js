@@ -368,7 +368,23 @@ const extractCustomerName = (text) => {
 };
 
 const extractDueDate = (text) => {
-  const t = text.toLowerCase();
+  let t = text.toLowerCase();
+  
+  // Convert words 1-30 to digits for date parsing
+  const smallNumMap = { 
+    "ek": 1, "do": 2, "teen": 3, "char": 4, "paanch": 5, "chhe": 6, "saat": 7, "aath": 8, "nau": 9, "das": 10,
+    "gyarah": 11, "barah": 12, "pandrah": 15, "bees": 20, "tees": 30,
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+    "fifteen": 15, "twenty": 20, "thirty": 30,
+    "don": 2, "pach": 5, "saha": 6, "daha": 10, "vis": 20, "tis": 30,
+    "एक": 1, "दोन": 2, "दो": 2, "तीन": 3, "चार": 4, "पाच": 5, "पांच": 5, "सहा": 6, "छह": 6, "सात": 7, "आठ": 8, "नऊ": 9, "नौ": 9,
+    "दहा": 10, "दस": 10, "पंधरा": 15, "पंद्रह": 15, "वीस": 20, "बीस": 20, "तीस": 30
+  };
+  for (const [word, digit] of Object.entries(smallNumMap)) {
+    const regex = new RegExp(`(^|\\s)${word}(?=\\s|$)`, "gi");
+    t = t.replace(regex, `$1${digit}`);
+  }
+
   const today = new Date();
   const addDays = (d) => {
     const dt = new Date(today);
@@ -412,9 +428,15 @@ const detectType = (text) => {
   if (CASHBOOK_OUT_WORDS.some((w) => t.includes(w)) || /खर्च|सैलरी|किराया|पेट्रोल/i.test(t)) return "cashbook_out";
   if (CASHBOOK_IN_WORDS.some((w) => t.includes(w)) || /बिक्री|कमाई|गल्ला/i.test(t)) return "cashbook_in";
 
+  // If explicit "will return" future tense, it's credit
+  if (/vapas karega|wapas karega|lautaega|dega|parat karel|वापस करेगा|लौटाएगा|देगा|परत करेल/i.test(t)) {
+    return "credit";
+  }
+
   // Check if "ne/mein/kadun" or "ने/में/कडून" is present before the amount, and "diya/diye/aale" or "दिया/दिए/आले/दिले" is present
   const isPaymentRegex = /(?:ne|mein|kadun|ने|में|कडून)\s+.*\s+(?:diya|diye|aale|jama|dile|दिया|दिए|आले|जमा|दिले)(?:\s|$)/i;
-  const isPaymentSimple = /mila|aaya|vasuli|wapas|payment|paid|collect|aale|kadun|parat|bhugtaan|bhugtan|settled|received|cleared|returned|vasul|mile|chukta|prapt|fitale|phitle|bharpai|मिला|आया|वसूली|वापस|आले|कडून|परत|भुगतान/i;
+  const isPaymentSimple = /mila|aaya|vasuli|wapas kiya|wapas aaya|vapas diya|payment|paid|collect|aale|kadun|parat dile|parat aale|bhugtaan|bhugtan|settled|received|cleared|returned|return kiya|vasul|mile|chukta|prapt|fitale|phitle|bharpai|मिला|आया|वसूली|वापस किया|वापस आया|वापस दिया|आले|कडून|परत दिले|परत आले|भुगतान/i;
+  
   if (isPaymentRegex.test(t) || isPaymentSimple.test(t)) {
     return "payment";
   }
