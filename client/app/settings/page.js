@@ -190,8 +190,8 @@ export default function SettingsPage() {
       setIsClearing(true);
       try {
         await apiClient.clearDemoData();
-        alert("Demo data cleared successfully.");
-        window.location.reload();
+        alert("Demo data cleared successfully. Logging out...");
+        logout();
       } catch (err) {
         alert("Failed to clear data: " + err.message);
         setIsClearing(false);
