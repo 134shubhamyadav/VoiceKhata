@@ -35,6 +35,7 @@ const userPayload = (user) => ({
   profilePhoto:        user.profilePhoto,
   upiId:               user.upiId,
   onboardingIncomplete: user.onboardingIncomplete,
+  isDemo:              user.firebaseUid ? user.firebaseUid.startsWith("demo-") : false,
 });
 
 // ─── Controllers ────────────────────────────────────────────────────────────

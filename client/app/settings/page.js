@@ -302,20 +302,22 @@ export default function SettingsPage() {
         </SettingSection>
 
 
-        {/* Clear Demo Data */}
-        <div className="mb-4">
-          <motion.button 
-            whileTap={{ scale: 0.97 }}
-            onClick={handleClearDemoData}
-            disabled={isClearing}
-            className="w-full py-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-950/40 text-orange-600 dark:text-orange-500 font-bold text-sm rounded-2xl flex items-center justify-center gap-2 cursor-pointer outline-none focus:outline-none"
-          >
-            <Shield size={16} /> {isClearing ? "Clearing Data..." : "Clear Demo Data"}
-          </motion.button>
-          <p className="text-center text-[10px] text-slate-400 mt-2 px-4">
-            Demo Mode Disclaimer: This clears all your entries, customers, and reminders for instant demo reset. This action cannot be undone.
-          </p>
-        </div>
+        {/* Clear Demo Data - Only visible to demo accounts */}
+        {user?.isDemo && (
+          <div className="mb-4">
+            <motion.button 
+              whileTap={{ scale: 0.97 }}
+              onClick={handleClearDemoData}
+              disabled={isClearing}
+              className="w-full py-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-950/40 text-orange-600 dark:text-orange-500 font-bold text-sm rounded-2xl flex items-center justify-center gap-2 cursor-pointer outline-none focus:outline-none"
+            >
+              <Shield size={16} /> {isClearing ? "Clearing Data..." : "Clear Demo Data"}
+            </motion.button>
+            <p className="text-center text-[10px] text-slate-400 mt-2 px-4">
+              Demo Mode Disclaimer: This clears all your entries, customers, and reminders for instant demo reset. This action cannot be undone.
+            </p>
+          </div>
+        )}
 
         {/* Logout */}
         <motion.button 
