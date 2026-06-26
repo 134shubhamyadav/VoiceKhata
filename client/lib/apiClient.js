@@ -56,8 +56,6 @@ export const apiClient = {
 
   getMe: () => request("/auth/me"),
 
-  clearDemoData: () => request("/auth/clear-demo-data", { method: "DELETE" }),
-
   // Ping endpoint to wake up server
   ping: () => request("/health").catch(() => {}),
 

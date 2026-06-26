@@ -35,7 +35,6 @@ const userPayload = (user) => ({
   profilePhoto:        user.profilePhoto,
   upiId:               user.upiId,
   onboardingIncomplete: user.onboardingIncomplete,
-  isDemo:              user.firebaseUid ? user.firebaseUid.startsWith("demo-") : false,
 });
 
 // ─── Controllers ────────────────────────────────────────────────────────────
@@ -190,32 +189,4 @@ const getMe = async (req, res) => {
   }
 };
 
-/**
- * DELETE /api/auth/clear-demo-data
- * Clears all entries, customers, and reminders for the current user.
- */
-const clearDemoData = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    
-    const Customer = require("../models/Customer");
-    const Entry = require("../models/Entry");
-    const Reminder = require("../models/Reminder");
-
-    const customers = await Customer.find({ userId });
-    const customerIds = customers.map(c => c._id);
-
-    if (customerIds.length > 0) {
-      await Reminder.deleteMany({ customerId: { $in: customerIds } });
-    }
-
-    await Entry.deleteMany({ userId });
-    await Customer.deleteMany({ userId });
-
-    return res.status(200).json({ success: true, message: "Demo data cleared successfully." });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
-  }
-};
-
-module.exports = { verifyToken, completeOnboarding, getMe, clearDemoData };
+module.exports = { verifyToken, completeOnboarding, getMe };
