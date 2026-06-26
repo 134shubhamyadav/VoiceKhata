@@ -329,6 +329,9 @@ const extractCustomerName = (text) => {
     /^([a-zA-Z]+(?:\s[a-zA-Z]+)?)\s+(?:ko|ne|ka|ke|ki|la|kadun)\b/i,
     /\b(?:ko|ne|ka|ke|kadun)\s+([a-zA-Z]+(?:\s[a-zA-Z]+)?)\b/i,
     /^([a-zA-Z]+)(?:ne|la)\b/i, // Suffix attached directly
+    // English action verbs & prepositions
+    /\b(?:gave|give|paid|to|from)\s+([a-zA-Z]+(?:\s[a-zA-Z]+)?)\b/i,
+    /\b([a-zA-Z]+(?:\s[a-zA-Z]+)?)\s+(?:paid|gave|owes|returns|returned)\b/i,
     /^([a-zA-Z]{2,})\b/i,
   ];
 
@@ -390,6 +393,12 @@ const extractDueDate = (text) => {
 
   const daysMatch = t.match(/(\d+)\s*(?:din|days?|divas|दिन|दिवस)\s*(?:mein|baad|later|nantar|sat|में|बाद|नंतर)/);
   if (daysMatch) return addDays(parseInt(daysMatch[1]));
+
+  const daysPrefixMatch = t.match(/(?:in|after)\s+(\d+)\s+(?:days?)/);
+  if (daysPrefixMatch) return addDays(parseInt(daysPrefixMatch[1]));
+
+  const marathiSuffixMatch = t.match(/(\d+)\s*(?:divsanantr)/);
+  if (marathiSuffixMatch) return addDays(parseInt(marathiSuffixMatch[1]));
 
   // ISO date
   const isoMatch = text.match(/(\d{4}-\d{2}-\d{2})/);
