@@ -230,10 +230,12 @@ const extractAmount = (text) => {
   const words = cleanText.split(/\s+/);
   let total = 0, current = 0;
   let hasEnglishWord = false;
+  let inEnglishBlock = false;
 
   for (const word of words) {
     if (ENGLISH_NUMBERS[word] !== undefined) {
       hasEnglishWord = true;
+      inEnglishBlock = true;
       const value = ENGLISH_NUMBERS[word];
       if (ENGLISH_MULTIPLIERS[word] !== undefined) {
         current = current === 0 ? value : current * value;
@@ -242,6 +244,8 @@ const extractAmount = (text) => {
       } else {
         current += value;
       }
+    } else if (inEnglishBlock) {
+      break;
     }
   }
   if (hasEnglishWord) {
@@ -253,9 +257,11 @@ const extractAmount = (text) => {
   total = 0;
   current = 0;
   let hasHindiWord = false;
+  let inHindiBlock = false;
   for (const word of words) {
     if (HINDI_NUMBERS[word] !== undefined) {
       hasHindiWord = true;
+      inHindiBlock = true;
       const value = HINDI_NUMBERS[word];
       if (MULTIPLIERS[word] !== undefined) {
         current = current === 0 ? value : current * value;
@@ -264,6 +270,8 @@ const extractAmount = (text) => {
       } else {
         current += value;
       }
+    } else if (inHindiBlock) {
+      break;
     }
   }
   if (hasHindiWord) {
@@ -275,9 +283,11 @@ const extractAmount = (text) => {
   total = 0;
   current = 0;
   let hasMarathiWord = false;
+  let inMarathiBlock = false;
   for (const word of words) {
     if (MARATHI_NUMBERS[word] !== undefined) {
       hasMarathiWord = true;
+      inMarathiBlock = true;
       const value = MARATHI_NUMBERS[word];
       if (MARATHI_MULTIPLIERS[word] !== undefined) {
         current = current === 0 ? value : current * value;
@@ -286,6 +296,8 @@ const extractAmount = (text) => {
       } else {
         current += value;
       }
+    } else if (inMarathiBlock) {
+      break;
     }
   }
   if (hasMarathiWord) {
@@ -297,9 +309,11 @@ const extractAmount = (text) => {
   total = 0;
   current = 0;
   let hasDevnagariWord = false;
+  let inDevnagariBlock = false;
   for (const word of words) {
     if (DEVNAGARI_NUMBERS[word] !== undefined) {
       hasDevnagariWord = true;
+      inDevnagariBlock = true;
       const value = DEVNAGARI_NUMBERS[word];
       if (DEVNAGARI_MULTIPLIERS[word] !== undefined) {
         current = current === 0 ? value : current * value;
@@ -308,6 +322,8 @@ const extractAmount = (text) => {
       } else {
         current += value;
       }
+    } else if (inDevnagariBlock) {
+      break;
     }
   }
   if (hasDevnagariWord) {
@@ -346,8 +362,14 @@ const extractCustomerName = (text) => {
         words.shift();
         name = words.join(" ");
       } else if (words.length === 1 && pronouns.includes(words[0].toLowerCase())) {
-        return null;
+        continue;
       }
+      
+      const stopwords = ["back", "rupees", "rupee", "rs", "inr", "bucks", "money", "cash", "credit", "payment", "udhar", "udhaar", "din", "days", "of", "took", "takes"];
+      if (stopwords.includes(name.toLowerCase())) {
+         continue; 
+      }
+
       // Capitalize first letter if it is English
       if (/^[a-zA-Z]/.test(name)) {
         return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
