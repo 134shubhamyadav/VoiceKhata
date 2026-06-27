@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export default function HeroGraphic() {
   return (
-    <div className="relative w-full h-[32vh] min-h-[260px] sm:h-[35vh]">
+    <div className="relative w-full h-[22vh] min-h-[180px] sm:h-[25vh]">
       <Image 
         src="/login-graphic.png" 
         alt="VoiceKhata Merchant Login" 

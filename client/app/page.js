@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Shield, Sparkles, ChevronRight, ArrowLeft, Mail, Phone, Store, Check } from "lucide-react";
+import { Shield, Sparkles, ChevronRight, ArrowLeft, Mail, Phone, Store, Check, AlertCircle } from "lucide-react";
 import { signInWithPopup, GoogleAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
@@ -37,7 +37,7 @@ export default function OnboardingPage() {
     logout
   } = useAuth();
 
-  const [step, setStep] = useState("splash"); // splash, auth-selector, mobile-input, otp-verify, merchant-setup
+  const [step, setStep] = useState("auth-selector"); // auth-selector, mobile-input, otp-verify, merchant-setup
   const [authMethod, setAuthMethod] = useState(""); // google, mobile
   const [mobileNumber, setMobileNumber] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]); // 6-digit state
@@ -323,13 +323,13 @@ export default function OnboardingPage() {
     <div className="relative h-[100dvh] w-full max-w-md mx-auto sm:max-w-none bg-white text-slate-800 flex flex-col justify-start overflow-hidden">
       
       {/* Top Graphic Area (Visible on Auth Steps) */}
-      {(step === "auth-selector" || step === "mobile-input" || step === "otp-verify") && (
-        <div className="w-full relative mb-8 shrink-0 rounded-b-[36px] overflow-hidden shadow-sm">
+      {(step === "mobile-input" || step === "otp-verify" || step === "merchant-setup") && (
+        <div className="w-full relative mb-4 shrink-0 rounded-b-[36px] overflow-hidden shadow-sm">
           <button 
             onClick={() => {
-              if (step === "otp-verify") setStep("mobile-input");
+              if (step === "merchant-setup") logout();
+              else if (step === "otp-verify") setStep("mobile-input");
               else if (step === "mobile-input") setStep("auth-selector");
-              else if (step === "auth-selector") setStep("splash");
             }}
             className="absolute top-4 left-4 z-10 p-2 bg-white/90 backdrop-blur-md rounded-full shadow-md text-slate-800 hover:text-black transition-colors"
             aria-label="Go Back"
@@ -344,10 +344,9 @@ export default function OnboardingPage() {
       <div className="relative z-10 flex-1 flex flex-col px-6 py-4 pb-6 overflow-y-auto no-scrollbar">
         <AnimatePresence mode="wait">
           
-          {/* STEP 1: SPLASH INTRO BRAND VIEW */}
-          {step === "splash" && (
+          {/* COMBINED STEP 1 & 2: SPLASH + AUTH SELECTOR */}
+          {step === "auth-selector" && (
             <>
-
               {/* Full Screen Faded Background Image */}
               <div className="absolute inset-0 z-0 overflow-hidden bg-white pointer-events-none">
                  <Image 
@@ -360,7 +359,7 @@ export default function OnboardingPage() {
                  <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent" />
               </div>
 
-              <motion.div {...transitionConfig} key="splash" className="flex-1 flex flex-col justify-between w-full h-full relative z-10 px-6 py-8">
+              <motion.div {...transitionConfig} key="auth-selector" className="flex-1 flex flex-col justify-between w-full h-full relative z-10 px-6 py-8">
                 
                 {/* Top Section: Logo in top-center */}
                 <div className="flex flex-col items-center mt-2 text-center">
@@ -394,81 +393,59 @@ export default function OnboardingPage() {
                   </motion.div>
                 </div>
 
-                {/* Bottom Section: Button near the table */}
-                <div className="w-full mt-auto pb-4 relative flex justify-center shrink-0">
+                {/* Bottom Section: Auth Buttons replacing the old Get Started button */}
+                <div className="w-full mt-auto pb-4 relative flex flex-col items-center shrink-0 space-y-3 z-10">
+                  {otpError && (
+                    <div className="w-full max-w-[320px] p-3 bg-red-50 text-red-600 text-[12px] rounded-xl font-medium border border-red-100 flex items-center justify-center gap-2 shadow-sm mb-2">
+                      <AlertCircle size={16} />
+                      {otpError}
+                    </div>
+                  )}
+
+                  {/* Google Button */}
                   <motion.button 
                     initial={{ y: 20, opacity: 0 }} 
                     animate={{ y: 0, opacity: 1 }} 
                     transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.3 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setStep("auth-selector")}
-                    className="group relative w-full max-w-[320px] py-3.5 bg-gradient-to-r from-[#4285F4] to-[#3367D6] hover:from-[#3367D6] hover:to-[#2857b8] text-white font-bold text-[16px] rounded-full flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 shadow-[0_8px_25px_0_rgba(66,133,244,0.5)] hover:shadow-[0_12px_30px_rgba(66,133,244,0.4)] hover:-translate-y-1 outline-none mx-auto z-10 border-[3px] border-[#1e3a8a]"
+                    onClick={triggerGoogleAuth}
+                    className="w-full max-w-[320px] py-3.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-[15px] rounded-full flex items-center justify-center gap-3 cursor-pointer transition-all shadow-md outline-none"
                   >
-                    Get Started 
-                    <ChevronRight size={20} className="transition-transform duration-300 group-hover:translate-x-1 text-white" />
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G" className="w-5 h-5" />
+                    Continue with Google
+                  </motion.button>
+
+                  {/* Mobile Button */}
+                  <motion.button 
+                    initial={{ y: 20, opacity: 0 }} 
+                    animate={{ y: 0, opacity: 1 }} 
+                    transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.4 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setOtpError("");
+                      setStep("mobile-input");
+                    }}
+                    className="w-full max-w-[320px] py-3.5 bg-gradient-to-r from-[#4285F4] to-[#3367D6] hover:from-[#3367D6] hover:to-[#2857b8] text-white font-bold text-[15px] rounded-full flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 shadow-[0_8px_25px_0_rgba(66,133,244,0.5)] hover:shadow-[0_12px_30px_rgba(66,133,244,0.4)] hover:-translate-y-1 outline-none border-[3px] border-[#1e3a8a]"
+                  >
+                    <Phone size={18} />
+                    Continue with Mobile
+                  </motion.button>
+
+                  {/* Demo Login Button */}
+                  <motion.button 
+                    initial={{ y: 20, opacity: 0 }} 
+                    animate={{ y: 0, opacity: 1 }} 
+                    transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleDemoLogin}
+                    className="w-full max-w-[320px] mt-2 py-3 bg-white/60 backdrop-blur-md hover:bg-white/80 text-slate-600 border border-slate-300/50 font-bold text-[13px] rounded-full flex items-center justify-center gap-2 cursor-pointer transition-colors outline-none shadow-sm"
+                  >
+                    <Sparkles size={15} className="text-[#4285F4]" />
+                    Hackathon Demo Login
                   </motion.button>
                 </div>
-
               </motion.div>
             </>
-          )}
-
-          {/* STEP 2: AUTHENTICATION OPTIONS SELECTOR */}
-          {step === "auth-selector" && (
-            <motion.div {...transitionConfig} key="auth-selector" className="flex-1 flex flex-col justify-center py-4">
-              <div className="mb-8">
-                <h2 className="text-[28px] font-black font-display tracking-tight text-slate-900 mb-2">Welcome Back :)</h2>
-                <p className="text-[14px] text-slate-500 font-medium leading-relaxed">Choose your preferred login channel to continue.</p>
-              </div>
-
-              {otpError && (
-                <div className="mb-6 p-4 bg-red-50 text-red-600 text-[13px] rounded-xl font-medium border border-red-100 flex items-center gap-2">
-                  <AlertCircle size={18} />
-                  {otpError}
-                </div>
-              )}
-
-              <div className="space-y-4">
-                {/* Google Button */}
-                <button 
-                  onClick={triggerGoogleAuth}
-                  className="w-full py-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-[15px] rounded-2xl flex items-center justify-center gap-3 cursor-pointer transition-all shadow-sm outline-none"
-                >
-                  <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G" className="w-5 h-5" />
-                  Continue with Google
-                </button>
-
-                {/* Mobile Button */}
-                <button 
-                  onClick={() => {
-                    setOtpError("");
-                    setStep("mobile-input");
-                  }}
-                  className="w-full py-4 bg-[#1877F2] hover:bg-[#166fe5] text-white font-bold text-[15px] rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-md outline-none"
-                >
-                  <Phone size={18} />
-                  Continue with Mobile Number
-                </button>
-              </div>
-
-              {/* Demo Login Option */}
-              <div className="relative my-8 flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-100"></div>
-                </div>
-                <div className="relative bg-white px-4 text-[11px] font-bold text-slate-300 tracking-widest uppercase">
-                  Hackathon Demo
-                </div>
-              </div>
-
-              <button 
-                onClick={handleDemoLogin}
-                className="w-full py-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-100 font-bold text-[15px] rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-colors outline-none"
-              >
-                <Sparkles size={18} />
-                Instant Demo Login
-              </button>
-            </motion.div>
           )}
 
           {/* STEP 3: INDIAN MOBILE NUMBER ENTRY */}
@@ -489,13 +466,13 @@ export default function OnboardingPage() {
               <form onSubmit={handleMobileSubmit} className="space-y-6">
                 <div>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs border-r border-slate-200 pr-3">+91</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[15px] border-r border-slate-200 pr-3">+91</span>
                     <input 
                       type="tel"
                       value={mobileNumber}
                       onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
                       placeholder="98765 43210"
-                      className="w-full bg-[#F8FAFC] border border-slate-200 rounded-full py-3.5 pl-16 pr-4 text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 transition-all"
+                      className="w-full bg-[#F8FAFC] border border-slate-200 rounded-full py-4 pl-16 pr-4 text-[15px] font-bold tracking-wide text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 transition-all"
                     />
                   </div>
                   <p className="mt-3 text-[10px] text-slate-500 font-medium leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100">
@@ -520,7 +497,7 @@ export default function OnboardingPage() {
 
           {/* STEP 4: OTP VERIFICATION */}
           {step === "otp-verify" && (
-            <motion.div {...transitionConfig} key="otp-verify" className="flex-1 flex flex-col justify-center py-4">
+            <motion.div {...transitionConfig} key="otp-verify" className="flex-1 flex flex-col">
               <div className="mb-8">
                 <h2 className="text-[28px] font-black font-display tracking-tight text-slate-900 mb-2">Verify OTP</h2>
                 <p className="text-[14px] text-slate-500 font-medium leading-relaxed">
@@ -582,7 +559,7 @@ export default function OnboardingPage() {
 
           {/* STEP 5: MERCHANT PROFILE CONFIGURATION SETUP */}
           {step === "merchant-setup" && (
-            <motion.div {...transitionConfig} key="merchant-setup" className="flex-1 flex flex-col justify-center mt-12">
+            <motion.div {...transitionConfig} key="merchant-setup" className="flex-1 flex flex-col pt-2 pb-4">
               <div className="mb-6">
                 <div className="inline-flex items-center gap-1 bg-emerald-50 border border-emerald-100 rounded-full px-2 py-0.5 mb-2.5">
                   <Check size={10} className="text-emerald-500" />
