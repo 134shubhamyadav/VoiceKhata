@@ -24,9 +24,8 @@ let geminiModel = null;
 (async () => {
   try {
     if (appConfig.geminiApiKey) {
-      const { GoogleGenerativeAI } = require("@google/generative-ai");
-      const genAI = new GoogleGenerativeAI(appConfig.geminiApiKey);
-      geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const Groq = require("groq-sdk");
+      geminiModel = new Groq({ apiKey: appConfig.geminiApiKey });
       console.log("[VoiceService] Gemini AI initialized successfully.");
     } else {
       console.warn("[VoiceService] GEMINI_API_KEY not set. Using rule-based fallback parser.");
@@ -135,8 +134,14 @@ const parseWithGemini = async (text) => {
   if (!geminiModel) return null;
 
   try {
-    const result = await geminiModel.generateContent(GEMINI_PROMPT(text));
-    const raw    = result.response.text().trim();
+    const chatCompletion = await geminiModel.chat.completions.create({
+      messages: [{ role: 'system', content: GEMINI_PROMPT(text) }],
+      model: 'llama-3.1-8b-instant',
+      temperature: 0,
+      response_format: { type: "json_object" }
+    });
+    
+    const raw = chatCompletion.choices[0].message.content;
 
     // Strip markdown code fences if Gemini returns them
     const json = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
@@ -530,9 +535,9 @@ const extractDueDate = (text) => {
   if (daysFallback) return addDays(parseInt(daysFallback[1]));
 
   // Step 6.5: "X tarikh" or "date X" or "X tarke la"
-  const tarikhMatch = t.match(/(?:on the\s+|date\s+|)(\d+)\s*(?:tarikh|tareekh|tariq|तारीख|tarke\s*la|tarakhela|तारखेला|th|nd|rd|st\s+of|th\s+of)?(?:\s+ko)?/);
+  const tarikhMatch = t.match(/(?:on the\s+|date\s+)(\d+)\b|(\d+)\s+(?:tarikh|tareekh|tariq|तारीख|tarke\s*la|tarakhela|तारखेला)/);
   if (tarikhMatch) {
-    const day = parseInt(tarikhMatch[1]);
+    const day = parseInt(tarikhMatch[1] || tarikhMatch[2]);
     const today = new Date();
     let m = today.getMonth();
     let y = today.getFullYear();
