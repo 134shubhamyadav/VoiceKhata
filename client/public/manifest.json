@@ -1,0 +1,21 @@
+{
+  "name": "VoiceKhata",
+  "short_name": "VoiceKhata",
+  "description": "AI-powered voice bookkeeping for Bharat merchants",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

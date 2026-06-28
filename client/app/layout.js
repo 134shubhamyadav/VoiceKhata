@@ -5,11 +5,14 @@ import { AuthProvider } from "@/context/AuthContext";
 export const metadata = {
   title: "VoiceKhata - Bolke Rakho Hisaab",
   description: "AI-powered voice bookkeeping for Bharat merchants",
+  manifest: "/manifest.json",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
     apple: "/favicon.ico",
   },
+  themeColor: "#10b981",
+  viewport: "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover",
 };
 
 export default function RootLayout({ children }) {
