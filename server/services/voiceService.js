@@ -99,6 +99,7 @@ DUE DATE EXTRACTION (FOR ALL LANGUAGES):
 - Examples of "Day after tomorrow" (+2 days): 'parso' / 'परसों' (Hindi), 'parva' / 'परवा' (Marathi), 'param divase' / 'પરમ દિવસે' (Gujarati), 'day after tomorrow', 'terwa'.
 - "give back in X days" or "after X days" or "in X days" = X days from today
 - "X din baad vapas karega", "X din mein dega", "X divsanantr deil", "X divsat parat karel" = X days from today
+- "X tarikh", "X tareekh", "X तारीख", "X tarke la", "X tarakhela", "X तारखेला", "on the Xth", "date X", "X of this month" = The Xth day of the current month (or next month if that day has passed). Format as YYYY-MM-DD.
 - "teen din baad" = 3 days from today
 - "तीन दिन बाद" = 3 days from today
 - "तीन दिवस नंतर" = 3 days from today
@@ -527,6 +528,22 @@ const extractDueDate = (text) => {
   // Step 6: Generic fallback "X days"
   const daysFallback = t.match(/(\d+)\s+days?/);
   if (daysFallback) return addDays(parseInt(daysFallback[1]));
+
+  // Step 6.5: "X tarikh" or "date X" or "X tarke la"
+  const tarikhMatch = t.match(/(?:on the\s+|date\s+|)(\d+)\s*(?:tarikh|tareekh|tariq|तारीख|tarke\s*la|tarakhela|तारखेला|th|nd|rd|st\s+of|th\s+of)?(?:\s+ko)?/);
+  if (tarikhMatch) {
+    const day = parseInt(tarikhMatch[1]);
+    const today = new Date();
+    let m = today.getMonth();
+    let y = today.getFullYear();
+    if (day < today.getDate()) {
+      m++;
+      if (m > 11) { m = 0; y++; }
+    }
+    const d = new Date(y, m, day);
+    // ensure local time formatting doesn't shift the day
+    return `${y}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
 
   // Step 7: ISO date in text
   const iso = text.match(/(\d{4}-\d{2}-\d{2})/);
