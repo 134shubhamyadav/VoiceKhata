@@ -82,7 +82,7 @@ export default function PrivacyPolicyPage() {
         {/* Bottom signoff */}
         <div className="text-center bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 shadow-sm dark:shadow-none">
           <p className="text-slate-500 text-[10px] leading-relaxed font-semibold">
-            If you have questions regarding data privacy or want to request account deletion, please email support at privacy@voicekhata.in
+            If you have questions regarding data privacy or want to request account deletion, please email support at 134shubhamyafav@gmail.com
           </p>
         </div>
       </div>

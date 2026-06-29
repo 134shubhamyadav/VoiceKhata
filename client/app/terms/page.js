@@ -82,7 +82,7 @@ export default function TermsOfServicePage() {
         {/* Bottom signoff */}
         <div className="text-center bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 shadow-sm dark:shadow-none">
           <p className="text-slate-500 text-[10px] leading-relaxed font-semibold">
-            If you have any questions regarding these merchant terms, please email our security team at legal@voicekhata.in
+            If you have any questions regarding these merchant terms, please email our security team at 134shubhamyafav@gmail.com
           </p>
         </div>
       </div>
